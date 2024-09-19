@@ -1,27 +1,23 @@
-import torchvision.datasets
 import torch.utils.data
 import os
 import numpy
 from matplotlib import pyplot
 import torchvision.utils
+from datasets import load_dataset
 from torch import nn
 from torch import optim
 from IPython import display
 
 def getDataLoader():
-    dataroot = os.path.join(
-        os.path.dirname(__file__),
-        'dataset',
-    )
-    dataset = torchvision.datasets.ImageFolder(
-        root=dataroot,
-        transform=torchvision.transforms.Compose([
-            torchvision.transforms.Resize(64),
-            torchvision.transforms.CenterCrop(64),
-            torchvision.transforms.ToTensor(),
-            torchvision.transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
-        ])
-    )
+    transform = torchvision.transforms.Compose([
+        torchvision.transforms.Resize(64),
+        torchvision.transforms.CenterCrop(64),
+        torchvision.transforms.ToTensor(),
+        torchvision.transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+    ])
+    dataset = load_dataset("nielsr/CelebA-faces")
+    dataset = transform(dataset)
+    torchvision.transforms.trans
     return torch.utils.data.DataLoader(
         dataset, batch_size=128,
         shuffle=True, num_workers=2
@@ -104,6 +100,7 @@ class Discriminator(nn.Module):
     
     def forward(self, input: numpy.ndarray):
         return self.layers(input)
+
 
 def train():
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
