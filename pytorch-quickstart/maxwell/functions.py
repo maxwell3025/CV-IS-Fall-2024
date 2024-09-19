@@ -1,5 +1,4 @@
 import torch.utils.data
-import os
 import numpy
 from matplotlib import pyplot
 import torchvision.utils
@@ -16,8 +15,7 @@ def getDataLoader():
         torchvision.transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
     ])
     dataset = load_dataset("nielsr/CelebA-faces")
-    dataset = transform(dataset)
-    torchvision.transforms.trans
+    dataset.set_transform(transform)
     return torch.utils.data.DataLoader(
         dataset, batch_size=128,
         shuffle=True, num_workers=2
