@@ -7,6 +7,10 @@ from torch import nn
 from torch import optim
 from IPython import display
 
+def handleRow(row, transform):
+    row['image'] = transform(row['image'])
+    return row
+
 def getDataLoader():
     transform = torchvision.transforms.Compose([
         torchvision.transforms.Resize(64),
@@ -14,11 +18,10 @@ def getDataLoader():
         torchvision.transforms.ToTensor(),
         torchvision.transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
     ])
-    dataset = load_dataset("nielsr/CelebA-faces")
-    dataset.set_transform(transform)
+    dataset = load_dataset("nielsr/CelebA-faces", streaming=True, split="train") \
+        .map(lambda row: handleRow(row, transform))
     return torch.utils.data.DataLoader(
-        dataset, batch_size=128,
-        shuffle=True, num_workers=2
+        dataset, batch_size=128, num_workers=2,
     )
 
 def displayDatasetSample(dataloader: torch.utils.data.DataLoader, device: torch.device):
@@ -99,7 +102,6 @@ class Discriminator(nn.Module):
     def forward(self, input: numpy.ndarray):
         return self.layers(input)
 
-
 def train():
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -123,9 +125,10 @@ def train():
     for epoch in range(1):
         # For each batch in the dataloader
         for i, data in enumerate(dataloader, 0):
+            print(data)
             #region Just grab some data and make sure the discriminator knows its fr
             discriminator_network.zero_grad()
-            real_data = data[0].to(device)
+            real_data = data["image"].to(device)
             b_size = real_data.size(0)
             label = torch.full((b_size,), REAL, dtype=torch.float, device=device)
             output = discriminator_network(real_data).view(-1)
@@ -159,10 +162,10 @@ def train():
             generator_optimizer.step()
             #endregion
 
-            print('[%d/%d][%d/%d]\tLoss_D: %.4f\tLoss_G: %.4f\tD(x): %.4f\tD(G(z)): %.4f / %.4f'
+            print('[%d/%d][%d/%s]\tLoss_D: %.4f\tLoss_G: %.4f\tD(x): %.4f\tD(G(z)): %.4f / %.4f'
                 % (
                     epoch, 1,
-                    i, len(dataloader),
+                    i, "infinity?",
                     discriminator_error.item(),
                     generator_error.item(),
                     discriminator_real_avg,
@@ -184,4 +187,3 @@ def train():
                 display.clear_output(wait=True)
                 pyplot.imshow(composite_image)
                 pyplot.show()
-
