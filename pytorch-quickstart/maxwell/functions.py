@@ -125,7 +125,6 @@ def train():
     for epoch in range(1):
         # For each batch in the dataloader
         for i, data in enumerate(dataloader, 0):
-            print(data)
             #region Just grab some data and make sure the discriminator knows its fr
             discriminator_network.zero_grad()
             real_data = data["image"].to(device)
@@ -162,16 +161,8 @@ def train():
             generator_optimizer.step()
             #endregion
 
-            print('[%d/%d][%d/%s]\tLoss_D: %.4f\tLoss_G: %.4f\tD(x): %.4f\tD(G(z)): %.4f / %.4f'
-                % (
-                    epoch, 1,
-                    i, "infinity?",
-                    discriminator_error.item(),
-                    generator_error.item(),
-                    discriminator_real_avg,
-                    discriminator_fake_avg, generator_avg
-                )
-            )
+            if(i % 10 != 0):
+                continue
 
             #Check how the generator is doing by saving G's output on fixed_noise
             with torch.no_grad():
@@ -187,3 +178,15 @@ def train():
                 display.clear_output(wait=True)
                 pyplot.imshow(composite_image)
                 pyplot.show()
+
+            print('[%d/%d][%d/%s]\tLoss_D: %.4f\tLoss_G: %.4f\tD(x): %.4f\tD(G(z)): %.4f / %.4f'
+                % (
+                    epoch, 1,
+                    i, "infinity?",
+                    discriminator_error.item(),
+                    generator_error.item(),
+                    discriminator_real_avg,
+                    discriminator_fake_avg, generator_avg
+                )
+            )
+            display.update_display()
