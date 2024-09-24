@@ -22,9 +22,9 @@ class NaiveSsmLayer(nn.Module):
         self.state_dimensions = state_dimensions
         self.out_dimensions = out_dimensions
 
-        self.A = nn.Parameter(torch.zeros((state_dimensions, state_dimensions)))
-        self.B = nn.Parameter(torch.zeros((state_dimensions, in_dimensions)))
-        self.C = nn.Parameter(torch.zeros((out_dimensions, state_dimensions)))
+        self.A = nn.Parameter(torch.Tensor(state_dimensions, state_dimensions))
+        self.B = nn.Parameter(torch.Tensor(state_dimensions, in_dimensions))
+        self.C = nn.Parameter(torch.Tensor(out_dimensions, state_dimensions))
 
     def forward(self, signal: Tensor, dt: float):
         if signal.shape[-1] != self.in_dimensions:
