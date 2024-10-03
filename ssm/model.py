@@ -4,6 +4,7 @@ from torch import linalg
 import torch
 import math
 import numpy
+from matplotlib import pyplot
 
 class NaiveSsmBase(nn.Module):
     """Base class for all SSM models
@@ -108,7 +109,6 @@ class DiagonalSsmLayer(NaiveSsmBase):
             for j in range(state_dimensions):
                 if i == j:
                     diagonal_matrix[i, j] = i / state_dimensions
-        print(diagonal_matrix)
         self.A = nn.Parameter(-diagonal_matrix, requires_grad=False)
         # a list of column vectors that each correspond to a channel-to-state
         # function
@@ -194,7 +194,14 @@ class HippoSsmLayer(NaiveSsmBase):
 
         self.log_dt = nn.Parameter(torch.tensor((-2.0,)))
 
-class MambaSsmLayer(nn.Module):
+class HippoSsmLayerTransposed(nn.Module):
+    def __init__(self, D, N) -> None:
+        super(HippoSsmLayerTransposed, self).__init__()
+        self.layer = HippoSsmLayer(D, N)
+    def forward(self, sequence: Tensor):
+        return self.layer(sequence.transpose(-1, -2)).transpose(-1, -2)
+
+class S6Layer(nn.Module):
     """This is the SSM layer for the Mamba architecture, outlined in section 3.2
     of
     [Mamba: Linear-Time Sequence Modeling with Selective State Spaces](https://arxiv.org/pdf/2312.00752)
@@ -212,7 +219,7 @@ class MambaSsmLayer(nn.Module):
     - N: single-instance state size
     """
     def __init__(self, D, N) -> None:
-        super(MambaSsmLayer, self).__init__()
+        super(S6Layer, self).__init__()
         self.D = D
         self.N = N
         A_init = -numpy.arange(1, D+1)
@@ -223,7 +230,7 @@ class MambaSsmLayer(nn.Module):
         self.s_C = nn.Linear(D, N)
         # Note that this gives a single timestep for all channels
         self.s_Delta = nn.Linear(D, 1)
-        self.bias_Delta = nn.Parameter(torch.Tensor((0.,)))
+        self.bias_Delta = nn.Parameter(torch.log(torch.rand((1,)) / (0.1 - 0.001) + 0.001))
         self.t_Delta = nn.Softplus()
     
     def forward(self, sequence: Tensor) -> Tensor:
@@ -274,6 +281,9 @@ class MambaSsmLayer(nn.Module):
                 .sum(-1) \
                 .unsqueeze(-2)
             )
+        self.previous_Delta = Delta
+        self.previous_sequence = sequence
+        self.previous_prediction = torch.cat(outputs, -2)
         return torch.cat(outputs, -2)
             
 
@@ -281,5 +291,5 @@ class MambaLayer(nn.Module):
     """This is the full block detailed in the Mamba paper.
     """
     def __init__(self) -> None:
-        super(MambaSsmLayer, self).__init__()
+        super(S6Layer, self).__init__()
     

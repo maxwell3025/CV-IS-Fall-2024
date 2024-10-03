@@ -4,7 +4,9 @@ import torch
 from torch import nn
 from torch.nn import functional
 from torch import optim
-from model import MambaSsmLayer
+from model import S6Layer
+from model import HippoSsmLayerTransposed
+from matplotlib import pyplot
 
 def getSelectiveCopyIterator(batch_count, avg_T):
     while True:
@@ -31,17 +33,21 @@ def getSelectiveCopyIterator(batch_count, avg_T):
         label = torch.from_numpy(label)
         input = functional.one_hot(input).float()
         label = functional.one_hot(label).float()
+        fig, (input_plot, label_plot) = pyplot.subplots(1, 2)
+        input_plot.matshow(input[0].detach())
+        label_plot.matshow(label[0].detach())
+        pyplot.show()
         yield input, label
 
 class MambaLayer(nn.Module):
-    def __init__(self) -> None:
+    def __init__(self, input_shape) -> None:
         super(MambaLayer, self).__init__()
     def forward():
         pass
 
 def train(model):
     data_iterator = getSelectiveCopyIterator(16, 40)
-    optimizer = optim.Adam(model.parameters(), lr=0.01, betas=(0.5, 0.999))
+    optimizer = optim.Adam(model.parameters(), lr=0.001, betas=(0.5, 0.999))
     criterion = nn.MSELoss()
     for (i, (data, label)) in enumerate(data_iterator):
         model.zero_grad()
@@ -51,7 +57,14 @@ def train(model):
         optimizer.step()
         if i % 10 == 0:
             print(error.item())
-        if i % 1000 == 0:
+        if i == 1000:
             break
 
-train(MambaSsmLayer(10, 16))
+hippo = HippoSsmLayerTransposed(10, 100)
+nn.init.normal_(hippo.layer.B)
+nn.init.normal_(hippo.layer.C)
+mamba = S6Layer(10, 100)
+print("Mamba")
+train(mamba)
+print("Hippo")
+train(hippo)
