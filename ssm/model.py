@@ -132,13 +132,13 @@ class DiagonalSsmLayer(NaiveSsmBase):
 
         A_bar = torch.matmul(
             linalg.inv(
-                torch.eye(self.state_dimensions) - (dt * 0.5) * self.A
+                torch.eye(self.state_dimensions, device=signal.device) - (dt * 0.5) * self.A
             ),
-            torch.eye(self.state_dimensions) + (dt * 0.5) * self.A
+            torch.eye(self.state_dimensions, device=signal.device) + (dt * 0.5) * self.A
         )
         B_bar = dt * torch.matmul(
             linalg.inv(
-                torch.eye(self.state_dimensions) - (dt * 0.5) * self.A
+                torch.eye(self.state_dimensions, device=signal.device) - (dt * 0.5) * self.A
             ),
             self.B
         )
