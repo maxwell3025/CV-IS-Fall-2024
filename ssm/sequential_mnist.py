@@ -75,7 +75,7 @@ def train(model):
         if batch_num % 10 == 0:
             print(error.item())
             print("label: ", label[0])
-            print("prediction: ", prediction[0].detach().numpy())
+            print("prediction: ", prediction[0].cpu().detach().numpy())
         if batch_num == 1000:
             break
     
