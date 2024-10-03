@@ -50,6 +50,8 @@ class SequentialMnistModel(nn.Module):
         return x
 
 def train(model):
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    model = model.to(device)
     dataset = load_dataset("ylecun/mnist")
     train_dataset = iter(dataset["train"])
     test_dataset = iter(dataset["test"])
