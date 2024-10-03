@@ -160,6 +160,89 @@ class DiagonalSsmLayer(NaiveSsmBase):
         assert full_output_signal.shape[-2] == signal.shape[-2]
         return full_output_signal
 
+class ComplexDiagonalSsmLayer(NaiveSsmBase):
+    """This layer applies an arbitrary SSM convolution using an unoptimized
+    algorithm.\\
+    Ih this layer, the A matrix is hardcoded to be a diagonal matrix
+        
+    The input shape of this layer is expected to be `[..., D, L]`,
+
+    Args:
+        num_channels (int): The number of output dimensions
+        state_dimensions (int): The number of dimensions in the internal state
+    """
+    def __init__(self, num_channels, state_dimensions) -> None:
+        super(ComplexDiagonalSsmLayer, self).__init__()
+        
+        self.num_channels = num_channels
+        self.state_dimensions = state_dimensions
+
+        diagonal_matrix = torch.zeros((state_dimensions, state_dimensions), dtype=torch.cfloat)
+        for i in range(state_dimensions):
+            for j in range(state_dimensions):
+                if i == j:
+                    diagonal_matrix[i, j] = 0.5 + 1j * (i - state_dimensions/2)
+        self.A = nn.Parameter(-diagonal_matrix, requires_grad=False)
+        # a list of column vectors that each correspond to a channel-to-state
+        # function
+        self.B = nn.Parameter(torch.complex(
+            torch.Tensor(state_dimensions, num_channels),
+            torch.Tensor(state_dimensions, num_channels),
+        ))
+        # a list of column vectors that each correspond to a transposed 
+        # state-to-channel function
+        self.C = nn.Parameter(torch.complex(
+            torch.Tensor(state_dimensions, num_channels),
+            torch.Tensor(state_dimensions, num_channels),
+        ))
+
+        self.log_dt = nn.Parameter(torch.tensor((-2.0,)))
+
+    def forward(self, signal: Tensor):
+        dt = torch.exp(self.log_dt)
+        #signal has shape [..., D, L]
+        if signal.shape[-2] != self.num_channels:
+            raise Exception(f"Received shape {signal.shape}, expected second to"
+                            f" last index to be {self.num_channels}.")
+
+        batch_dims = signal.shape[:-2]
+
+        device = next(self.parameters()).device
+
+        A_bar = torch.matmul(
+            linalg.inv(
+                torch.eye(self.state_dimensions, device=signal.device) - (dt * 0.5) * self.A
+            ),
+            torch.eye(self.state_dimensions, device=signal.device) + (dt * 0.5) * self.A
+        )
+        B_bar = dt * torch.matmul(
+            linalg.inv(
+                torch.eye(self.state_dimensions, device=signal.device) - (dt * 0.5) * self.A
+            ),
+            self.B
+        )
+        C_bar = self.C
+
+        state = torch.zeros(
+            batch_dims + (self.state_dimensions, self.num_channels),
+            dtype=torch.cfloat,
+        ).to(device)
+        output_signal = []
+
+        signal_length = signal.shape[-1]
+
+        for i in range(signal_length):
+            state = torch.matmul(A_bar, state)
+            state = state + torch.mul(B_bar, signal[..., :, i:i+1].swapaxes(-1, -2))
+            matchings = torch.mul(C_bar.real, state.real)
+            matchings += torch.mul(C_bar.imag, state.imag)
+            output_signal.append(matchings.sum(-2, keepdim=True).swapaxes(-1, -2))
+        
+        full_output_signal = torch.cat(output_signal, -1)
+        assert full_output_signal.shape[-1] == signal.shape[-1]
+        assert full_output_signal.shape[-2] == signal.shape[-2]
+        return full_output_signal
+
 class HippoSsmLayer(NaiveSsmBase):
     """This layer applies an arbitrary SSM convolution using an unoptimized
     algorithm.\\
