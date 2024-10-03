@@ -103,7 +103,7 @@ class Discriminator(nn.Module):
         return self.layers(input)
 
 def train():
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    device = torch.device("mps")
 
     dataloader = getDataLoader()
             
