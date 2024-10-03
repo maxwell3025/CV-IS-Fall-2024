@@ -60,8 +60,10 @@ def train(model):
     for batch_num in range(1000):
         items = [next(train_dataset) for _ in range(4)]
         label = torch.tensor([item["label"] for item in items])
+        label = label.to(device)
         images = [(pil_to_tensor(item["image"])/256).flatten().unsqueeze(0) for item in items]
         data = torch.cat(images, 0)
+        data = data.to(device)
         # print(data.shape)
 
         model.zero_grad()
