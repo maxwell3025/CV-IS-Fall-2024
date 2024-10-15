@@ -21,15 +21,13 @@ logger.info(f'Using device: {device}')
 
 # Define model
 mambaconfig = MambaConfig()
-model = MambaLMHeadModel(mambaconfig, device=device)
 
-criterion = nn.CrossEntropyLoss()
-optimizer = optim.Adam(model.parameters(), lr=training_config["learning_rate"])
+# Setup local logging
+os.makedirs("./.logs", exist_ok=True)
+validation_logs = csv.writer(open(f".logs/{time.strftime('%Y%m%d-%H%M%S')}.csv", "a"))
 
-os.makedirs(os.path.dirname("./logs"), exist_ok=True)
-validation_logs = csv.writer(open(f".logs/{time.strftime("%Y%m%d-%H%M%S")}.csv", "a"))
 # Validation function
-def validate(step, machine, start, enumeration, training_length):
+def validate(step, machine, start, enumeration, training_length, model):
     model.eval()
     with torch.no_grad():
         for validation_length in range(2, dataset_config["max_length"]):
@@ -61,6 +59,9 @@ def validate(step, machine, start, enumeration, training_length):
 # Training function
 def train(machine, start, enumeration, training_length):
     model = MambaLMHeadModel(mambaconfig, device=device)
+
+    criterion = nn.CrossEntropyLoss()
+    optimizer = optim.Adam(model.parameters(), lr=training_config["learning_rate"])
     """
     Train the model.
     """
@@ -93,10 +94,11 @@ def train(machine, start, enumeration, training_length):
         accuracy = 100 * correct / total
         logger.info(f'Step [{step+1}/{training_config["num_steps"]}], Loss: {step_loss/training_config["batch_size"]:.4f}, Accuracy: {accuracy:.2f}%')
         if step % training_config["val_interval"] == 0:
-            validate(step, machine, start, enumeration, training_length)
+            validate(step, machine, start, enumeration, training_length, model)
 
     end_time = time.time()
     logger.info(f'Training completed in: {(end_time - start_time)/60:.2f} minutes')
+    return model
 
 if __name__ == '__main__':
     machine, start, enumeration = get_example_1(dataset_config["max_length"])
@@ -106,12 +108,19 @@ if __name__ == '__main__':
             project="dfa-ops-mamba-gridsearch",
         )
         table = wandb.Table(columns=["batch_num", "accuracy", "validation_length"])
-        train(
+        model = train(
             machine=machine,
             start=start,
             enumeration=enumeration,
             training_length=training_length
         )
-        validate(training_config["num_steps"], machine, start, enumeration, training_length)
+        validate(
+            training_config["num_steps"],
+            machine,
+            start,
+            enumeration,
+            training_length,
+            model
+        )
         run.log({"validation": table})
 
