@@ -3,7 +3,7 @@
 #SBATCH --mem=8192  # Requested Memory
 #SBATCH -p gpu-preempt  # Partition
 #SBATCH -G 1  # Number of GPUs
-#SBATCH -t 01:00:00  # Job time limit
+#SBATCH -t 04:00:00  # Job time limit
 #SBATCH -o train_mamba_%j.out  # %j = job ID
 #SBATCH --constraint sm_70  # %j = job ID
 

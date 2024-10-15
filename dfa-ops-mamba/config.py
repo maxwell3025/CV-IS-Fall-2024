@@ -6,12 +6,19 @@ training_config = {
     "val_interval": 100
 }
 
+# training_config = {
+#     "batch_size": 64,
+#     "learning_rate": 0.0001,
+#     "num_steps": 1000,
+#     "val_interval": 100
+# }
+
 # Configuration for dataset
 dataset_config = {
     "n_tokens": 2,
-    "training_length": [2, 4, 8, 16, 32, 64],
-    "max_length": 64,
+    "training_length": 16,
     "positive_rate": 0.5,
+    "randomize_training_length": True,
     "one_hot": False,
     "static": False,
 }
@@ -31,7 +38,22 @@ class MambaConfig:
     pad_vocab_size_multiple: int = 1
     tie_embeddings: bool = False
 
+sweep_config = {
+    "training_length": [2, 4, 8, 16, 32, 64],
+    "validation_length": [i for i in range(1, 65)],
+    "d_model": [2, 4, 8, 16, 32],
+    "randomize_training_length": [True, False]
+}
+
+# sweep_config = {
+#     "training_length": [16, 64],
+#     "validation_length": [16, 64],
+#     "d_model": [16, 32],
+#     "randomize_training_length": [True, False]
+# }
+
 # class MambaConfig:
+
 
 #     d_model: int = 2560
 #     d_intermediate: int = 0
