@@ -9,6 +9,7 @@
 
 mkdir -p /work/pi_jaimedavila_umass_edu/maxwelltang_umass_edu/dfa-ops-mamba
 cd /work/pi_jaimedavila_umass_edu/maxwelltang_umass_edu/dfa-ops-mamba
+source .env
 module load cuda/12.2.1
 
 if ! test -d .venv; then
@@ -32,6 +33,6 @@ python -m pip install causal-conv1d
 python -m pip install mamba-ssm
 python -m pip install wandb
 
-export WANDB_API_KEY=6701a2ec1a7ccf30a6e05cffd0a9281b1de3b41c
+export WANDB_API_KEY
 
 python dfa_ops_mamba.py

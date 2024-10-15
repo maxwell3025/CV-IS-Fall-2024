@@ -8,6 +8,8 @@ from config import training_config, dataset_config, MambaConfig
 from data_generator import generate_dataset
 from regular_languages import get_example_1
 import wandb
+import csv
+import os
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
@@ -24,28 +26,41 @@ model = MambaLMHeadModel(mambaconfig, device=device)
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=training_config["learning_rate"])
 
+os.makedirs(os.path.dirname("./logs"), exist_ok=True)
+validation_logs = csv.writer(open(f".logs/{time.strftime("%Y%m%d-%H%M%S")}.csv", "a"))
 # Validation function
-def validate(step, machine, start, enumeration):
+def validate(step, machine, start, enumeration, training_length):
     model.eval()
     with torch.no_grad():
-        correct = 0
-        total = 0
-        inputs, targets = generate_dataset(machine, start, enumeration, dataset_config, training_config)
-        inputs = inputs.to(device)
-        targets = targets.to(device)
-        outputs = model(inputs, num_last_tokens=1).logits
-        total += targets.size(0) * targets.size(1)
-        correct += (outputs.argmax(2) == targets).sum().item()
-        accuracy = 100 * correct / total
-        logger.info(f'Validation Accuracy: {accuracy:.2f}%')
-        if step != -1:
-            wandb.log({
-                "step": step,
-                "accuracy": accuracy
-            })
+        for validation_length in range(2, dataset_config["max_length"]):
+            correct = 0
+            total = 0
+            inputs, targets = generate_dataset(
+                machine=machine,
+                start=start,
+                enumeration=enumeration,
+                length=validation_length,
+                dataset_config=dataset_config,
+                training_config=training_config
+            )
+            inputs = inputs.to(device)
+            targets = targets.to(device)
+            outputs = model(inputs, num_last_tokens=1).logits
+            total += targets.size(0) * targets.size(1)
+            correct += (outputs.argmax(2) == targets).sum().item()
+            accuracy = 100 * correct / total
+            logger.info(f'Validation Accuracy: {accuracy:.2f}%')
+            if step != -1:
+                table.add_data(
+                    step,
+                    accuracy,
+                    validation_length
+                )
+                validation_logs.writerow([step, accuracy, validation_length, training_length])
 
 # Training function
-def train(machine, start, enumeration):
+def train(machine, start, enumeration, training_length):
+    model = MambaLMHeadModel(mambaconfig, device=device)
     """
     Train the model.
     """
@@ -55,7 +70,14 @@ def train(machine, start, enumeration):
         step_loss = 0
         correct = 0
         total = 0
-        inputs, targets = generate_dataset(machine, start, enumeration, dataset_config, training_config)
+        inputs, targets = generate_dataset(
+            machine=machine,
+            start=start,
+            enumeration=enumeration,
+            length=training_length,
+            dataset_config=dataset_config,
+            training_config=training_config
+        )
         inputs = inputs.to(device)
         targets = targets.to(device)
         outputs = model(inputs, num_last_tokens=1).logits
@@ -71,17 +93,25 @@ def train(machine, start, enumeration):
         accuracy = 100 * correct / total
         logger.info(f'Step [{step+1}/{training_config["num_steps"]}], Loss: {step_loss/training_config["batch_size"]:.4f}, Accuracy: {accuracy:.2f}%')
         if step % training_config["val_interval"] == 0:
-            validate(step, machine, start, enumeration)
+            validate(step, machine, start, enumeration, training_length)
 
     end_time = time.time()
     logger.info(f'Training completed in: {(end_time - start_time)/60:.2f} minutes')
 
 if __name__ == '__main__':
-    wandb.login()
-    run = wandb.init(
-        project="dfa-ops-mamba",
-    )
-    machine, start, enumeration = get_example_1(dataset_config["length"])
-    train(machine, start, enumeration)
-    validate(-1, machine, start, enumeration)
+    machine, start, enumeration = get_example_1(dataset_config["max_length"])
+    for training_length in dataset_config["training_length"]:
+        wandb.login()
+        run = wandb.init(
+            project="dfa-ops-mamba-gridsearch",
+        )
+        table = wandb.Table(columns=["batch_num", "accuracy", "validation_length"])
+        train(
+            machine=machine,
+            start=start,
+            enumeration=enumeration,
+            training_length=training_length
+        )
+        validate(training_config["num_steps"], machine, start, enumeration, training_length)
+        run.log({"validation": table})
 

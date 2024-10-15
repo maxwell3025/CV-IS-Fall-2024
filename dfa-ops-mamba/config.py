@@ -9,7 +9,8 @@ training_config = {
 # Configuration for dataset
 dataset_config = {
     "n_tokens": 2,
-    "length": 16,  # number of tokens to memorize
+    "training_length": [2, 4, 8, 16, 32, 64],
+    "max_length": 64,
     "positive_rate": 0.5,
     "one_hot": False,
     "static": False,

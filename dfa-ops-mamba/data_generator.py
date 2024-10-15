@@ -58,6 +58,7 @@ def generate_dataset(
     machine: set[DfaState],
     start: DfaState,
     enumeration: dict[str, int],
+    length: int,
     dataset_config,
     training_config
     ):
@@ -77,11 +78,11 @@ def generate_dataset(
     y = []
     for _ in range(training_config["batch_size"]):
         x_instance, y_instance = regular_sample(
-            machine,
-            start,
+            machine=machine,
+            start=start,
             positive_rate=dataset_config["positive_rate"],
             enumeration=enumeration,
-            length=dataset_config["length"],
+            length=length,
             one_hot=dataset_config["one_hot"]
         )
         x.append(x_instance)
