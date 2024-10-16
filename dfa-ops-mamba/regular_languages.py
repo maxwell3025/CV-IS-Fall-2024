@@ -116,7 +116,7 @@ def get_example_2(limit: int):
 
 if __name__ == "__main__":
     machine, start, enumeration = get_example_2(64)
-    mysample = sampleRandom(machine, start, 2)
+    mysample = sampleRandomInv(machine, start, 2)
     print(mysample)
     iterate(mysample, start)
 

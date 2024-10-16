@@ -6,12 +6,13 @@ import time
 from mamba_ssm.models.mixer_seq_simple import MambaLMHeadModel
 from config import sweep_config, training_config, dataset_config, MambaConfig
 from data_generator import generate_dataset
-from regular_languages import get_example_1
+from regular_languages import get_example_1, get_example_2
 import wandb
 import csv
 import os
 import random
 import numpy
+from unique_names_generator import get_random_name
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
@@ -25,15 +26,11 @@ logger.info(f'Using device: {device}')
 mambaconfig = MambaConfig()
 
 # Setup local logging
-os.makedirs("./.logs", exist_ok=True)
-if(os.path.isfile(".logs/latest.csv")):
-    log_creation_time = os.path.getctime(".logs/latest.csv")
-    log_creation_time = time.ctime(log_creation_time)
-    log_creation_time = time.strptime(log_creation_time)
-    new_filename = f".logs/{time.strftime('%Y%m%d-%H%M%S', log_creation_time)}.csv"
-    os.rename(".logs/latest.csv", new_filename)
+folder_name = get_random_name(separator="_", style="lowercase")
+os.makedirs(f"./output/{folder_name}", exist_ok=True)
+logger.info(f"Saving to output to ./output/{folder_name}")
 
-validation_logs = csv.writer(open(f".logs/latest.csv", "a"))
+validation_logs = csv.writer(open(f"output/{folder_name}/validation_logs.csv", "a"))
 
 # Validation function
 def validate(step, machine, start, enumeration, model):
@@ -56,7 +53,6 @@ def validate(step, machine, start, enumeration, model):
             total += targets.size(0) * targets.size(1)
             correct += (outputs.argmax(2) == targets).sum().item()
             accuracy = 100 * correct / total
-            logger.info(f'Validation Accuracy: {accuracy:.2f}%')
             if step != -1:
                 validation_logs.writerow([
                     step,
@@ -64,7 +60,8 @@ def validate(step, machine, start, enumeration, model):
                     validation_length,
                     dataset_config["training_length"],
                     mambaconfig.d_model,
-                    dataset_config["randomize_training_length"]
+                    dataset_config["randomize_training_length"],
+                    mambaconfig.n_layer,
                 ])
 
 # Training function
@@ -111,7 +108,7 @@ def train(machine, start, enumeration):
             validate(step, machine, start, enumeration, model)
 
     end_time = time.time()
-    logger.info(f'Training completed in: {(end_time - start_time)/60:.2f} minutes')
+    logger.info(f'Training instance completed in: {(end_time - start_time)/60:.2f} minutes')
     return model
 
 if __name__ == '__main__':
@@ -123,8 +120,8 @@ if __name__ == '__main__':
     abs_max_length = numpy.max(
         sweep_config["training_length"] + sweep_config["validation_length"]
     )
-    print(abs_max_length)
-    machine, start, enumeration = get_example_1(abs_max_length)
+
+    machine, start, enumeration = get_example_2(abs_max_length)
 
     for training_length in sweep_config["training_length"]:
         dataset_config["training_length"] = training_length
@@ -132,15 +129,19 @@ if __name__ == '__main__':
             mambaconfig.d_model = d_model
             for randomize_training_length in sweep_config["randomize_training_length"]:
                 dataset_config["randomize_training_length"] = randomize_training_length
-                model = train(
-                    machine=machine,
-                    start=start,
-                    enumeration=enumeration,
-                )
-                validate(
-                    training_config["num_steps"],
-                    machine,
-                    start,
-                    enumeration,
-                    model
-                )
+                for n_layer in sweep_config["n_layer"]:
+                    mambaconfig.n_layer=n_layer
+                    logger.info(f"Training {dict(dataset_config, **training_config, **mambaconfig.__dict__)}")
+                    model = train(
+                        machine=machine,
+                        start=start,
+                        enumeration=enumeration,
+                    )
+                    validate(
+                        training_config["num_steps"],
+                        machine,
+                        start,
+                        enumeration,
+                        model
+                    )
+                    torch.save(model.state_dict(), f"./output/{folder_name}/{training_length}_{d_model}_{randomize_training_length}")

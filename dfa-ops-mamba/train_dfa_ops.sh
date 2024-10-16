@@ -5,7 +5,9 @@
 #SBATCH -G 1  # Number of GPUs
 #SBATCH -t 04:00:00  # Job time limit
 #SBATCH -o train_mamba_%j.out  # %j = job ID
-#SBATCH --constraint sm_70  # %j = job ID
+#SBATCH --constraint sm_70
+#SBATCH --mail-type=END
+
 
 mkdir -p /work/pi_jaimedavila_umass_edu/maxwelltang_umass_edu/dfa-ops-mamba
 cd /work/pi_jaimedavila_umass_edu/maxwelltang_umass_edu/dfa-ops-mamba
@@ -32,6 +34,7 @@ python -m pip install wheel packaging setuptools
 python -m pip install causal-conv1d
 python -m pip install mamba-ssm
 python -m pip install wandb
+python -m pip install unique-names-generator
 
 export WANDB_API_KEY
 

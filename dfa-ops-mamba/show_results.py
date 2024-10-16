@@ -3,6 +3,7 @@ import numpy
 from matplotlib import pyplot
 from matplotlib.widgets import Slider
 import pandas
+import sys
 
 def indexArray(array: numpy.ndarray):
     values = numpy.unique(array)
@@ -10,8 +11,12 @@ def indexArray(array: numpy.ndarray):
     array = numpy.searchsorted(values, array)
     return array, values
 
+if len(sys.argv) != 2:
+    print("Usage: python show_results.py <path to file>")
+    exit(1)
+log_location = sys.argv[1]
 # data = numpy.genfromtxt(".logs/latest.csv", delimiter=",")
-data = pandas.read_csv(".logs/latest.csv", header=None)
+data = pandas.read_csv(log_location, header=None)
 
 step_indexes, step_values                           = indexArray(data.iloc[:, 0].to_numpy())
 validation_length_indexes, validation_length_values = indexArray(data.iloc[:, 2].to_numpy())
