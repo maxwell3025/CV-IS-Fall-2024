@@ -93,7 +93,33 @@ def get_example_1(limit: int):
     precomputeSuffixCounts(machine, accepting, limit)
     return machine, S, enumeration
 
+def get_example_2(limit: int):
+    """multiple of 7
+    """
+    alphabet = { str(i) for i in range(10) }
+    enumeration = { str(i): i for i in range(10) }
+    state_list = [DfaState(alphabet, str(i)) for i in range(7)]
+    for state_index in range(7):
+        state = state_list[state_index]
+        for digit in range(10):
+            state.transitions[str(digit)] = state_list[(state_index * 10 + digit) % 7]
+    S_Null = DfaState(alphabet, "empty string")
+    S_Null.transitions = state_list[0].transitions
+
+    machine = {
+        S_Null,
+        *state_list,
+    }
+    accepting = {state_list[0]}
+    precomputeSuffixCounts(machine, accepting, limit)
+    return machine, S_Null, enumeration
+
 if __name__ == "__main__":
+    machine, start, enumeration = get_example_2(64)
+    mysample = sampleRandom(machine, start, 2)
+    print(mysample)
+    iterate(mysample, start)
+
     alphabet = {"a", "b"}
     # a goes to A
     # b goes to B
