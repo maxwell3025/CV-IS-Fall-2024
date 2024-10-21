@@ -114,9 +114,81 @@ def get_example_2(limit: int):
     precomputeSuffixCounts(machine, accepting, limit)
     return machine, S_Null, enumeration
 
+def get_example_3(limit: int):
+    """multiple of 3
+    """
+    alphabet = { str(i) for i in range(10) }
+    enumeration = { str(i): i for i in range(10) }
+    state_list = [DfaState(alphabet, str(i)) for i in range(3)]
+    for state_index in range(3):
+        state = state_list[state_index]
+        for digit in range(10):
+            state.transitions[str(digit)] = state_list[(state_index * 10 + digit) % 3]
+    S_Null = DfaState(alphabet, "empty string")
+    S_Null.transitions = state_list[0].transitions
+
+    machine = {
+        S_Null,
+        *state_list,
+    }
+    accepting = {state_list[0]}
+    precomputeSuffixCounts(machine, accepting, limit)
+    return machine, S_Null, enumeration
+
+def get_example_4(limit: int):
+    """counting: multiples of 3
+    """
+    alphabet = { "a", "b" }
+    enumeration = { "a": 0, "b": 1 }
+    S_0 = DfaState(alphabet, "0")
+    S_1 = DfaState(alphabet, "1")
+    S_2 = DfaState(alphabet, "2")
+    S_0.transitions["a"] = S_0
+    S_1.transitions["a"] = S_1
+    S_2.transitions["a"] = S_2
+    S_0.transitions["b"] = S_1
+    S_1.transitions["b"] = S_2
+    S_2.transitions["b"] = S_0
+
+    machine = {
+        S_0,
+        S_1,
+        S_2,
+    }
+    accepting = {S_0}
+    precomputeSuffixCounts(machine, accepting, limit)
+    return machine, S_0, enumeration
+
+def get_example_5(limit: int):
+    """counting: multiples of 3 with negatives
+    """
+    alphabet = { "a", "b", "c" }
+    enumeration = { "a": 0, "b": 1, "c": 2 }
+    S_0 = DfaState(alphabet, "0")
+    S_1 = DfaState(alphabet, "1")
+    S_2 = DfaState(alphabet, "2")
+    S_0.transitions["a"] = S_0
+    S_1.transitions["a"] = S_1
+    S_2.transitions["a"] = S_2
+    S_0.transitions["b"] = S_1
+    S_1.transitions["b"] = S_2
+    S_2.transitions["b"] = S_0
+    S_0.transitions["c"] = S_2
+    S_1.transitions["c"] = S_0
+    S_2.transitions["c"] = S_1
+
+    machine = {
+        S_0,
+        S_1,
+        S_2,
+    }
+    accepting = {S_0}
+    precomputeSuffixCounts(machine, accepting, limit)
+    return machine, S_0, enumeration
+
 if __name__ == "__main__":
-    machine, start, enumeration = get_example_2(64)
-    mysample = sampleRandomInv(machine, start, 2)
+    machine, start, enumeration = get_example_5(64)
+    mysample = sampleRandom(machine, start, 10)
     print(mysample)
     iterate(mysample, start)
 

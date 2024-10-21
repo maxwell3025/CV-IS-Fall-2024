@@ -6,7 +6,7 @@
 #SBATCH -t 04:00:00  # Job time limit
 #SBATCH -o train_mamba_%j.out  # %j = job ID
 #SBATCH --constraint sm_70
-#SBATCH --mail-type=END
+#SBATCH --mail-type=ALL
 
 
 mkdir -p /work/pi_jaimedavila_umass_edu/maxwelltang_umass_edu/dfa-ops-mamba

@@ -2,8 +2,8 @@
 training_config = {
     "batch_size": 64,
     "learning_rate": 0.0001,
-    "num_steps": 4000,
-    "val_interval": 100
+    "num_steps": 10000,
+    "val_interval": 250
 }
 
 # training_config = {
@@ -15,7 +15,7 @@ training_config = {
 
 # Configuration for dataset
 dataset_config = {
-    "n_tokens": 10,
+    "n_tokens": 3,
     "training_length": 16,
     "positive_rate": 0.5,
     "randomize_training_length": True,
@@ -39,20 +39,20 @@ class MambaConfig:
     tie_embeddings: bool = False
 
 sweep_config = {
-    "training_length": [2, 4, 8, 16, 32, 64],
-    "validation_length": [i for i in range(1, 65)],
-    "d_model": [2, 4, 8, 16, 32, 64],
-    "n_layer": [2],
-    "randomize_training_length": [True, False]
-}
-
-sweep_config = {
-    "training_length": [64],
+    "training_length": [16, 64],
     "validation_length": [i for i in range(1, 65)],
     "d_model": [8, 16, 32],
-    "n_layer": [1, 2, 3, 4],
-    "randomize_training_length": [True, False]
+    "n_layer": [2],
+    "randomize_training_length": [True]
 }
+
+# sweep_config = {
+#     "training_length": [64],
+#     "validation_length": [i for i in range(1, 65)],
+#     "d_model": [64],
+#     "n_layer": [1, 2, 3, 4, 5, 6, 7, 8],
+#     "randomize_training_length": [True]
+# }
 
 # sweep_config = {
 #     "training_length": [64],
@@ -63,9 +63,10 @@ sweep_config = {
 # }
 
 # sweep_config = {
-#     "training_length": [16, 64],
-#     "validation_length": [16, 64],
-#     "d_model": [16, 32],
+#     "training_length": [2, 4, 8, 16, 32, 64],
+#     "validation_length": [i for i in range(1, 65)],
+#     "d_model": [4, 8, 16, 32],
+#     "n_layer": [2],
 #     "randomize_training_length": [True, False]
 # }
 

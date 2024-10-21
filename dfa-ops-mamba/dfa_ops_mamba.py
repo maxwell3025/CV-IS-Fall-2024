@@ -6,7 +6,7 @@ import time
 from mamba_ssm.models.mixer_seq_simple import MambaLMHeadModel
 from config import sweep_config, training_config, dataset_config, MambaConfig
 from data_generator import generate_dataset
-from regular_languages import get_example_1, get_example_2
+from regular_languages import get_example_1, get_example_2, get_example_3, get_example_4
 import wandb
 import csv
 import os
@@ -37,6 +37,8 @@ def validate(step, machine, start, enumeration, model):
     model.eval()
     with torch.no_grad():
         for validation_length in sweep_config["validation_length"]:
+            old_positive = dataset_config["positive_rate"]
+            dataset_config["positive_rate"] = 1
             correct = 0
             total = 0
             inputs, targets = generate_dataset(
@@ -63,6 +65,7 @@ def validate(step, machine, start, enumeration, model):
                     dataset_config["randomize_training_length"],
                     mambaconfig.n_layer,
                 ])
+            dataset_config["positive_rate"] = old_positive
 
 # Training function
 def train(machine, start, enumeration):
@@ -121,7 +124,7 @@ if __name__ == '__main__':
         sweep_config["training_length"] + sweep_config["validation_length"]
     )
 
-    machine, start, enumeration = get_example_2(abs_max_length)
+    machine, start, enumeration = get_example_1(abs_max_length)
 
     for training_length in sweep_config["training_length"]:
         dataset_config["training_length"] = training_length
@@ -144,4 +147,4 @@ if __name__ == '__main__':
                         enumeration,
                         model
                     )
-                    torch.save(model.state_dict(), f"./output/{folder_name}/{training_length}_{d_model}_{randomize_training_length}")
+                    torch.save(model.state_dict(), f"./output/{folder_name}/{training_length}_{d_model}_{randomize_training_length}_{n_layer}")
