@@ -281,5 +281,3 @@ if __name__ == "__main__":
     perf_time = time.time() - perf_time
     print(perf_time / m / n * 1000)
     # print(counters)
-
-# def populate_cache(sentence: tuple[CFGSymbol], cache: map[tuple[CFGSymbol], list[int]], length: int):
