@@ -17,6 +17,7 @@ class CFGSymbol:
         self.terminal = terminal
         self.string_repr = string_repr
         self.possibly_empty = False
+        self.enumeration: dict[CFGSymbol, int] = {}
 
     def __str__(self) -> str:
         return self.string_repr
@@ -119,11 +120,16 @@ class CFGSymbol:
             symbol.alphabet_nonterm = self.alphabet_nonterm
             symbol.cache = self.cache
 
+    def _init_enumeration(self):
+        for i, term in enumerate(self.alphabet):
+            self.enumeration[term] = i
+        
     def init(self, max_length: int):
         self._init_alphabet()
         self._calculate_emptyness()
         self._init_cache(max_length)
         self._propagate_neighbors()
+        self._init_enumeration()
 
     def test(self, string: list["CFGSymbol"]):
         segment_multibundle: list[list[tuple[tuple["CFGSymbol", ...], int]]] = [[] for _ in range(len(string))]
@@ -270,6 +276,9 @@ def get_arithemtic_expr():
 if __name__ == "__main__":
     logging.basicConfig(level=logging.NOTSET)
     G = get_json_cfg()
+    for i in range(64):
+        print(f"{i}: {G.cache[(G,)][i]}")
+    exit(0)
     # logger.disabled = False
     print("starting timer")
     perf_time = time.time()

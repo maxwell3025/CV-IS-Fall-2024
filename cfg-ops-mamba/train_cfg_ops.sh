@@ -9,8 +9,8 @@
 #SBATCH --mail-type=ALL
 
 
-mkdir -p /work/pi_jaimedavila_umass_edu/maxwelltang_umass_edu/dfa-ops-mamba
-cd /work/pi_jaimedavila_umass_edu/maxwelltang_umass_edu/dfa-ops-mamba
+mkdir -p /work/pi_jaimedavila_umass_edu/maxwelltang_umass_edu/cfg-ops-mamba
+cd /work/pi_jaimedavila_umass_edu/maxwelltang_umass_edu/cfg-ops-mamba
 source .env
 module load cuda/12.6
 
@@ -38,4 +38,4 @@ python -m pip install unique-names-generator
 
 export WANDB_API_KEY
 
-python dfa_ops_mamba.py
+python cfg_ops_mamba.py

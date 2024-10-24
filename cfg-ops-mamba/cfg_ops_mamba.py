@@ -6,13 +6,13 @@ import time
 from mamba_ssm.models.mixer_seq_simple import MambaLMHeadModel
 from config import sweep_config, training_config, dataset_config, MambaConfig
 from data_generator import generate_dataset
-from regular_languages import get_example_1, get_example_2, get_example_3, get_example_4, get_example_6
 import wandb
 import csv
 import os
 import random
 import numpy
 from unique_names_generator import get_random_name
+from context_free_grammars import CFGSymbol, get_json_cfg
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
@@ -33,7 +33,7 @@ logger.info(f"Saving to output to ./output/{folder_name}")
 validation_logs = csv.writer(open(f"output/{folder_name}/validation_logs.csv", "a"))
 
 # Validation function
-def validate(step, machine, start, enumeration, model):
+def validate(step, grammar: CFGSymbol, model):
     model.eval()
     with torch.no_grad():
         for validation_length in sweep_config["validation_length"]:
@@ -42,9 +42,7 @@ def validate(step, machine, start, enumeration, model):
             correct = 0
             total = 0
             inputs, targets = generate_dataset(
-                machine=machine,
-                start=start,
-                enumeration=enumeration,
+                grammar=grammar,
                 length=validation_length,
                 dataset_config=dataset_config,
                 training_config=training_config
@@ -68,24 +66,25 @@ def validate(step, machine, start, enumeration, model):
             dataset_config["positive_rate"] = old_positive
 
 # Training function
-def train(machine, start, enumeration):
+def train(grammar: CFGSymbol):
+    model = MambaLMHeadModel(mambaconfig, device=device)
+
+    criterion = nn.CrossEntropyLoss()
+    optimizer = optim.Adam(model.parameters(), lr=training_config["learning_rate"])
     """
     Train the model.
     """
-    model = MambaLMHeadModel(mambaconfig, device=device)
-    criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=training_config["learning_rate"])
-
     model.train()
     start_time = time.time()
     for step in range(training_config["num_steps"]):
+        step_loss = 0
+        correct = 0
+        total = 0
         batch_length = dataset_config["training_length"]
         if dataset_config["randomize_training_length"]:
-            batch_length = random.randint(1, dataset_config["training_length"])
+            batch_length = random.randint(18, dataset_config["training_length"])
         inputs, targets = generate_dataset(
-            machine=machine,
-            start=start,
-            enumeration=enumeration,
+            grammar=grammar,
             length=batch_length,
             dataset_config=dataset_config,
             training_config=training_config
@@ -93,13 +92,20 @@ def train(machine, start, enumeration):
         inputs = inputs.to(device)
         targets = targets.to(device)
         outputs = model(inputs, num_last_tokens=1).logits
+        # print(outputs.shape)
+        # print(targets.shape)
         loss = criterion(torch.transpose(outputs, 1, 2), targets)
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-
+        step_loss += loss.item()
+        total += targets.size(0) * targets.size(1)
+        correct += (outputs.argmax(2) == targets).sum().item()
+        accuracy = 100 * correct / total
+        # logger.info(f'Step [{step+1}/{training_config["num_steps"]}], Loss: {step_loss/training_config["batch_size"]:.4f}, Accuracy: {accuracy:.2f}%')
         if step % training_config["val_interval"] == 0:
-            validate(step, machine, start, enumeration, model)
+            validate(step=step, grammar=grammar, model=model)
+
     end_time = time.time()
     logger.info(f'Training instance completed in: {(end_time - start_time)/60:.2f} minutes')
     return model
@@ -114,7 +120,7 @@ if __name__ == '__main__':
         sweep_config["training_length"] + sweep_config["validation_length"]
     )
 
-    machine, start, enumeration = get_example_6(abs_max_length)
+    grammar = get_json_cfg()
 
     for training_length in sweep_config["training_length"]:
         dataset_config["training_length"] = training_length
@@ -126,15 +132,11 @@ if __name__ == '__main__':
                     mambaconfig.n_layer=n_layer
                     logger.info(f"Training {dict(dataset_config, **training_config, **mambaconfig.__dict__)}")
                     model = train(
-                        machine=machine,
-                        start=start,
-                        enumeration=enumeration,
+                        grammar=grammar
                     )
                     validate(
                         training_config["num_steps"],
-                        machine,
-                        start,
-                        enumeration,
-                        model
+                        grammar=grammar,
+                        model=model
                     )
                     torch.save(model.state_dict(), f"./output/{folder_name}/{training_length}_{d_model}_{randomize_training_length}_{n_layer}")

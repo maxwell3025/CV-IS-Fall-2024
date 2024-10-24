@@ -186,6 +186,26 @@ def get_example_5(limit: int):
     precomputeSuffixCounts(machine, accepting, limit)
     return machine, S_0, enumeration
 
+def get_example_6(limit: int):
+    """counting: parity
+    """
+    alphabet = { "a", "b" }
+    enumeration = { "a": 0, "b": 1 }
+    S_0 = DfaState(alphabet, "0")
+    S_1 = DfaState(alphabet, "1")
+    S_0.transitions["a"] = S_0
+    S_1.transitions["a"] = S_1
+    S_0.transitions["b"] = S_1
+    S_1.transitions["b"] = S_0
+
+    machine = {
+        S_0,
+        S_1,
+    }
+    accepting = {S_0}
+    precomputeSuffixCounts(machine, accepting, limit)
+    return machine, S_0, enumeration
+
 if __name__ == "__main__":
     machine, start, enumeration = get_example_5(64)
     mysample = sampleRandom(machine, start, 10)
