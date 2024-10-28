@@ -2,13 +2,12 @@ import torch
 import random
 import numpy as np
 import torch.nn.functional as F
-from regular_languages import DfaState, sampleRandom, sampleRandomInv
+from config import DatasetConfig, TrainingConfig
+from regular_languages import DfaState, RegularLanguage
 
 def regular_sample(
-        machine: set[DfaState],
-        start: DfaState,
+        language: RegularLanguage,
         positive_rate: float,
-        enumeration: dict[str, int],
         length: int,
         one_hot=False,
     ):
@@ -29,21 +28,15 @@ def regular_sample(
     x = None
     y = None
     if random.random() < positive_rate:
-        sample = sampleRandom(machine, start, length)
-        numerical_sequence = []
-        for i in range(len(sample)):
-            numerical_sequence.append(enumeration[sample[i]])
-        x = torch.tensor(numerical_sequence, dtype=torch.long)
+        sample = language.sampleRandom(length)
+        x = torch.tensor(sample, dtype=torch.long)
         y = torch.tensor((1,), dtype=torch.long)
     else:
-        sample = sampleRandomInv(machine, start, length)
-        numerical_sequence = []
-        for i in range(len(sample)):
-            numerical_sequence.append(enumeration[sample[i]])
-        x = torch.tensor(numerical_sequence, dtype=torch.long)
+        sample = language.sampleRandomInv(length)
+        x = torch.tensor(sample, dtype=torch.long)
         y = torch.tensor((0,), dtype=torch.long)
         
-    if one_hot: x = F.one_hot(x, len(enumeration)).float()
+    if one_hot: x = F.one_hot(x, len(language.machine)).float()
     return x, y
 
 """
@@ -55,12 +48,10 @@ Outputs:
 (tensor([0, 6, 0, 0, 0, 0, 0, 6, 7, 0, 7, 5, 0, 0, 0, 9, 9, 9, 9, 9]), tensor([6, 6, 7, 7, 5])) # selective copying task
 """
 def generate_dataset(
-    machine: set[DfaState],
-    start: DfaState,
-    enumeration: dict[str, int],
+    language: RegularLanguage,
     length: int,
-    dataset_config,
-    training_config
+    dataset_config: DatasetConfig,
+    training_config: TrainingConfig
     ):
     """
     Generate a dataset based on the provided configuration.
@@ -76,14 +67,12 @@ def generate_dataset(
 
     x = []
     y = []
-    for _ in range(training_config["batch_size"]):
+    for _ in range(training_config.batch_size):
         x_instance, y_instance = regular_sample(
-            machine=machine,
-            start=start,
-            positive_rate=dataset_config["positive_rate"],
-            enumeration=enumeration,
+            language=language,
+            positive_rate=dataset_config.positive_rate,
             length=length,
-            one_hot=dataset_config["one_hot"]
+            one_hot=dataset_config.one_hot
         )
         x.append(x_instance)
         y.append(y_instance)

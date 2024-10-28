@@ -1,4 +1,3 @@
-import seaborn
 import numpy
 from matplotlib import pyplot
 from matplotlib.widgets import Slider

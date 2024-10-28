@@ -1,97 +1,64 @@
+import typing
+import json
+import copy
+
 # Configuration for training
-training_config = {
-    "batch_size": 64,
-    "learning_rate": 0.0001,
-    "num_steps": 10000,
-    "val_interval": 250
-}
+class TrainingConfig:
+    def __init__(self, config: dict[str, any]) -> None:
+        self.batch_size:    int   = int  (config["batch_size"])
+        self.learning_rate: float = float(config["learning_rate"])
+        self.num_steps:     int   = int  (config["num_steps"])
+        self.val_interval:  int   = int  (config["val_interval"])
+        self.val_lengths:   list  = list (config["val_lengths"])
 
-# training_config = {
-#     "batch_size": 64,
-#     "learning_rate": 0.0001,
-#     "num_steps": 1000,
-#     "val_interval": 100
-# }
-
-# Configuration for dataset
-dataset_config = {
-    "n_tokens": 3,
-    "training_length": 16,
-    "positive_rate": 0.5,
-    "randomize_training_length": True,
-    "one_hot": False,
-    "static": False,
-}
+class DatasetConfig:
+    def __init__(self, config: dict[str, any]) -> None:
+        self.training_length:           int   = int  (config["training_length"])
+        self.positive_rate:             float = float(config["positive_rate"])
+        self.randomize_training_length: bool  = bool (config["randomize_training_length"])
+        self.one_hot:                   bool  = bool (config["one_hot"])
 
 # Configuration for Mamba model
 class MambaConfig:
-    d_model: int = 8
-    d_intermediate: int = 0
-    n_layer: int = 12
-    vocab_size: int = dataset_config['n_tokens']
-    ssm_cfg: dict = {}
-    attn_layer_idx: list = [2]
-    attn_cfg: dict = {
-        "num_heads": 8
-    }
-    rms_norm: bool = True
-    residual_in_fp32: bool = True
-    fused_add_norm: bool = True
-    pad_vocab_size_multiple: int = 1
-    tie_embeddings: bool = False
+    def __init__(self, config: dict[str, any]) -> None:
+        self.d_model:                 int  = int (config["d_model"])
+        self.d_intermediate:          int  = int (config["d_intermediate"])
+        self.n_layer:                 int  = int (config["n_layer"])
+        self.vocab_size:              int  = int (config["vocab_size"])
+        self.ssm_cfg:                 dict = dict(config["ssm_cfg"])
+        self.attn_layer_idx:          list = list(config["attn_layer_idx"])
+        self.attn_cfg:                dict = dict(config["attn_cfg"])
+        self.rms_norm:                bool = bool(config["rms_norm"])
+        self.residual_in_fp32:        bool = bool(config["residual_in_fp32"])
+        self.fused_add_norm:          bool = bool(config["fused_add_norm"])
+        self.pad_vocab_size_multiple: int  = int (config["pad_vocab_size_multiple"])
+        self.tie_embeddings:          bool = bool(config["tie_embeddings"])
+
+def from_dict(data: dict[str, any]):
+    return TrainingConfig(data), DatasetConfig(data), MambaConfig(data)
+
+def from_json(json_file: typing.IO):
+    data = json.load(json_file)
+    return from_dict(data)
 
 sweep_config = {
-    "training_length": [16, 64],
-    "validation_length": [i for i in range(1, 65)],
-    "d_model": [8, 16, 32],
+    "training_length": [64],
+    "d_model": [32],
     "n_layer": [5],
     "randomize_training_length": [True]
 }
 
-# sweep_config = {
-#     "training_length": [16, 64],
-#     "validation_length": [i for i in range(1, 65)],
-#     "d_model": [8, 16, 32],
-#     "n_layer": [2],
-#     "randomize_training_length": [True]
-# }
+def iterate_sweep(base: dict[str, any], sweep: dict[str, list[any]]):
+    base = copy.deepcopy(base)
+    total_cases = 1
+    for sweep_dim in sweep:
+        total_cases *= len(sweep[sweep_dim])
+    print(f"total_cases: {total_cases}")
+    for case_index in range(total_cases):
+        for sweep_dim in sweep:
+            sweep_choices = sweep[sweep_dim]
+            sweep_choice_index = case_index % len(sweep_choices)
+            base[sweep_dim] = sweep_choices[sweep_choice_index]
+            case_index = case_index // len(sweep_choices)
+        yield from_dict(base)
 
-# sweep_config = {
-#     "training_length": [64],
-#     "validation_length": [i for i in range(1, 65)],
-#     "d_model": [64],
-#     "n_layer": [1, 2, 3, 4, 5, 6, 7, 8],
-#     "randomize_training_length": [True]
-# }
-
-# sweep_config = {
-#     "training_length": [64],
-#     "validation_length": [i for i in range(1, 65)],
-#     "d_model": [8],
-#     "n_layer": [2],
-#     "randomize_training_length": [True]
-# }
-
-# sweep_config = {
-#     "training_length": [2, 4, 8, 16, 32, 64],
-#     "validation_length": [i for i in range(1, 65)],
-#     "d_model": [4, 8, 16, 32],
-#     "n_layer": [2],
-#     "randomize_training_length": [True, False]
-# }
-
-# class MambaConfig:
-
-
-#     d_model: int = 2560
-#     d_intermediate: int = 0
-#     n_layer: int = 64
-#     vocab_size: int = 50277
-#     ssm_cfg: dict = dict
-#     attn_layer_idx: list = list
-#     attn_cfg: dict = dict
-#     rms_norm: bool = True
-#     residual_in_fp32: bool = True
-#     fused_add_norm: bool = True
-#     pad_vocab_size_multiple: int = 8
-#     tie_embeddings: bool = True

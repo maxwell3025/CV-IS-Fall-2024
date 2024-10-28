@@ -4,15 +4,18 @@ import torch.optim as optim
 import logging
 import time
 from mamba_ssm.models.mixer_seq_simple import MambaLMHeadModel
-from config import sweep_config, training_config, dataset_config, MambaConfig
+from config import sweep_config, from_json, iterate_sweep
 from data_generator import generate_dataset
-from regular_languages import get_example_1, get_example_2, get_example_3, get_example_4, get_example_6
-import wandb
+from regular_languages import RegularLanguage, get_example_1, get_example_2, get_example_3, get_example_4, get_example_6
 import csv
 import os
 import random
 import numpy
 from unique_names_generator import get_random_name
+import json
+
+training_config, dataset_config, mamba_config = from_json(open("config/a_or_bb.json"))
+base_config_data = json.load(open("config/a_or_bb.json"))
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
@@ -22,29 +25,26 @@ logger = logging.getLogger()
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 logger.info(f'Using device: {device}')
 
-# Define model
-mambaconfig = MambaConfig()
-
 # Setup local logging
 folder_name = get_random_name(separator="_", style="lowercase")
 os.makedirs(f"./output/{folder_name}", exist_ok=True)
 logger.info(f"Saving to output to ./output/{folder_name}")
-
 validation_logs = csv.writer(open(f"output/{folder_name}/validation_logs.csv", "a"))
 
+# Setup local logging(New)
+validation_logs_object = []
+
 # Validation function
-def validate(step, machine, start, enumeration, model):
+def validate(language: RegularLanguage, step: int, model):
     model.eval()
     with torch.no_grad():
-        for validation_length in sweep_config["validation_length"]:
-            old_positive = dataset_config["positive_rate"]
-            dataset_config["positive_rate"] = 0.5
+        for validation_length in training_config.val_lengths:
+            old_positive = dataset_config.positive_rate
+            dataset_config.positive_rate = 0.5
             correct = 0
             total = 0
             inputs, targets = generate_dataset(
-                machine=machine,
-                start=start,
-                enumeration=enumeration,
+                language=language,
                 length=validation_length,
                 dataset_config=dataset_config,
                 training_config=training_config
@@ -60,32 +60,38 @@ def validate(step, machine, start, enumeration, model):
                     step,
                     accuracy,
                     validation_length,
-                    dataset_config["training_length"],
-                    mambaconfig.d_model,
-                    dataset_config["randomize_training_length"],
-                    mambaconfig.n_layer,
+                    dataset_config.training_length,
+                    mamba_config.d_model,
+                    dataset_config.randomize_training_length,
+                    mamba_config.n_layer,
                 ])
-            dataset_config["positive_rate"] = old_positive
+            validation_logs_object.append({
+                "step": step,
+                "accuracy": accuracy,
+                "validation_length": validation_length,
+                "dataset_config": dataset_config.__dict__,
+                "training_config": training_config.__dict__,
+                "mamba_config": dataset_config.__dict__,
+            })
+            dataset_config.positive_rate = old_positive
 
 # Training function
-def train(machine, start, enumeration):
+def train(language: RegularLanguage):
     """
     Train the model.
     """
-    model = MambaLMHeadModel(mambaconfig, device=device)
+    model = MambaLMHeadModel(mamba_config, device=device)
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=training_config["learning_rate"])
+    optimizer = optim.Adam(model.parameters(), lr=training_config.learning_rate)
 
     model.train()
     start_time = time.time()
-    for step in range(training_config["num_steps"]):
-        batch_length = dataset_config["training_length"]
-        if dataset_config["randomize_training_length"]:
-            batch_length = random.randint(1, dataset_config["training_length"])
+    for step in range(training_config.num_steps):
+        batch_length = dataset_config.training_length
+        if dataset_config.randomize_training_length:
+            batch_length = random.randint(1, dataset_config.training_length)
         inputs, targets = generate_dataset(
-            machine=machine,
-            start=start,
-            enumeration=enumeration,
+            language=language,
             length=batch_length,
             dataset_config=dataset_config,
             training_config=training_config
@@ -98,43 +104,45 @@ def train(machine, start, enumeration):
         loss.backward()
         optimizer.step()
 
-        if step % training_config["val_interval"] == 0:
-            validate(step, machine, start, enumeration, model)
+        if step % training_config.val_interval == 0:
+            validate(
+                language=language,
+                step=step,
+                model=model,
+            )
     end_time = time.time()
+
     logger.info(f'Training instance completed in: {(end_time - start_time)/60:.2f} minutes')
     return model
 
 if __name__ == '__main__':
-    wandb.login()
-    run = wandb.init(
-        project="dfa-ops-mamba-gridsearch",
-    )
-
     abs_max_length = numpy.max(
-        sweep_config["training_length"] + sweep_config["validation_length"]
+        sweep_config["training_length"] + training_config.val_lengths
     )
 
-    machine, start, enumeration = get_example_6(abs_max_length)
+    language = get_example_6(abs_max_length)
 
-    for training_length in sweep_config["training_length"]:
-        dataset_config["training_length"] = training_length
-        for d_model in sweep_config["d_model"]:
-            mambaconfig.d_model = d_model
-            for randomize_training_length in sweep_config["randomize_training_length"]:
-                dataset_config["randomize_training_length"] = randomize_training_length
-                for n_layer in sweep_config["n_layer"]:
-                    mambaconfig.n_layer=n_layer
-                    logger.info(f"Training {dict(dataset_config, **training_config, **mambaconfig.__dict__)}")
-                    model = train(
-                        machine=machine,
-                        start=start,
-                        enumeration=enumeration,
-                    )
-                    validate(
-                        training_config["num_steps"],
-                        machine,
-                        start,
-                        enumeration,
-                        model
-                    )
-                    torch.save(model.state_dict(), f"./output/{folder_name}/{training_length}_{d_model}_{randomize_training_length}_{n_layer}")
+    for _training_config, _dataset_config, _mamba_config in iterate_sweep(base_config_data, sweep_config):
+        training_config = _training_config
+        dataset_config = _dataset_config
+        mamba_config = _mamba_config
+
+        logger.info(f"Training {dict(**dataset_config.__dict__, **training_config.__dict__, **mamba_config.__dict__)}")
+        model = train(
+            language=language,
+        )
+        validate(
+            language=language,
+            step=training_config.num_steps,
+            model=model,
+        )
+
+        torch.save(model.state_dict(), f"./output/{folder_name}/"
+                   f"{dataset_config.training_length}_"
+                   f"{mamba_config.d_model}_"
+                   f"{dataset_config.randomize_training_length}_"
+                   f"{mamba_config.n_layer}")
+    json_logs_path = f"output/{folder_name}/validation_logs.json"
+    validation_logs_json = open(json_logs_path, "w")
+    json.dump(validation_logs_object, validation_logs_json)
+

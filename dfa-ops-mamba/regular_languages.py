@@ -1,5 +1,6 @@
 import random
 
+
 class DfaState:
     def __init__(self, alphabet: set[str], name="Unnamed State") -> None:
         self.alphabet = alphabet
@@ -71,6 +72,18 @@ def sampleRandomInv(machine: set[DfaState], start: DfaState, length: int):
         current_string = current_string + random_character
     return current_string
 
+class RegularLanguage:
+    def __init__(self, machine: set[DfaState], start: DfaState, enumeration: dict[str, int]) -> None:
+        self.machine = machine
+        self.start = start
+        self.enumeration = enumeration
+    def sampleRandom(self, length: int):
+        sentence = sampleRandom(self.machine, self.start, length=length)
+        return [self.enumeration[char] for char in list(sentence)]
+    def sampleRandomInv(self, length: int):
+        sentence = sampleRandom(self.machine, self.start, length=length)
+        return [self.enumeration[char] for char in list(sentence)]
+
 def get_example_1(limit: int):
     """(a|bb)+
     """
@@ -91,7 +104,7 @@ def get_example_1(limit: int):
     machine = {S, F, B, E}
     accepting = {F}
     precomputeSuffixCounts(machine, accepting, limit)
-    return machine, S, enumeration
+    return RegularLanguage(machine, S, enumeration)
 
 def get_example_2(limit: int):
     """multiple of 7
@@ -112,7 +125,7 @@ def get_example_2(limit: int):
     }
     accepting = {state_list[0]}
     precomputeSuffixCounts(machine, accepting, limit)
-    return machine, S_Null, enumeration
+    return RegularLanguage(machine, S_Null, enumeration)
 
 def get_example_3(limit: int):
     """multiple of 3
@@ -133,10 +146,10 @@ def get_example_3(limit: int):
     }
     accepting = {state_list[0]}
     precomputeSuffixCounts(machine, accepting, limit)
-    return machine, S_Null, enumeration
+    return RegularLanguage(machine, S_Null, enumeration)
 
 def get_example_4(limit: int):
-    """counting: multiples of 3
+    """counting: mod 3
     """
     alphabet = { "a", "b" }
     enumeration = { "a": 0, "b": 1 }
@@ -157,10 +170,10 @@ def get_example_4(limit: int):
     }
     accepting = {S_0}
     precomputeSuffixCounts(machine, accepting, limit)
-    return machine, S_0, enumeration
+    return RegularLanguage(machine, S_0, enumeration)
 
 def get_example_5(limit: int):
-    """counting: multiples of 3 with negatives
+    """counting: mod 3 with negatives
     """
     alphabet = { "a", "b", "c" }
     enumeration = { "a": 0, "b": 1, "c": 2 }
@@ -184,7 +197,7 @@ def get_example_5(limit: int):
     }
     accepting = {S_0}
     precomputeSuffixCounts(machine, accepting, limit)
-    return machine, S_0, enumeration
+    return RegularLanguage(machine, S_0, enumeration)
 
 def get_example_6(limit: int):
     """counting: parity
@@ -204,7 +217,8 @@ def get_example_6(limit: int):
     }
     accepting = {S_0}
     precomputeSuffixCounts(machine, accepting, limit)
-    return machine, S_0, enumeration
+    return RegularLanguage(machine, S_0, enumeration)
+
 
 if __name__ == "__main__":
     machine, start, enumeration = get_example_5(64)

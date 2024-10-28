@@ -1,0 +1,3 @@
+{
+    "python.defaultInterpreterPath": "${workspaceFolder/dfa-ops-mamba/.venv/bin/python}"
+}

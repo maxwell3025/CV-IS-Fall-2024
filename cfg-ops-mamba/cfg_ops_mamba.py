@@ -12,7 +12,7 @@ import os
 import random
 import numpy
 from unique_names_generator import get_random_name
-from context_free_grammars import CFGSymbol, get_json_cfg
+from context_free_grammars import CFGSymbol, get_json_cfg, get_arithemtic_expr
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
@@ -82,7 +82,7 @@ def train(grammar: CFGSymbol):
         total = 0
         batch_length = dataset_config["training_length"]
         if dataset_config["randomize_training_length"]:
-            batch_length = random.randint(18, dataset_config["training_length"])
+            batch_length = random.randint(1, dataset_config["training_length"])
         inputs, targets = generate_dataset(
             grammar=grammar,
             length=batch_length,
@@ -120,7 +120,7 @@ if __name__ == '__main__':
         sweep_config["training_length"] + sweep_config["validation_length"]
     )
 
-    grammar = get_json_cfg()
+    grammar = get_arithemtic_expr()
 
     for training_length in sweep_config["training_length"]:
         dataset_config["training_length"] = training_length
