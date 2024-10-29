@@ -35,6 +35,7 @@ python -m pip install causal-conv1d
 python -m pip install mamba-ssm
 python -m pip install wandb
 python -m pip install unique-names-generator
+python -m pip install pyyaml
 
 export WANDB_API_KEY
 

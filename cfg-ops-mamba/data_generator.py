@@ -3,6 +3,7 @@ import random
 import numpy as np
 import torch.nn.functional as F
 from context_free_grammars import CFGSymbol
+from config import DatasetConfig, TrainingConfig
 
 def regular_sample(
         grammar: CFGSymbol,
@@ -55,8 +56,8 @@ Outputs:
 def generate_dataset(
     grammar: CFGSymbol,
     length: int,
-    dataset_config,
-    training_config
+    dataset_config: DatasetConfig,
+    training_config: TrainingConfig,
     ):
     """
     Generate a dataset based on the provided configuration.
@@ -71,12 +72,12 @@ def generate_dataset(
 
     x = []
     y = []
-    for _ in range(training_config["batch_size"]):
+    for _ in range(training_config.batch_size):
         x_instance, y_instance = regular_sample(
             grammar=grammar,
-            positive_rate=dataset_config["positive_rate"],
+            positive_rate=dataset_config.positive_rate,
             length=length,
-            one_hot=dataset_config["one_hot"]
+            one_hot=dataset_config.one_hot
         )
         x.append(x_instance)
         y.append(y_instance)

@@ -12,8 +12,9 @@ python -m ensurepip --upgrade
 python -m pip install --upgrade pip --quiet
 python -m pip install torch==2.4.0 torchvision==0.19.0 torchaudio==2.4.0 --index-url https://download.pytorch.org/whl/cpu --quiet
 python -m pip install wheel packaging setuptools --quiet
-python -m pip install causal-conv1d --quiet --no-cache-dir --no-binary=mypackage
-python -m pip install mamba-ssm --quiet --no-cache-dir --no-binary=mypackage
+# CAUSAL_CONV1D_SKIP_CUDA_BUILD=TRUE python -m pip install causal-conv1d --quiet
+# MAMBA_SKIP_CUDA_BUILD=TRUE python -m pip install mamba-ssm --quiet
+MAMBA_SKIP_CUDA_BUILD=TRUE python -m pip install -e ../mamba-debugger/
 python -m pip install wandb --quiet
 python -m pip install unique-names-generator --quiet
 # CPU only

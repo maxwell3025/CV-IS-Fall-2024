@@ -71,7 +71,7 @@ def validate(language: RegularLanguage, step: int, model):
                 "validation_length": validation_length,
                 "dataset_config": dataset_config.__dict__,
                 "training_config": training_config.__dict__,
-                "mamba_config": dataset_config.__dict__,
+                "mamba_config": mamba_config.__dict__,
             })
             dataset_config.positive_rate = old_positive
 
