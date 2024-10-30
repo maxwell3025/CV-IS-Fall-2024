@@ -8,9 +8,10 @@
 #SBATCH --constraint sm_70
 #SBATCH --mail-type=ALL
 
+source "$(dirname "$(realpath $0)")/.env"
 
-mkdir -p /work/pi_jaimedavila_umass_edu/maxwelltang_umass_edu/cfg-ops-mamba
-cd /work/pi_jaimedavila_umass_edu/maxwelltang_umass_edu/cfg-ops-mamba
+mkdir -p $UNITY_WORK_FOLDER
+cd $UNITY_WORK_FOLDER
 source .env
 module load cuda/12.6
 
@@ -29,14 +30,13 @@ fi
 
 python -m ensurepip --upgrade
 python -m pip install --upgrade pip
+python -m pip install -e .
 python -m pip install torch==2.4.0 torchvision==0.19.0 torchaudio==2.4.0 --index-url https://download.pytorch.org/whl/cu124
 python -m pip install wheel packaging setuptools
 python -m pip install causal-conv1d
-python -m pip install mamba-ssm
-python -m pip install wandb
+python -m pip install -e ../mamba-debugger/
+# python -m pip install mamba-ssm
 python -m pip install unique-names-generator
 python -m pip install pyyaml
 
-export WANDB_API_KEY
-
-python cfg_ops_mamba.py
+python -m cfg_ops_mamba

@@ -7,6 +7,7 @@ logger.disabled = True
 
 def sentence_to_string(sentence: list["CFGSymbol"]):
     return "".join(str(symbol) for symbol in sentence)
+
 class CFGSymbol:
     def __init__(self, terminal: bool, string_repr: str) -> None:
         self.rules: list[list[CFGSymbol]] = []
@@ -248,7 +249,7 @@ def get_list_cfg():
     L.init(64)
     return L
 
-def get_arithemtic_expr():
+def get_arithmetic_expr():
     G = CFGSymbol(False, "G")
     E = CFGSymbol(False, "E")
     T = CFGSymbol(False, "T")

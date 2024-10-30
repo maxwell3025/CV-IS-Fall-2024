@@ -9,27 +9,35 @@ from data_generator import generate_dataset
 import os
 import random
 from unique_names_generator import get_random_name
-from context_free_grammars import CFGSymbol, get_arithemtic_expr
+from context_free_grammars import CFGSymbol, get_arithmetic_expr
 import json
 
-# Setup logging
+# We set up a global logger for debugging purposes.
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
 logger = logging.getLogger()
 
-# Device configuration
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 logger.info(f'Using device: {device}')
 
-# Validation function
-def validate(
-    step: int,
+def validate_recognizer(
     language: CFGSymbol,
     model: nn.Module,
-    training_config: TrainingConfig,
     dataset_config: DatasetConfig,
-    mamba_config: MambaConfig,
-    log_object: list[any],
+    additional_params: dict[str, any],
 ):
+    """Test the accuracy of a language recognizer model against multiple input
+    string lengths.
+
+    Args:
+        language: The language to be validated against
+        model: The model that we want to test
+        dataset_config: The configuration for generating data
+        additional_params: Additional JSON objects to add to the record
+    Returns:
+        A list of JSON-compatible objects representing the validation logs
+        produced by this function
+    """
+    log_object = []
     model.eval()
     with torch.no_grad():
         for validation_length in training_config.val_lengths:
@@ -49,28 +57,41 @@ def validate(
             total += targets.size(0) * targets.size(1)
             correct += (outputs.argmax(2) == targets).sum().item()
             accuracy = 100 * correct / total
-            if step != -1:
-                log_object.append({
-                    "step": step,
-                    "accuracy": accuracy,
-                    "validation_length": validation_length,
-                    "dataset_config": dataset_config.__dict__,
-                    "training_config": training_config.__dict__,
-                    "mamba_config": mamba_config.__dict__,
-                })
+            log_object.append(dict(
+                accuracy=accuracy,
+                validation_length=validation_length,
+                dataset_config=dataset_config.__dict__,
+                **additional_params,
+            ))
             dataset_config.positive_rate = old_positive
+    return log_object
 
-# Training function
-def train(
+def train_recognizer(
     language: CFGSymbol,
     training_config: TrainingConfig,
     dataset_config: DatasetConfig,
-    log_object: list[any],
+    mamba_config: MambaConfig,
     model: MambaLMHeadModel,
 ):
+    """Trains a model to recognize instances of a language.
+
+    Args:
+        language: A CFG Symbol representing the language that we will train the
+            model to recognize.
+        training_config: A TrainingConfig object containing the training-related
+            hyperparameters like step size and number of steps. For more info,
+            see TrainingConfig.
+        dataset_config: A DatasetConfig object containing the hyperparameters
+            that define our dataset.
+        mamba_config: A MambaConfig object containing the hyperparameters
+            defining our model architecture.
+        model: The model that we want to train.
+
+    Returns:
+        A tuple (model, logs) where model is the model after training and logs
+        is a list of JSON log entries produced during training.
     """
-    Train the model.
-    """
+    log_object = []
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=training_config.learning_rate)
     model.train()
@@ -93,53 +114,71 @@ def train(
         loss.backward()
         optimizer.step()
         if step % training_config.val_interval == 0:
-            validate(
-                step=step,
+            log_object = log_object + validate_recognizer(
                 language=language,
                 model=model,
-                training_config=training_config,
                 dataset_config=dataset_config,
-                mamba_config=mamba_config,
-                log_object=log_object,
+                additional_params=dict(
+                    training_config=training_config,
+                    step=step,
+                    mamba_config=mamba_config,
+                )
             )
-
+            model.train()
     end_time = time.time()
-    logger.info(f'Training instance completed in: {(end_time - start_time)/60:.2f} minutes')
-    return model
+    train_time_mins = (end_time - start_time)/60
+    logger.info(
+        f"Training instance completed in: {train_time_mins:.2f} minutes"
+    )
+    return model, log_object
 
 if __name__ == '__main__':
-    language = get_arithemtic_expr()
+    language = get_arithmetic_expr()
 
-    # Setup local logging
     folder_name = get_random_name(separator="_", style="lowercase")
     os.makedirs(f"./output/{folder_name}", exist_ok=True)
     logger.info(f"Saving to output to ./output/{folder_name}")
     validation_logs_object = []
 
-    for training_config, dataset_config, mamba_config in iterate_sweep("config/a_or_bb.yaml"):
+    for (training_config, dataset_config,
+        mamba_config) in iterate_sweep("config/a_or_bb.yaml"):
         model = MambaLMHeadModel(mamba_config, device=device)
 
-        logger.info(f"Training {dict(**dataset_config.__dict__, **training_config.__dict__, **mamba_config.__dict__)}")
+        logger.info(f"Training {dict(
+            **dataset_config.__dict__,
+            **training_config.__dict__,
+            **mamba_config.__dict__
+        )}")
 
-        model = train(
+        model = train_recognizer(
             language=language,
             training_config=training_config,
             dataset_config=dataset_config,
+            mamba_config=mamba_config,
             log_object=validation_logs_object,
             model=model,
         )
-        validate(
+        validate_recognizer(
             language=language,
-            step=training_config.num_steps,
             model=model,
-            log_object=validation_logs_object
+            dataset_config=dataset_config,
+            additional_params=dict(
+                step=training_config.num_steps,
+                training_config=training_config,
+                mamba_config=mamba_config,
+            )
         )
 
-        torch.save(model.state_dict(), f"./output/{folder_name}/"
-                   f"{dataset_config.training_length}_"
-                   f"{mamba_config.d_model}_"
-                   f"{dataset_config.randomize_training_length}_"
-                   f"{mamba_config.n_layer}")
+        torch.save(
+            model.state_dict(),
+            "./output/{}/{}_{}_{}_{}".format(
+                folder_name,
+                dataset_config.training_length,
+                mamba_config.d_model,
+                dataset_config.randomize_training_length,
+                mamba_config.n_layer,
+            ),
+        )
     json_logs_path = f"output/{folder_name}/validation_logs.json"
-    validation_logs_json = open(json_logs_path, "w")
-    json.dump(validation_logs_object, validation_logs_json)
+    with open(json_logs_path, "w") as validation_logs_json:
+        json.dump(validation_logs_object, validation_logs_json)
