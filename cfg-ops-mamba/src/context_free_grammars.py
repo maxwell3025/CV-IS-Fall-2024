@@ -165,6 +165,8 @@ class CFGSymbol:
 
     def sample_random(self, length: int):
         if self.terminal: return [self]
+        if sum(self.cache[tuple(rule)][length] for rule in self.rules) == 0:
+            return None
         logger.info("BEGIN")
         logger.info(f"Deriving {self}")
         # Pick a random production rule
@@ -207,6 +209,8 @@ class CFGSymbol:
         return symbol_list
 
     def sample_random_inv(self, length: int):
+        if sum(self.cache[tuple(rule)][length] for rule in self.rules) == len(self.alphabet)**length:
+            return None
         while True:
             sample = [random.choice(self.alphabet) for _ in range(length)]
             if not self.test(sample): return sample
@@ -238,7 +242,7 @@ def get_json_cfg():
     arr_inner.add_rule(arr_inner,value,comma)
     arr_inner.add_rule()
 
-    obj.init(256)
+    obj.init(64)
     return obj
 
 def get_list_cfg():
@@ -274,11 +278,45 @@ def get_arithmetic_expr():
     G.init(64)
     return G
     
+def a_or_bb():
+    G = CFGSymbol(False, "G")
+    a = CFGSymbol(True, "a")
+    b = CFGSymbol(True, "b")
+    G.add_rule(G, a)
+    G.add_rule(G, b, b)
+    G.add_rule(a)
+    G.add_rule(b, b)
+    G.init(64)
+    return G
+    
+def parity():
+    Even = CFGSymbol(False, "Even")
+    Odd = CFGSymbol(False, "Odd")
+    a = CFGSymbol(True, "a")
+    b = CFGSymbol(True, "b")
+    Even.add_rule(Even, a)
+    Even.add_rule(Odd, b)
+    Even.add_rule(a)
+    Odd.add_rule(Odd, a)
+    Odd.add_rule(Even, b)
+    Odd.add_rule(b)
+    Even.init(64)
+    return Even
+
+language_list = dict(
+    json=get_json_cfg(),
+    list=get_json_cfg(),
+    arithmetic=get_arithmetic_expr(),
+    a_or_bb=a_or_bb(),
+)
+
 if __name__ == "__main__":
     logging.basicConfig(level=logging.NOTSET)
-    G = get_json_cfg()
+    G = parity()
+    # for i in range(64):
+    #     print(f"{i}: {G.cache[(G,)][i]}")
     for i in range(64):
-        print(f"{i}: {G.cache[(G,)][i]}")
+        print(G.sample_random_inv(64))
     exit(0)
     # logger.disabled = False
     print("starting timer")

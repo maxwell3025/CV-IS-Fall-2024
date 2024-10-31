@@ -6,7 +6,6 @@ import copy
 # Configuration for training
 class TrainingConfig:
     def __init__(self, config: dict[str, any]) -> None:
-        self.batch_size:    int   = int  (config["batch_size"])
         self.learning_rate: float = float(config["learning_rate"])
         self.num_steps:     int   = int  (config["num_steps"])
         self.val_interval:  int   = int  (config["val_interval"])
@@ -15,6 +14,7 @@ class TrainingConfig:
 # Configuration for datasets
 class DatasetConfig:
     def __init__(self, config: dict[str, any]) -> None:
+        self.batch_size:                int   = int  (config["batch_size"])
         self.training_length:           int   = int  (config["training_length"])
         self.positive_rate:             float = float(config["positive_rate"])
         self.randomize_training_length: bool  = bool (config["randomize_training_length"])
@@ -36,8 +36,15 @@ class MambaConfig:
         self.pad_vocab_size_multiple: int  = int (config["pad_vocab_size_multiple"])
         self.tie_embeddings:          bool = bool(config["tie_embeddings"])
 
+# Configuration for Mamba model
+class MambaLstmConfig(MambaConfig):
+    def __init__(self, config: dict[str, any]) -> None:
+        super(MambaLstmConfig, self).__init__(config)
+        self.lstm_layer_idx: list = list(config["lstm_layer_idx"])
+        self.lstm_cfg: dict = dict(config["lstm_cfg"])
+
 def from_dict(data: dict[str, any]):
-    return TrainingConfig(data), DatasetConfig(data), MambaConfig(data)
+    return TrainingConfig(data), DatasetConfig(data), MambaLstmConfig(data)
 
 def from_json(json_file: typing.IO):
     data = json.load(json_file)

@@ -4,13 +4,15 @@ import torch.optim as optim
 import logging
 import time
 from mamba_ssm.models.mixer_seq_simple import MambaLMHeadModel
+from mamba_lstm import MambaLMHeadModelLstm
 from config import iterate_sweep, DatasetConfig, TrainingConfig, MambaConfig
-from data_generator import generate_dataset
+from data_generator import generate_dataset, generate_dataset_multi
 import os
 import random
 from unique_names_generator import get_random_name
-from context_free_grammars import CFGSymbol, get_arithmetic_expr
+from context_free_grammars import CFGSymbol, get_arithmetic_expr, a_or_bb, parity
 import json
+import sys
 
 # We set up a global logger for debugging purposes.
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
@@ -48,8 +50,10 @@ def validate_recognizer(
             inputs, targets = generate_dataset(
                 grammar=language,
                 length=validation_length,
-                dataset_config=dataset_config,
-                training_config=training_config
+                randomize=False,
+                batch_size=dataset_config.batch_size,
+                one_hot=dataset_config.one_hot,
+                positive_rate=dataset_config.positive_rate,
             )
             inputs = inputs.to(device)
             targets = targets.to(device)
@@ -98,13 +102,13 @@ def train_recognizer(
     start_time = time.time()
     for step in range(training_config.num_steps):
         batch_length = dataset_config.training_length
-        if dataset_config.randomize_training_length:
-            batch_length = random.randint(1, dataset_config.training_length)
         inputs, targets = generate_dataset(
             grammar=language,
             length=batch_length,
-            dataset_config=dataset_config,
-            training_config=training_config
+            randomize=dataset_config.randomize_training_length,
+            batch_size=dataset_config.batch_size,
+            one_hot=dataset_config.one_hot,
+            positive_rate=dataset_config.positive_rate,
         )
         inputs = inputs.to(device)
         targets = targets.to(device)
@@ -119,9 +123,93 @@ def train_recognizer(
                 model=model,
                 dataset_config=dataset_config,
                 additional_params=dict(
-                    training_config=training_config,
                     step=step,
-                    mamba_config=mamba_config,
+                    training_config=training_config.__dict__,
+                    mamba_config=mamba_config.__dict__,
+                )
+            )
+            model.train()
+        print(step)
+    end_time = time.time()
+    train_time_mins = (end_time - start_time)/60
+    logger.info(
+        f"Training instance completed in: {train_time_mins:.2f} minutes"
+    )
+    return model, log_object
+
+def validate_multi(
+    language: list[CFGSymbol],
+    model: nn.Module,
+    dataset_config: DatasetConfig,
+    additional_params: dict[str, any],
+):
+    log_object = []
+    model.eval()
+    with torch.no_grad():
+        for validation_length in training_config.val_lengths:
+            old_positive = dataset_config.positive_rate
+            dataset_config.positive_rate = 0.5
+            correct = 0
+            total = 0
+            inputs, targets = generate_dataset_multi(
+                grammars=language,
+                length=validation_length,
+                randomize=False,
+                batch_size=dataset_config.batch_size,
+                one_hot=dataset_config.one_hot,
+            )
+            inputs = inputs.to(device)
+            targets = targets.to(device)
+            outputs: torch.Tensor = model(inputs, num_last_tokens=1).logits
+            total += targets.size(0) * targets.size(1)
+            correct += (outputs.argmax(2) == targets).sum().item()
+            accuracy = 100 * correct / total
+            log_object.append(dict(
+                accuracy=accuracy,
+                validation_length=validation_length,
+                dataset_config=dataset_config.__dict__,
+                **additional_params,
+            ))
+            dataset_config.positive_rate = old_positive
+    return log_object
+
+def train_multi(
+    language: list[CFGSymbol],
+    training_config: TrainingConfig,
+    dataset_config: DatasetConfig,
+    mamba_config: MambaConfig,
+    model: MambaLMHeadModel,
+):
+    log_object = []
+    criterion = nn.CrossEntropyLoss()
+    optimizer = optim.Adam(model.parameters(), lr=training_config.learning_rate)
+    model.train()
+    start_time = time.time()
+    for step in range(training_config.num_steps):
+        batch_length = dataset_config.training_length
+        inputs, targets = generate_dataset(
+            grammars=language,
+            length=batch_length,
+            randomize=dataset_config.randomize_training_length,
+            batch_size=dataset_config.batch_size,
+            one_hot=dataset_config.one_hot,
+        )
+        inputs = inputs.to(device)
+        targets = targets.to(device)
+        outputs = model(inputs, num_last_tokens=1).logits
+        loss = criterion(torch.transpose(outputs, 1, 2), targets)
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+        if step % training_config.val_interval == 0:
+            log_object = log_object + validate_recognizer(
+                language=language,
+                model=model,
+                dataset_config=dataset_config,
+                additional_params=dict(
+                    step=step,
+                    training_config=training_config.__dict__,
+                    mamba_config=mamba_config.__dict__,
                 )
             )
             model.train()
@@ -133,16 +221,20 @@ def train_recognizer(
     return model, log_object
 
 if __name__ == '__main__':
-    language = get_arithmetic_expr()
+    language = parity()
 
     folder_name = get_random_name(separator="_", style="lowercase")
     os.makedirs(f"./output/{folder_name}", exist_ok=True)
     logger.info(f"Saving to output to ./output/{folder_name}")
     validation_logs_object = []
 
+    if len(sys.argv) != 2:
+        print("Usage: python -m cfg_ops_mamba <path to config file>")
+
     for (training_config, dataset_config,
-        mamba_config) in iterate_sweep("config/a_or_bb.yaml"):
-        model = MambaLMHeadModel(mamba_config, device=device)
+        mamba_config) in iterate_sweep(sys.argv[1]):
+
+        model = MambaLMHeadModelLstm(mamba_config, device=device)
 
         logger.info(f"Training {dict(
             **dataset_config.__dict__,
@@ -150,22 +242,22 @@ if __name__ == '__main__':
             **mamba_config.__dict__
         )}")
 
-        model = train_recognizer(
+        model, validation_logs_object = train_recognizer(
             language=language,
             training_config=training_config,
             dataset_config=dataset_config,
             mamba_config=mamba_config,
-            log_object=validation_logs_object,
             model=model,
         )
-        validate_recognizer(
+
+        validation_logs_object += validate_recognizer(
             language=language,
             model=model,
             dataset_config=dataset_config,
             additional_params=dict(
                 step=training_config.num_steps,
-                training_config=training_config,
-                mamba_config=mamba_config,
+                training_config=training_config.__dict__,
+                mamba_config=mamba_config.__dict__,
             )
         )
 

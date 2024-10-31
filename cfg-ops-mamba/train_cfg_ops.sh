@@ -8,7 +8,7 @@
 #SBATCH --constraint sm_70
 #SBATCH --mail-type=ALL
 
-source "$(dirname "$(realpath $0)")/.env"
+source .env
 
 mkdir -p $UNITY_WORK_FOLDER
 cd $UNITY_WORK_FOLDER
@@ -34,9 +34,9 @@ python -m pip install -e .
 python -m pip install torch==2.4.0 torchvision==0.19.0 torchaudio==2.4.0 --index-url https://download.pytorch.org/whl/cu124
 python -m pip install wheel packaging setuptools
 python -m pip install causal-conv1d
-python -m pip install -e ../mamba-debugger/
-# python -m pip install mamba-ssm
+# python -m pip install -e ../mamba-debugger/
+python -m pip install mamba-ssm
 python -m pip install unique-names-generator
 python -m pip install pyyaml
 
-python -m cfg_ops_mamba
+python -m cfg_ops_mamba ./config/a_or_bb_lstm.yaml
