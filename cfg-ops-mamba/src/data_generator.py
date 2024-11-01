@@ -92,7 +92,6 @@ def generate_dataset(
 
 def regular_sample_multi(
         grammars: list[CFGSymbol],
-        positive_rate: float,
         length: int,
         one_hot=False,
     ):
@@ -114,10 +113,10 @@ def regular_sample_multi(
     y = None
     chosen_grammar_index = random.randrange(len(grammars))
     grammar = grammars[chosen_grammar_index]
-    sample = grammar.sample_random_inv(length)
+    sample = grammar.sample_random(length)
     numerical_sequence = []
     for i in range(len(sample)):
-        numerical_sequence.append(grammar.enumeration[sample[i]])
+        numerical_sequence.append(grammars[0].enumeration[sample[i]])
     x = torch.tensor(numerical_sequence, dtype=torch.long)
     y = torch.tensor((chosen_grammar_index,), dtype=torch.long)
     if one_hot: x = F.one_hot(x, len(grammar.enumeration)).float()
@@ -162,8 +161,8 @@ def generate_dataset_multi(
     x = []
     y = []
     for _ in range(batch_size):
-        x_instance, y_instance = regular_sample(
-            grammar=grammar,
+        x_instance, y_instance = regular_sample_multi(
+            grammars=grammars,
             length=length,
             one_hot=one_hot
         )

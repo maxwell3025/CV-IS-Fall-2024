@@ -39,4 +39,4 @@ python -m pip install mamba-ssm
 python -m pip install unique-names-generator
 python -m pip install pyyaml
 
-python -m cfg_ops_mamba ./config/a_or_bb_lstm.yaml
+python -m cfg_ops_mamba ./config/parity_lstm.yaml

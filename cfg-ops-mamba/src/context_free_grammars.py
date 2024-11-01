@@ -277,6 +277,31 @@ def get_arithmetic_expr():
     X.rules.append([x])
     G.init(64)
     return G
+
+def get_arithmetic_expr_all():
+    G = CFGSymbol(False, "G")
+    E = CFGSymbol(False, "E")
+    T = CFGSymbol(False, "T")
+    F = CFGSymbol(False, "F")
+    X = CFGSymbol(False, "X")
+    plus = CFGSymbol(True, "+")
+    times = CFGSymbol(True, "*")
+    lparen = CFGSymbol(True, "(")
+    rparen = CFGSymbol(True, ")")
+    x = CFGSymbol(True, "x")
+    prime = CFGSymbol(True, "'")
+    
+    G.rules.append([E])
+    E.rules.append([T])
+    E.rules.append([E,plus,T])
+    T.rules.append([F])
+    T.rules.append([T,times,F])
+    F.rules.append([X])
+    F.rules.append([lparen,E,rparen])
+    X.rules.append([X, prime])
+    X.rules.append([x])
+    G.init(64)
+    return G, E, T, F, X
     
 def a_or_bb():
     G = CFGSymbol(False, "G")
@@ -303,6 +328,19 @@ def parity():
     Even.init(64)
     return Even
 
+def parity_all():
+    Even = CFGSymbol(False, "Even")
+    Odd = CFGSymbol(False, "Odd")
+    a = CFGSymbol(True, "a")
+    b = CFGSymbol(True, "b")
+    Even.add_rule(Even, a)
+    Even.add_rule(Odd, b)
+    Even.add_rule(a)
+    Odd.add_rule(Odd, a)
+    Odd.add_rule(Even, b)
+    Odd.add_rule(b)
+    Even.init(65)
+    return Even, Odd
 language_list = dict(
     json=get_json_cfg(),
     list=get_json_cfg(),
