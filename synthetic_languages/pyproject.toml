@@ -1,0 +1,7 @@
+[project]
+name = "synthetic_langauges"
+version = "0.1.0"
+description = "Contains the "
+
+[tool.distutils.egg_info]
+egg_base = "."

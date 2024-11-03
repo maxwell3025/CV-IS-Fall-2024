@@ -1,7 +1,8 @@
 import random
 import logging
 import time
-from data_generator import LanguageSelectTask
+
+from synthetic_languages.language_select_task import LanguageSelectTask
     
 logger = logging.getLogger(__name__)
 logger.disabled = True
@@ -215,139 +216,75 @@ class CFGSymbol:
         while True:
             sample = [random.choice(self.alphabet) for _ in range(length)]
             if not self.test(sample): return sample
+        
+class CFGRecognizerTask(LanguageSelectTask):
+    """Represents a language recognition task
+    """
+    def __init__(self, grammar: CFGSymbol, max_length=64):
+        self.grammar = grammar
+        self.grammar.init(max_length)
 
-def get_json_cfg():
-    value = CFGSymbol(False, "<value>")
-    obj = CFGSymbol(False, "<Object>")
-    obj_inner = CFGSymbol(False, "<entry list>")
-    arr = CFGSymbol(False, "<Array>")
-    arr_inner = CFGSymbol(False, "<inner list")
-    num = CFGSymbol(True, "0")
-    str = CFGSymbol(True, "\"s\"")
-    id = CFGSymbol(True, "p")
-    colon = CFGSymbol(True, ":")
-    lcurly = CFGSymbol(True, "{")
-    rcurly = CFGSymbol(True, "}")
-    lsquare = CFGSymbol(True, "[")
-    rsquare = CFGSymbol(True, "]")
-    comma = CFGSymbol(True, ",")
-    
-    value.add_rule(obj)
-    value.add_rule(arr)
-    value.add_rule(str)
-    value.add_rule(num)
-    obj.add_rule(lcurly,obj_inner,rcurly)
-    obj_inner.add_rule(obj_inner,id,colon,value,comma)
-    obj_inner.add_rule()
-    arr.add_rule(lsquare,obj_inner,rsquare)
-    arr_inner.add_rule(arr_inner,value,comma)
-    arr_inner.add_rule()
+    def sample(self, length: int, type: int) -> list[int] | None:
+        if(type == 0):
+            symbol_list = self.grammar.sample_random(length)
+            if(symbol_list == None): return None
+            return [self.grammar.enumeration[symbol] for symbol in symbol_list]
+        if(type == 1):
+            symbol_list = self.grammar.sample_random_inv(length)
+            if(symbol_list == None): return None
+            return [self.grammar.enumeration[symbol] for symbol in symbol_list]
+            
+    def repr_sample(self, length: int, type: int) -> str | None:
+        if(type == 0):
+            symbol_list = self.grammar.sample_random(length)
+            if(symbol_list == None): return None
+            output_string = [repr(symbol) for symbol in symbol_list]
+            output_string = "".join(output_string)
+            return f"{self.grammar}: {output_string}"
+        if(type == 1):
+            symbol_list = self.grammar.sample_random_inv(length)
+            if(symbol_list == None): return None
+            output_string = [repr(symbol) for symbol in symbol_list]
+            output_string = "".join(output_string)
+            return f"Not {self.grammar}: {output_string}"
 
-    obj.init(64)
-    return obj
+    def language_count(self) -> int:
+        return 2
 
-def get_list_cfg():
-    L = CFGSymbol(False, "L")
-    i = CFGSymbol(True, "i")
-    L.add_rule()
-    L.add_rule(L, i)
-    L.init(64)
-    return L
+    def alphabet_size(self) -> int:
+        return len(self.grammar.alphabet)
 
-def get_arithmetic_expr():
-    G = CFGSymbol(False, "G")
-    E = CFGSymbol(False, "E")
-    T = CFGSymbol(False, "T")
-    F = CFGSymbol(False, "F")
-    X = CFGSymbol(False, "X")
-    plus = CFGSymbol(True, "+")
-    times = CFGSymbol(True, "*")
-    lparen = CFGSymbol(True, "(")
-    rparen = CFGSymbol(True, ")")
-    x = CFGSymbol(True, "x")
-    prime = CFGSymbol(True, "'")
-    
-    G.rules.append([E])
-    E.rules.append([T])
-    E.rules.append([E,plus,T])
-    T.rules.append([F])
-    T.rules.append([T,times,F])
-    F.rules.append([X])
-    F.rules.append([lparen,E,rparen])
-    X.rules.append([X, prime])
-    X.rules.append([x])
-    G.init(64)
-    return G
+class CFGDiscriminationTask(LanguageSelectTask):
+    """Represents a language discrimination task
+    """
+    def __init__(self, grammar_list: list[CFGSymbol], max_length=64):
+        self.grammar_list = grammar_list
+        union_enumeration = set()
+        for grammar in self.grammar_list:
+            if len(grammar.cache) == 0:
+                grammar.init(max_length)
+            union_enumeration.update(*grammar.alphabet)
+        self.enumeration = {}
+        for i, symbol in enumerate(union_enumeration):
+            self.enumeration[symbol] = i
 
-def get_arithmetic_expr_all():
-    G = CFGSymbol(False, "G")
-    E = CFGSymbol(False, "E")
-    T = CFGSymbol(False, "T")
-    F = CFGSymbol(False, "F")
-    X = CFGSymbol(False, "X")
-    plus = CFGSymbol(True, "+")
-    times = CFGSymbol(True, "*")
-    lparen = CFGSymbol(True, "(")
-    rparen = CFGSymbol(True, ")")
-    x = CFGSymbol(True, "x")
-    prime = CFGSymbol(True, "'")
-    
-    G.rules.append([E])
-    E.rules.append([T])
-    E.rules.append([E,plus,T])
-    T.rules.append([F])
-    T.rules.append([T,times,F])
-    F.rules.append([X])
-    F.rules.append([lparen,E,rparen])
-    X.rules.append([X, prime])
-    X.rules.append([x])
-    G.init(64)
-    return G, E, T, F, X
-    
-def a_or_bb():
-    G = CFGSymbol(False, "G")
-    a = CFGSymbol(True, "a")
-    b = CFGSymbol(True, "b")
-    G.add_rule(G, a)
-    G.add_rule(G, b, b)
-    G.add_rule(a)
-    G.add_rule(b, b)
-    G.init(64)
-    return G
-    
-def parity():
-    Even = CFGSymbol(False, "Even")
-    Odd = CFGSymbol(False, "Odd")
-    a = CFGSymbol(True, "a")
-    b = CFGSymbol(True, "b")
-    Even.add_rule(Even, a)
-    Even.add_rule(Odd, b)
-    Even.add_rule(a)
-    Odd.add_rule(Odd, a)
-    Odd.add_rule(Even, b)
-    Odd.add_rule(b)
-    Even.init(64)
-    return Even
+    def sample(self, length: int, type: int) -> list[int] | None:
+            symbol_list = self.grammar_list[type].sample_random(length=length)
+            if(symbol_list == None): return None
+            return [self.grammar.enumeration[symbol] for symbol in symbol_list]
+            
+    def repr_sample(self, length: int, type: int) -> str | None:
+            symbol_list = self.grammar_list[type].sample_random(length=length)
+            if(symbol_list == None): return None
+            output_string = [repr(symbol) for symbol in symbol_list]
+            output_string = "".join(output_string)
+            return f"{self.grammar}: {output_string}"
 
-def parity_all():
-    Even = CFGSymbol(False, "Even")
-    Odd = CFGSymbol(False, "Odd")
-    a = CFGSymbol(True, "a")
-    b = CFGSymbol(True, "b")
-    Even.add_rule(Even, a)
-    Even.add_rule(Odd, b)
-    Even.add_rule(a)
-    Odd.add_rule(Odd, a)
-    Odd.add_rule(Even, b)
-    Odd.add_rule(b)
-    Even.init(65)
-    return Even, Odd
-language_list = dict(
-    json=get_json_cfg(),
-    list=get_json_cfg(),
-    arithmetic=get_arithmetic_expr(),
-    a_or_bb=a_or_bb(),
-)
+    def language_count(self) -> int:
+        return len(self.grammar_list)
+
+    def alphabet_size(self) -> int:
+        return len(self.enumeration)
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.NOTSET)

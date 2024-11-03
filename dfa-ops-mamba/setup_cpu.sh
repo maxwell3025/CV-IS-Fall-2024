@@ -1,9 +1,10 @@
-if ! test -d .venv; then
-    echo "Please create a .venv for Python 3.12"
+if ! test -d ../mamba-language-ops-venv; then
+    echo "Please create a venv for Python 3.12 in $(realpath ../mamba-language-ops-venv)"
+    exit 1
 else
-    source ./.venv/bin/activate
+    source ../mamba-language-ops-venv/bin/activate
     if ! python --version | grep "Python 3.12"; then
-        echo ".venv currently uses an incorrect python version. Please delete .venv and rerun this script"
+        echo "venv currently uses an incorrect python version. Please delete $(realpath ../mamba-language-ops-venv) and rerun this script"
         exit 1
     fi
 fi
