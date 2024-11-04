@@ -85,8 +85,8 @@ for i in range(100):
 # print(f'shape of train data is {x_train.shape}')
 # print(f'shape of test data is {x_test.shape}')
 
-x_train_pad = pad_and_clip_data(x_train, 500)
-x_test_pad = pad_and_clip_data(x_test, 500)
+x_train_pad = pad_and_clip_data(x_train, 64)
+x_test_pad = pad_and_clip_data(x_test, 64)
 
 # Here, we move our data from numpy arrays into pytorch DataLoaders
 batch_size = 50
@@ -196,6 +196,7 @@ for epoch in range(epochs):
     epoch_vl_loss.append(epoch_val_loss)
     epoch_tr_acc.append(epoch_train_acc)
     epoch_vl_acc.append(epoch_val_acc)
+    print('='*80)
     print(f'Epoch {epoch+1}') 
     print(f'train_loss : {epoch_train_loss} val_loss : {epoch_val_loss}')
     print(f'train_accuracy : {epoch_train_acc*100} val_accuracy : {epoch_val_acc*100}')
@@ -207,30 +208,32 @@ for epoch in range(epochs):
 
 # Prediction
 
-# TODO: Modify prediction functions to work with parity
-# def predict_text(text):
-#         word_seq = numpy.array([vocab[preprocess_string(word)] for word in text.split() 
-#                          if preprocess_string(word) in vocab.keys()])
-#         word_seq = numpy.expand_dims(word_seq,axis=0)
-#         pad =  torch.from_numpy(pad_and_clip_data(word_seq,500))
-#         inputs = pad.to(device)
-#         batch_size = 1
-#         h = model.init_hidden(batch_size)
-#         h = tuple([each.data for each in h])
-#         output, h = model(inputs, h)
-#         return(output.item())
+def predict_text(string):
+        word_seq = numpy.array(string)
+        word_seq = numpy.expand_dims(word_seq,axis=0)
+        pad = torch.from_numpy(pad_and_clip_data(word_seq,64))
+        inputs = pad.to(device)
+        batch_size = 1
+        h = model.init_hidden(batch_size)
+        h = tuple([each.data for each in h])
+        output, h = model(inputs, h)
+        return(output.item())
 
-# def print_prediction(text, label):
-#     print(text)
-#     print('='*80)
-#     print(f'Actual sentiment is  : {label}')
-#     print('='*80)
-#     probability = predict_text(text)
-#     status = "positive" if probability > 0.5 else "negative"
-#     probability = (1 - probability) if status == "negative" else probability
-#     print(f'Predicted sentiment is {status} with a probability of {probability}')
-#     print('='*80)
+def print_prediction(text, label):
+    print("="*80)
+    print("Test Case:")
+    print()
+    print(text)
+    print()
+    print(f"Actual parity is:   {label}")
+    print()
+    probability = predict_text(text)
+    status = "odd" if probability > 0.5 else "even"
+    probability = (1 - probability) if status == "odd" else probability
+    print(f"Predicted parity is {status} with a probability of {probability}")
+    print("="*80)
     
-# print_prediction(df["review"][30], df["sentiment"][30])
-# print_prediction(df["review"][32], df["sentiment"][32])
-# print_prediction("Personally, I thought that this movie was terrible!", "negative")
+print_prediction([0, 1, 0, 0, 1], "even")
+print_prediction([0, 1, 0, 0, 0], "odd")
+print_prediction([1, 0, 0, 1], "even")
+print_prediction([1, 0, 0, 0], "odd")
