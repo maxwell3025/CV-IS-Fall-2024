@@ -5,10 +5,10 @@ from synthetic_languages.language_select_task import LanguageSelectTask
 
 def sample_one(
         task: LanguageSelectTask,
-        distribution: list[float] | None,
         length: int,
+        distribution: list[float] | None=None,
         one_hot=False,
-    ) -> torch.Tensor | None:
+    ) -> tuple[torch.Tensor, torch.Tensor] | None:
     """
     """
     if distribution == None:
@@ -68,8 +68,8 @@ def sample_batch(
     for _ in range(batch_size):
         x_instance, y_instance = sample_one(
             task=task,
-            distribution=None,
             length=length,
+            distribution=None,
             one_hot=one_hot,
         )
         x.append(x_instance)
