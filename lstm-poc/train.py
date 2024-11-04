@@ -241,24 +241,17 @@ def predict_text(text):
         output, h = model(inputs, h)
         return(output.item())
 
-index = 30
-print(df['review'][index])
-print('='*80)
-print(f'Actual sentiment is  : {df["sentiment"][index]}')
-print('='*80)
-probability = predict_text(df['review'][index])
-status = "positive" if probability > 0.5 else "negative"
-probability = (1 - probability) if status == "negative" else probability
-print(f'Predicted sentiment is {status} with a probability of {probability}')
-print('='*80)
-
-index = 32
-print(df['review'][index])
-print('='*70)
-print(f'Actual sentiment is  : {df["sentiment"][index]}')
-print('='*70)
-probability = predict_text(df['review'][index])
-status = "positive" if probability > 0.5 else "negative"
-probability = (1 - probability) if status == "negative" else probability
-print(f'predicted sentiment is {status} with a probability of {probability}')
-print('='*80)
+def print_prediction(text, label):
+    print(text)
+    print('='*80)
+    print(f'Actual sentiment is  : {label}')
+    print('='*80)
+    probability = predict_text(text)
+    status = "positive" if probability > 0.5 else "negative"
+    probability = (1 - probability) if status == "negative" else probability
+    print(f'Predicted sentiment is {status} with a probability of {probability}')
+    print('='*80)
+    
+print_prediction(df["review"][30], df["sentiment"][30])
+print_prediction(df["review"][32], df["sentiment"][32])
+print_prediction("Personally, I thought that this movie was terrible!", "negative")
