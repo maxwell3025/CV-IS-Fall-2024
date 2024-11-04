@@ -9,7 +9,6 @@ from sklearn import model_selection
 import torch
 from torch import nn
 from torch.utils import data as torch_data
-import tqdm
 
 def pad_and_clip_data(sentences: numpy.ndarray, seq_len: int):
     """Pad and clip a ragged matrix of tokens to a given length.
@@ -52,7 +51,6 @@ def preprocess_string(s: str):
 
 def tokenize(x_train, y_train, x_val, y_val):
     """Turns the data into Python lists"""
-    # TODO 2: Fix docstrings
     nltk.download("stopwords")
     word_list = []
 
