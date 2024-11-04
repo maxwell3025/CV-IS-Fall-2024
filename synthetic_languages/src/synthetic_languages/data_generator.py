@@ -1,7 +1,7 @@
 import torch
 import random
 import torch.nn.functional as F
-from language_select_task import LanguageSelectTask
+from synthetic_languages.language_select_task import LanguageSelectTask
 
 def sample_one(
         task: LanguageSelectTask,

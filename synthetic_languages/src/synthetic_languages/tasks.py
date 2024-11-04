@@ -1,7 +1,6 @@
-from context_free_grammars import CFGSymbol
-from synthetic_languages.context_free_grammars import CFGDiscriminationTask, CFGRecognizerTask
-from synthetic_languages.regular_languages import DfaState, RegularRecognizerTask, precomputeSuffixCounts
+from synthetic_languages.context_free_grammars import CFGSymbol, CFGDiscriminationTask, CFGRecognizerTask
 from synthetic_languages.language_select_task import LanguageSelectTask
+from synthetic_languages.regular_languages import DfaState, RegularRecognizerTask, precomputeSuffixCounts
 
 def a_or_bb_plus(limit: int) -> LanguageSelectTask:
     alphabet = {"a", "b"}
