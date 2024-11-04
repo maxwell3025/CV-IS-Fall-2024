@@ -3,7 +3,7 @@ import random
 import torch.nn.functional as F
 from language_select_task import LanguageSelectTask
 
-def regular_sample(
+def sample_one(
         task: LanguageSelectTask,
         distribution: list[float] | None,
         length: int,
@@ -37,7 +37,7 @@ def regular_sample(
     if one_hot: x = F.one_hot(x, task.language_count()).float()
     return x, y
 
-def generate_dataset(
+def sample_batch(
     task: LanguageSelectTask,
     length: int,
     batch_size: int,
@@ -66,7 +66,7 @@ def generate_dataset(
     x = []
     y = []
     for _ in range(batch_size):
-        x_instance, y_instance = regular_sample(
+        x_instance, y_instance = sample_one(
             task=task,
             distribution=None,
             length=length,
