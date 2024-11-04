@@ -1,20 +1,6 @@
 import torch
 from torch import nn
 
-# TODO 1: Remove this device boilerplate, since device should be accessible
-# from within the model.
-is_cuda = torch.cuda.is_available()
-
-# If we have a GPU available, we'll set our device to GPU. We'll use this device
-# variable later in our code.
-if is_cuda:
-    device = torch.device("cuda")
-    print("GPU is available")
-else:
-    device = torch.device("cpu")
-    print("GPU not available, CPU used")
-
-
 class SentimentRNN(nn.Module):
     def __init__(
         self,
@@ -77,15 +63,11 @@ class SentimentRNN(nn.Module):
         # return last sigmoid output and hidden state
         return sig_out, hidden
         
-        
-        
     def init_hidden(self, batch_size):
         """ Initializes hidden state """
         # Create two new tensors with sizes n_layers x batch_size x hidden_dim,
         # initialized to zero, for hidden state and cell state of LSTM
-        # TODO 1: Once the tutorial is complete, try replacing this with
-        # self.device() or something so that we can avoid the global device
-        # boilerplate
+        device = next(self.parameters()).device
         h0 = torch.zeros((self.no_layers,batch_size,self.hidden_dim)).to(device)
         c0 = torch.zeros((self.no_layers,batch_size,self.hidden_dim)).to(device)
         hidden = (h0,c0)
