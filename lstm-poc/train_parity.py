@@ -1,16 +1,13 @@
-import collections
-import nltk
-from nltk import corpus as nltk_corpus
 import numpy
-import pandas
+import random
 import re
 import sentiment_rnn
-from sklearn import model_selection
+import synthetic_languages
 import torch
 from torch import nn
 from torch.utils import data as torch_data
 
-def pad_and_clip_data(sentences: numpy.ndarray, seq_len: int):
+def pad_and_clip_data(sentences: list[list[int]], seq_len: int) -> numpy.ndarray:
     """Pad and clip a ragged matrix of tokens to a given length.
 
     This function homogenizes dimension 1, so we expect the shape of the
@@ -28,7 +25,7 @@ def pad_and_clip_data(sentences: numpy.ndarray, seq_len: int):
     features = numpy.zeros((len(sentences), seq_len), dtype=int)
     for ii, review in enumerate(sentences):
         if len(review) != 0:
-            features[ii, -len(review):] = numpy.array(review)[:seq_len]
+            features[ii, -len(review):] = numpy.array(review)[:seq_len] + 1
     return features
 
 def preprocess_string(s: str):
@@ -49,61 +46,44 @@ def preprocess_string(s: str):
 
     return s
 
-def tokenize(x_train, y_train, x_val, y_val):
-    """Turns the data into Python lists"""
-    nltk.download("stopwords")
-    word_list = []
-
-    stop_words = set(nltk_corpus.stopwords.words("english")) 
-    for sentence in x_train:
-        for word in sentence.lower().split():
-            word = preprocess_string(word)
-            if word not in stop_words and word != "":
-                word_list.append(word)
-  
-    corpus = collections.Counter(word_list)
-    # sorting on the basis of most common words
-    corpus_ = sorted(corpus,key=corpus.get,reverse=True)[:1000]
-    # creating a dict
-    onehot_dict = {w:i+1 for i,w in enumerate(corpus_)}
-    
-    # tokenize
-    train_tokens, test_tokens = [],[]
-    for sentence in x_train:
-            train_tokens.append([onehot_dict[preprocess_string(word)] for word in sentence.lower().split() 
-                                     if preprocess_string(word) in onehot_dict.keys()])
-    for sentence in x_val:
-            test_tokens.append([onehot_dict[preprocess_string(word)] for word in sentence.lower().split() 
-                                    if preprocess_string(word) in onehot_dict.keys()])
-            
-    train_labels = [1 if label =='positive' else 0 for label in y_train]  
-    test_labels = [1 if label =='positive' else 0 for label in y_val] 
-    return (
-        train_tokens,
-        train_labels,
-        test_tokens,
-        test_labels,
-        onehot_dict
-    )
-
 # Here, we load our training data from a CSV file
-base_csv = './data/IMDB Dataset.csv'
-df = pandas.read_csv(base_csv)
+parity_language = synthetic_languages.parity(64)
 
-X, y = df['review'].values, df['sentiment'].values
-x_train, x_test, y_train, y_test = model_selection.train_test_split(
-    X, y, stratify=y
-)
+x_train = []
+y_train = []
+x_test = []
+y_test = []
 
-print(f'shape of train data is {x_train.shape}')
-print(f'shape of test data is {x_test.shape}')
+# Generate training examples
+for i in range(10000):
+    result = synthetic_languages.sample_one(
+        task=parity_language,
+        length=random.randrange(64),
+    )
+    if result == None: break
+    data, label = result
 
-x_train, y_train, x_test, y_test, vocab = tokenize(
-    x_train,
-    y_train,
-    x_test,
-    y_test,
-)
+    data = data.tolist()
+    label = label.item()
+    x_train.append(data)
+    y_train.append(label)
+
+# Generate test examples
+for i in range(100):
+    result = synthetic_languages.sample_one(
+        task=parity_language,
+        length=random.randrange(64),
+    )
+    if result == None: break
+    data, label = result
+
+    data = data.tolist()
+    label = label.item()
+    x_test.append(data)
+    y_test.append(label)
+
+# print(f'shape of train data is {x_train.shape}')
+# print(f'shape of test data is {x_test.shape}')
 
 x_train_pad = pad_and_clip_data(x_train, 500)
 x_test_pad = pad_and_clip_data(x_test, 500)
@@ -128,7 +108,7 @@ else:
 
 # Model Hyperparameters
 no_layers = 2
-vocab_size = len(vocab) + 1 #extra 1 for padding
+vocab_size = 3 #extra 1 for padding
 embedding_dim = 64
 output_dim = 1
 hidden_dim = 256
@@ -227,29 +207,30 @@ for epoch in range(epochs):
 
 # Prediction
 
-def predict_text(text):
-        word_seq = numpy.array([vocab[preprocess_string(word)] for word in text.split() 
-                         if preprocess_string(word) in vocab.keys()])
-        word_seq = numpy.expand_dims(word_seq,axis=0)
-        pad =  torch.from_numpy(pad_and_clip_data(word_seq,500))
-        inputs = pad.to(device)
-        batch_size = 1
-        h = model.init_hidden(batch_size)
-        h = tuple([each.data for each in h])
-        output, h = model(inputs, h)
-        return(output.item())
+# TODO: Modify prediction functions to work with parity
+# def predict_text(text):
+#         word_seq = numpy.array([vocab[preprocess_string(word)] for word in text.split() 
+#                          if preprocess_string(word) in vocab.keys()])
+#         word_seq = numpy.expand_dims(word_seq,axis=0)
+#         pad =  torch.from_numpy(pad_and_clip_data(word_seq,500))
+#         inputs = pad.to(device)
+#         batch_size = 1
+#         h = model.init_hidden(batch_size)
+#         h = tuple([each.data for each in h])
+#         output, h = model(inputs, h)
+#         return(output.item())
 
-def print_prediction(text, label):
-    print(text)
-    print('='*80)
-    print(f'Actual sentiment is  : {label}')
-    print('='*80)
-    probability = predict_text(text)
-    status = "positive" if probability > 0.5 else "negative"
-    probability = (1 - probability) if status == "negative" else probability
-    print(f'Predicted sentiment is {status} with a probability of {probability}')
-    print('='*80)
+# def print_prediction(text, label):
+#     print(text)
+#     print('='*80)
+#     print(f'Actual sentiment is  : {label}')
+#     print('='*80)
+#     probability = predict_text(text)
+#     status = "positive" if probability > 0.5 else "negative"
+#     probability = (1 - probability) if status == "negative" else probability
+#     print(f'Predicted sentiment is {status} with a probability of {probability}')
+#     print('='*80)
     
-print_prediction(df["review"][30], df["sentiment"][30])
-print_prediction(df["review"][32], df["sentiment"][32])
-print_prediction("Personally, I thought that this movie was terrible!", "negative")
+# print_prediction(df["review"][30], df["sentiment"][30])
+# print_prediction(df["review"][32], df["sentiment"][32])
+# print_prediction("Personally, I thought that this movie was terrible!", "negative")
