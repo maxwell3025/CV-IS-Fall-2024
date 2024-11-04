@@ -6,8 +6,6 @@ import pandas
 import re
 import sentiment_rnn
 from sklearn import model_selection
-from sklearn.model_selection import train_test_split
-import string
 import torch
 from torch import nn
 from torch.utils import data as torch_data
@@ -228,3 +226,39 @@ for epoch in range(epochs):
         print('Validation loss decreased ({:.6f} --> {:.6f}).  Saving model ...'.format(valid_loss_min,epoch_val_loss))
         valid_loss_min = epoch_val_loss
     print(80*'=')
+
+# Prediction
+
+def predict_text(text):
+        word_seq = numpy.array([vocab[preprocess_string(word)] for word in text.split() 
+                         if preprocess_string(word) in vocab.keys()])
+        word_seq = numpy.expand_dims(word_seq,axis=0)
+        pad =  torch.from_numpy(pad_and_clip_data(word_seq,500))
+        inputs = pad.to(device)
+        batch_size = 1
+        h = model.init_hidden(batch_size)
+        h = tuple([each.data for each in h])
+        output, h = model(inputs, h)
+        return(output.item())
+
+index = 30
+print(df['review'][index])
+print('='*80)
+print(f'Actual sentiment is  : {df["sentiment"][index]}')
+print('='*80)
+probability = predict_text(df['review'][index])
+status = "positive" if probability > 0.5 else "negative"
+probability = (1 - probability) if status == "negative" else probability
+print(f'Predicted sentiment is {status} with a probability of {probability}')
+print('='*80)
+
+index = 32
+print(df['review'][index])
+print('='*70)
+print(f'Actual sentiment is  : {df["sentiment"][index]}')
+print('='*70)
+probability = predict_text(df['review'][index])
+status = "positive" if probability > 0.5 else "negative"
+probability = (1 - probability) if status == "negative" else probability
+print(f'predicted sentiment is {status} with a probability of {probability}')
+print('='*80)
