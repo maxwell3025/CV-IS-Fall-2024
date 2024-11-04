@@ -174,7 +174,7 @@ for epoch in range(epochs):
         inputs, labels = inputs.to(device), labels.to(device)   
         # Creating new variables for the hidden state, otherwise
         # we'd backprop through the entire training history
-        h = tuple([each.data for each in h])
+        h = model.init_hidden(batch_size)
         
         model.zero_grad()
         output,h = model(inputs,h)
