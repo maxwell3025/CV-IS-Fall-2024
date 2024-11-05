@@ -39,7 +39,8 @@ class SentimentRNN(nn.Module):
         # sigmoid layer
         self.sig = nn.Sigmoid()
         
-    def forward(self, x: torch.Tensor, hidden: tuple[torch.Tensor, torch.Tensor]):
+    def forward(self, x: torch.Tensor):
+        hidden = self.init_hidden(x.shape[0])
         batch_size = x.size(0)
         # embeddings and lstm_out
         embeds = self.embedding(x)  # shape: B x S x Feature   since batch = True
@@ -61,7 +62,7 @@ class SentimentRNN(nn.Module):
         sig_out = sig_out[:, -1] # get last batch of labels
         
         # return last sigmoid output and hidden state
-        return sig_out, hidden
+        return sig_out
         
     def init_hidden(self, batch_size):
         """ Initializes hidden state """

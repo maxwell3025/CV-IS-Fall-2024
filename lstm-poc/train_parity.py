@@ -148,16 +148,14 @@ for epoch in range(epochs):
     train_acc = 0.0
     model.train()
     # initialize hidden state 
-    h = model.init_hidden(batch_size)
     for inputs, labels in train_loader:
         
         inputs, labels = inputs.to(device), labels.to(device)   
         # Creating new variables for the hidden state, otherwise
         # we'd backprop through the entire training history
-        h = model.init_hidden(batch_size)
         
         model.zero_grad()
-        output,h = model(inputs,h)
+        output = model(inputs)
         
         # calculate the loss and perform backprop
         loss = criterion(output.squeeze(), labels.float())
@@ -171,16 +169,14 @@ for epoch in range(epochs):
         nn.utils.clip_grad_norm_(model.parameters(), clip)
         optimizer.step()
  
-    val_h = model.init_hidden(batch_size)
     val_losses = []
     val_acc = 0.0
     model.eval()
     for inputs, labels in valid_loader:
-        val_h = tuple([each.data for each in val_h])
 
         inputs, labels = inputs.to(device), labels.to(device)
 
-        output, val_h = model(inputs, val_h)
+        output = model(inputs)
         val_loss = criterion(output.squeeze(), labels.float())
 
         val_losses.append(val_loss.item())
@@ -213,10 +209,7 @@ def predict_text(string):
         word_seq = numpy.expand_dims(word_seq,axis=0)
         pad = torch.from_numpy(pad_and_clip_data(word_seq,64))
         inputs = pad.to(device)
-        batch_size = 1
-        h = model.init_hidden(batch_size)
-        h = tuple([each.data for each in h])
-        output, h = model(inputs, h)
+        output = model(inputs)
         return(output.item())
 
 def print_prediction(text, label):
@@ -229,7 +222,7 @@ def print_prediction(text, label):
     print()
     probability = predict_text(text)
     status = "odd" if probability > 0.5 else "even"
-    probability = (1 - probability) if status == "odd" else probability
+    probability = (1 - probability) if status == "even" else probability
     print(f"Predicted parity is {status} with a probability of {probability}")
     print("="*80)
     
