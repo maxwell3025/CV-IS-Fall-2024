@@ -221,7 +221,7 @@ def main():
             "{}/{}_{}_{}_{}".format(
                 folder_name,
                 dataset_config.training_length,
-                mamba_config.d_model,
+                mamba_config.d_intermediate,
                 dataset_config.randomize_training_length,
                 mamba_config.n_layer,
             ),
