@@ -1,7 +1,6 @@
 import typing
 import json
 import yaml
-import copy
 
 # Configuration for training
 class TrainingConfig:

@@ -1,6 +1,6 @@
 base:
   batch_size: 64
-  learning_rate: 0.0001
+  learning_rate: 0.001
   num_steps: 10000
   val_interval: 250
   val_lengths:
@@ -72,7 +72,7 @@ base:
   one_hot: false
   # Mamba settings
   d_intermediate: 0
-  vocab_size: 6
+  vocab_size: 10
   ssm_cfg: {}
   attn_layer_idx: []
   attn_cfg:

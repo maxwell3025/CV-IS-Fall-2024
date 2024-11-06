@@ -1,17 +1,17 @@
-import torch
-import torch.nn as nn
-import torch.optim as optim
-import logging
-import time
-from mamba_ssm.models.mixer_seq_simple import MambaLMHeadModel
-from mamba_lstm import MambaLMHeadModelLstm
-from config import iterate_sweep, DatasetConfig, TrainingConfig, MambaConfig
-from data_generator import generate_dataset, generate_dataset_multi
-import os
-from unique_names_generator import get_random_name
-from context_free_grammars import CFGSymbol, get_arithmetic_expr, a_or_bb, parity, get_arithmetic_expr_all, parity_all
+from cfg_ops_mamba.config import iterate_sweep, DatasetConfig, TrainingConfig, MambaConfig
+from cfg_ops_mamba.context_free_grammars import CFGSymbol, get_arithmetic_expr, a_or_bb, parity, get_arithmetic_expr_all, parity_all
+from cfg_ops_mamba.data_generator import generate_dataset, generate_dataset_multi
+from cfg_ops_mamba.mamba_lstm import MambaLMHeadModelLstm
 import json
+import logging
+from mamba_ssm.models.mixer_seq_simple import MambaLMHeadModel
+import os
 import sys
+import time
+import torch
+from torch import nn
+from torch import optim
+from unique_names_generator import get_random_name
 
 # We set up a global logger for debugging purposes.
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
@@ -22,23 +22,29 @@ def validate_recognizer(
     model: nn.Module,
     dataset_config: DatasetConfig,
     additional_params: dict[str, any],
+    val_lengths: list[int],
+    device: torch.device,
 ):
     """Test the accuracy of a language recognizer model against multiple input
     string lengths.
 
     Args:
-        language: The language to be validated against
-        model: The model that we want to test
-        dataset_config: The configuration for generating data
-        additional_params: Additional JSON objects to add to the record
+        language: The language to be validated against.
+        model: The model that we want to test.
+        dataset_config: The configuration for generating data.
+        additional_params: Additional JSON objects to add to the record.
+        val_lengths: A list of integers representing the string lengths that we
+            will validate against.
+        device: The device that we will use to run the validation step.
+
     Returns:
         A list of JSON-compatible objects representing the validation logs
-        produced by this function
+        produced by this function.
     """
     log_object = []
     model.eval()
     with torch.no_grad():
-        for validation_length in training_config.val_lengths:
+        for validation_length in val_lengths:
             old_positive = dataset_config.positive_rate
             dataset_config.positive_rate = 0.5
             correct = 0
@@ -72,6 +78,7 @@ def train_recognizer(
     dataset_config: DatasetConfig,
     mamba_config: MambaConfig,
     model: MambaLMHeadModel,
+    device: torch.device,
 ):
     """Trains a model to recognize instances of a language.
 
@@ -86,6 +93,7 @@ def train_recognizer(
         mamba_config: A MambaConfig object containing the hyperparameters
             defining our model architecture.
         model: The model that we want to train.
+        device: The device that we will train on.
 
     Returns:
         A tuple (model, logs) where model is the model after training and logs
@@ -122,7 +130,9 @@ def train_recognizer(
                     step=step,
                     training_config=training_config.__dict__,
                     mamba_config=mamba_config.__dict__,
-                )
+                ),
+                val_lengths=training_config.val_lengths,
+                device=device,
             )
             model.train()
         print(step)
@@ -138,6 +148,8 @@ def validate_multi(
     model: nn.Module,
     dataset_config: DatasetConfig,
     additional_params: dict[str, any],
+    val_lengths: list[int],
+    device: torch.device,
 ):
     """Test the ability for a model to distinguish multiple context free
     languages.
@@ -151,6 +163,9 @@ def validate_multi(
             are generated
         additional_params: A dictionary of additional fields that should be
             appended to each row of logs
+        val_lengths: A list of integers representing the string lengths that we
+            will validate against.
+        device: The device that we will use to run the validation step.
 
     Returns:
         A list of JSON-compatible dicts representing the performance of the
@@ -159,7 +174,7 @@ def validate_multi(
     log_object = []
     model.eval()
     with torch.no_grad():
-        for validation_length in training_config.val_lengths:
+        for validation_length in val_lengths:
             old_positive = dataset_config.positive_rate
             dataset_config.positive_rate = 0.5
             correct = 0
@@ -192,6 +207,7 @@ def train_multi(
     dataset_config: DatasetConfig,
     mamba_config: MambaConfig,
     model: MambaLMHeadModel,
+    device: torch.device,
 ):
     """Trains a model to differentiate between multiple languages.
 
@@ -206,6 +222,7 @@ def train_multi(
         mamba_config: A MambaConfig object containing the hyperparameters
             defining our model architecture.
         model: The model that we want to train.
+        device: The device that we will train on.
 
     Returns:
         A tuple (model, logs) where model is the model after training and logs
@@ -241,7 +258,9 @@ def train_multi(
                     step=step,
                     training_config=training_config.__dict__,
                     mamba_config=mamba_config.__dict__,
-                )
+                ),
+                val_lengths=training_config.val_lengths,
+                device=device,
             )
             model.train()
         print(step)
@@ -252,9 +271,11 @@ def train_multi(
     )
     return model, log_object
 
-if __name__ == '__main__':
+def main():
+    print("hello world!")
     if len(sys.argv) != 2:
         print("Usage: python -m cfg_ops_mamba <path to config file>")
+        exit(1)
     config_uri = sys.argv[1]
 
     # For this test, we will use the parity language
@@ -290,6 +311,7 @@ if __name__ == '__main__':
             dataset_config=dataset_config,
             mamba_config=mamba_config,
             model=model,
+            device=device,
         )
 
         validation_logs_object += validate_multi(
@@ -300,7 +322,9 @@ if __name__ == '__main__':
                 step=training_config.num_steps,
                 training_config=training_config.__dict__,
                 mamba_config=mamba_config.__dict__,
-            )
+            ),
+            val_lengths=training_config.val_lengths,
+            device=device,
         )
 
         torch.save(
@@ -316,3 +340,6 @@ if __name__ == '__main__':
     json_logs_path = f"{folder_name}/validation_logs.json"
     with open(json_logs_path, "w") as validation_logs_json:
         json.dump(validation_logs_object, validation_logs_json)
+
+if __name__ == "__main__":
+    main()

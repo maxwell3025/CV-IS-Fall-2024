@@ -7,13 +7,19 @@
 #SBATCH -o train_mamba_%j.out  # %j = job ID
 #SBATCH --constraint sm_70
 #SBATCH --mail-type=ALL
+#
+# This script trains a model using the provided config
 
-cd "$(dirname "$0")"
+if [ -f "./train_cfg.sh" ]; then
+    ./scripts/venv_setup_gpu.sh || exit 1
+    ./scripts/install_gpu.sh || exit 1
+    source ./.venv/bin/activate
 
-./scripts/venv_setup_gpu.sh || exit 1
-./scripts/install_gpu.sh || exit 1
-./.venv/bin/activate
+    module load cuda/12.6
 
-module load cuda/12.6
+    python -m cfg_ops_mamba config/parity_lstm.yaml
 
-python -m cfg_ops_mamba ./config/parity_lstm.yaml
+    deactivate
+else
+    echo "Please run this script from the same folder as train_cfg.sh"
+fi

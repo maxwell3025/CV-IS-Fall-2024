@@ -2,8 +2,8 @@ import torch
 import random
 import numpy as np
 import torch.nn.functional as F
-from context_free_grammars import CFGSymbol
-from config import DatasetConfig, TrainingConfig
+from cfg_ops_mamba.context_free_grammars import CFGSymbol
+from cfg_ops_mamba.config import DatasetConfig, TrainingConfig
 import math
 
 def regular_sample(
