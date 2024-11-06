@@ -2,6 +2,7 @@ import numpy
 import random
 import re
 import sentiment_rnn
+import simple_lstm
 import synthetic_languages
 import torch
 from torch import nn
@@ -88,10 +89,15 @@ for i in range(100):
 x_train_pad = pad_and_clip_data(x_train, 64)
 x_test_pad = pad_and_clip_data(x_test, 64)
 
-# Here, we move our data from numpy arrays into pytorch DataLoaders
+x_train_pad = torch.from_numpy(x_train_pad)
+x_test_pad = torch.from_numpy(x_test_pad)
+
+x_train_pad = nn.functional.one_hot(x_train_pad).float()
+x_test_pad = nn.functional.one_hot(x_test_pad).float()
+
 batch_size = 50
-train_data = torch_data.TensorDataset(torch.from_numpy(x_train_pad), torch.tensor(y_train))
-valid_data = torch_data.TensorDataset(torch.from_numpy(x_test_pad), torch.tensor(y_test))
+train_data = torch_data.TensorDataset(x_train_pad, torch.tensor(y_train))
+valid_data = torch_data.TensorDataset(x_test_pad, torch.tensor(y_test))
 train_loader = torch_data.DataLoader(train_data, shuffle=True, batch_size=batch_size)
 valid_loader = torch_data.DataLoader(valid_data, shuffle=True, batch_size=batch_size)
 
@@ -113,12 +119,19 @@ embedding_dim = 64
 output_dim = 1
 hidden_dim = 256
 
-model = sentiment_rnn.SentimentRNN(
-    no_layers=no_layers,
-    vocab_size=vocab_size,
-    hidden_dim=hidden_dim,
-    embedding_dim=embedding_dim,
-    output_dim=output_dim,
+# model = sentiment_rnn.SentimentRNN(
+#     no_layers=no_layers,
+#     vocab_size=vocab_size,
+#     hidden_dim=hidden_dim,
+#     embedding_dim=embedding_dim,
+#     output_dim=output_dim,
+#     drop_prob=0.5
+# ).to(device)
+
+model = simple_lstm.SimpleLSTM(
+    input_dim=vocab_size,
+    hidden_dim=64,
+    output_dim=2,
     drop_prob=0.5
 ).to(device)
 
@@ -127,14 +140,15 @@ print(model)
 # Begin training our model
 lr=0.001
 
-criterion = nn.BCELoss()
+criterion = nn.CrossEntropyLoss()
 
 optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
 # function to predict accuracy
 def calculate_accuracy(pred, label, batch_size):
-    pred = torch.round(pred.squeeze())
-    return torch.sum(pred == label.squeeze()).item() / batch_size
+    assert pred.shape[0] == batch_size
+    pred = torch.argmax(pred, dim=1)
+    return torch.sum(pred == label).item() / batch_size
 
 clip = 5
 epochs = 5 
@@ -158,11 +172,11 @@ for epoch in range(epochs):
         output = model(inputs)
         
         # calculate the loss and perform backprop
-        loss = criterion(output.squeeze(), labels.float())
+        loss = criterion(output, labels)
         loss.backward()
         train_losses.append(loss.item())
         # calculating accuracy
-        accuracy = calculate_accuracy(output,labels, batch_size)
+        accuracy = calculate_accuracy(output, labels, batch_size)
         train_acc += accuracy
         print(f"Training Accuracy: {accuracy * 100:.2f}%")
         #`clip_grad_norm` helps prevent the exploding gradient problem in RNNs / LSTMs.
@@ -177,11 +191,11 @@ for epoch in range(epochs):
         inputs, labels = inputs.to(device), labels.to(device)
 
         output = model(inputs)
-        val_loss = criterion(output.squeeze(), labels.float())
+        val_loss = criterion(output, labels)
 
         val_losses.append(val_loss.item())
         
-        accuracy = calculate_accuracy(output,labels, batch_size)
+        accuracy = calculate_accuracy(output, labels, batch_size)
         val_acc += accuracy
             
     epoch_train_loss = numpy.mean(train_losses)
@@ -207,10 +221,17 @@ for epoch in range(epochs):
 def predict_text(string):
         word_seq = numpy.array(string)
         word_seq = numpy.expand_dims(word_seq,axis=0)
-        pad = torch.from_numpy(pad_and_clip_data(word_seq,64))
-        inputs = pad.to(device)
-        output = model(inputs)
-        return(output.item())
+        word_seq = pad_and_clip_data(word_seq,64)
+        word_seq = torch.from_numpy(word_seq)
+        word_seq = nn.functional.one_hot(word_seq).float()
+        word_seq = word_seq.to(device)
+        assert word_seq.shape == (1, 64, 3)
+        output = model(word_seq)
+        assert output.shape == (1, 2)
+        # Since output is an array of logits, we need to convert it into
+        # probabilities
+        output = torch.softmax(output, 1)
+        return(output[0, 1])
 
 def print_prediction(text, label):
     print("="*80)
