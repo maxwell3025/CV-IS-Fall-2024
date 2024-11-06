@@ -8,6 +8,7 @@ import logging
 from mamba_ssm.models.mixer_seq_simple import MambaLMHeadModel
 import os
 import sys
+import synthetic_languages
 import time
 import torch
 from torch import nn
@@ -18,139 +19,13 @@ from unique_names_generator import get_random_name
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
 logger = logging.getLogger()
 
-def validate_recognizer(
-    language: CFGSymbol,
+def validate(
+    task: synthetic_languages.LanguageSelectTask,
     model: nn.Module,
     dataset_config: DatasetConfig,
-    additional_params: dict[str, any],
     val_lengths: list[int],
     device: torch.device,
-):
-    """Test the accuracy of a language recognizer model against multiple input
-    string lengths.
-
-    Args:
-        language: The language to be validated against.
-        model: The model that we want to test.
-        dataset_config: The configuration for generating data.
-        additional_params: Additional JSON objects to add to the record.
-        val_lengths: A list of integers representing the string lengths that we
-            will validate against.
-        device: The device that we will use to run the validation step.
-
-    Returns:
-        A list of JSON-compatible objects representing the validation logs
-        produced by this function.
-    """
-    log_object = []
-    model.eval()
-    with torch.no_grad():
-        for validation_length in val_lengths:
-            old_positive = dataset_config.positive_rate
-            dataset_config.positive_rate = 0.5
-            correct = 0
-            total = 0
-            inputs, targets = generate_dataset(
-                grammar=language,
-                length=validation_length,
-                randomize=False,
-                batch_size=dataset_config.batch_size,
-                one_hot=dataset_config.one_hot,
-                positive_rate=dataset_config.positive_rate,
-            )
-            inputs = inputs.to(device)
-            targets = targets.to(device)
-            outputs: torch.Tensor = model(inputs, num_last_tokens=1).logits
-            total += targets.size(0) * targets.size(1)
-            correct += (outputs.argmax(2) == targets).sum().item()
-            accuracy = 100 * correct / total
-            log_object.append(dict(
-                accuracy=accuracy,
-                validation_length=validation_length,
-                dataset_config=dataset_config.__dict__,
-                **additional_params,
-            ))
-            dataset_config.positive_rate = old_positive
-    return log_object
-
-def train_recognizer(
-    language: CFGSymbol,
-    training_config: TrainingConfig,
-    dataset_config: DatasetConfig,
-    mamba_config: MambaConfig,
-    model: MambaLMHeadModel,
-    device: torch.device,
-):
-    """Trains a model to recognize instances of a language.
-
-    Args:
-        language: A CFG Symbol representing the language that we will train the
-            model to recognize.
-        training_config: A TrainingConfig object containing the training-related
-            hyperparameters like step size and number of steps. For more info,
-            see TrainingConfig.
-        dataset_config: A DatasetConfig object containing the hyperparameters
-            that define our dataset.
-        mamba_config: A MambaConfig object containing the hyperparameters
-            defining our model architecture.
-        model: The model that we want to train.
-        device: The device that we will train on.
-
-    Returns:
-        A tuple (model, logs) where model is the model after training and logs
-        is a list of JSON log entries produced during training.
-    """
-    log_object = []
-    criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=training_config.learning_rate)
-    model.train()
-    start_time = time.time()
-    for step in range(training_config.num_steps):
-        batch_length = dataset_config.training_length
-        inputs, targets = generate_dataset(
-            grammar=language,
-            length=batch_length,
-            randomize=dataset_config.randomize_training_length,
-            batch_size=dataset_config.batch_size,
-            one_hot=dataset_config.one_hot,
-            positive_rate=dataset_config.positive_rate,
-        )
-        inputs = inputs.to(device)
-        targets = targets.to(device)
-        outputs = model(inputs, num_last_tokens=1).logits
-        loss = criterion(torch.transpose(outputs, 1, 2), targets)
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-        if step % training_config.val_interval == 0:
-            log_object = log_object + validate_recognizer(
-                language=language,
-                model=model,
-                dataset_config=dataset_config,
-                additional_params=dict(
-                    step=step,
-                    training_config=training_config.__dict__,
-                    mamba_config=mamba_config.__dict__,
-                ),
-                val_lengths=training_config.val_lengths,
-                device=device,
-            )
-            model.train()
-        print(step)
-    end_time = time.time()
-    train_time_mins = (end_time - start_time)/60
-    logger.info(
-        f"Training instance completed in: {train_time_mins:.2f} minutes"
-    )
-    return model, log_object
-
-def validate_multi(
-    languages: list[CFGSymbol],
-    model: nn.Module,
-    dataset_config: DatasetConfig,
     additional_params: dict[str, any],
-    val_lengths: list[int],
-    device: torch.device,
 ):
     """Test the ability for a model to distinguish multiple context free
     languages.
@@ -178,18 +53,26 @@ def validate_multi(
         for validation_length in val_lengths:
             old_positive = dataset_config.positive_rate
             dataset_config.positive_rate = 0.5
-            inputs, targets = generate_dataset_multi(
-                grammars=languages,
+            inputs, targets = synthetic_languages.sample_batch(
+                task=task,
                 length=validation_length,
-                randomize=False,
                 batch_size=dataset_config.batch_size,
+                randomize=False,
                 one_hot=dataset_config.one_hot,
             )
+            alphabet_length = inputs.shape[2]
+            assert inputs.shape == (dataset_config.batch_size, validation_length, alphabet_length)
+            assert targets.shape == (dataset_config.batch_size,)
+
             inputs = inputs.to(device)
             targets = targets.to(device)
             outputs: torch.Tensor = model(inputs, num_last_tokens=1).squeeze(dim=1)
+            output_dim = outputs.shape[1]
+            assert outputs.shape == (dataset_config.batch_size, output_dim)
+
             total = targets.shape[0]
             correct = (outputs.argmax(dim=1) == targets).sum().item()
+
             accuracy = 100 * correct / total
             print(accuracy)
             log_object.append(dict(
@@ -202,8 +85,8 @@ def validate_multi(
     model.train()
     return log_object
 
-def train_multi(
-    languages: list[CFGSymbol],
+def train(
+    task: synthetic_languages.LanguageSelectTask,
     training_config: TrainingConfig,
     dataset_config: DatasetConfig,
     mamba_config: MambaConfig,
@@ -236,23 +119,31 @@ def train_multi(
     start_time = time.time()
     for step in range(training_config.num_steps):
         batch_length = dataset_config.training_length
-        inputs, targets = generate_dataset_multi(
-            grammars=languages,
+        inputs, targets = synthetic_languages.sample_batch(
+            task=task,
             length=batch_length,
-            randomize=dataset_config.randomize_training_length,
             batch_size=dataset_config.batch_size,
+            randomize=dataset_config.randomize_training_length,
             one_hot=dataset_config.one_hot,
         )
+        train_length_actual = inputs.shape[1]
+        alphabet_length = inputs.shape[2]
+        assert inputs.shape == (dataset_config.batch_size, train_length_actual, alphabet_length)
+        assert targets.shape == (dataset_config.batch_size,)
+
         inputs = inputs.to(device)
         targets = targets.to(device)
         outputs = model(inputs, num_last_tokens=1).squeeze(dim=1)
+        output_dim = outputs.shape[1]
+        assert outputs.shape == (dataset_config.batch_size, output_dim)
+
         loss = criterion(outputs, targets)
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
         if step % training_config.val_interval == 0:
-            log_object = log_object + validate_multi(
-                languages=languages,
+            log_object = log_object + validate(
+                task=task,
                 model=model,
                 dataset_config=dataset_config,
                 additional_params=dict(
@@ -273,15 +164,13 @@ def train_multi(
     return model, log_object
 
 def main():
-    print("hello world!")
     if len(sys.argv) != 2:
         print("Usage: python -m cfg_ops_mamba <path to config file>")
         exit(1)
     config_uri = sys.argv[1]
 
     # For this test, we will use the parity language
-    Even, Odd = parity_all()
-    language_set=[Even, Odd]
+    task=synthetic_languages.parity(64)
 
     # We will put all of our logs and checkpoints into a subfolder in output,
     # where the subfolder name is a random adjective_noun name.
@@ -307,8 +196,8 @@ def main():
             **mamba_config.__dict__
         )}")
 
-        model, validation_logs_object = train_multi(
-            languages=language_set,
+        model, validation_logs_object = train(
+            task=task,
             training_config=training_config,
             dataset_config=dataset_config,
             mamba_config=mamba_config,
@@ -316,8 +205,8 @@ def main():
             device=device,
         )
 
-        validation_logs_object += validate_multi(
-            languages=language_set,
+        validation_logs_object += validate(
+            task=task,
             model=model,
             dataset_config=dataset_config,
             additional_params=dict(

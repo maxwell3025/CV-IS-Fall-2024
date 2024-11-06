@@ -61,7 +61,7 @@ def sample_batch(
         labels
     """
 
-    if randomize: length = random.randrange(length)
+    if randomize: length = random.randrange(1, length + 1)
 
     x = []
     y = []
@@ -76,4 +76,4 @@ def sample_batch(
         y.append(y_instance)
     if None in x: return None
 
-    return torch.stack(x), torch.stack(y)
+    return torch.stack(x), torch.cat(y)
