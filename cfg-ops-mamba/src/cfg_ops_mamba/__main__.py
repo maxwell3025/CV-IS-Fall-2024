@@ -2,6 +2,7 @@ from cfg_ops_mamba.config import iterate_sweep, DatasetConfig, TrainingConfig, M
 from cfg_ops_mamba.context_free_grammars import CFGSymbol, get_arithmetic_expr, a_or_bb, parity, get_arithmetic_expr_all, parity_all
 from cfg_ops_mamba.data_generator import generate_dataset, generate_dataset_multi
 from cfg_ops_mamba.mamba_lstm import MambaLMHeadModelLstm
+from cfg_ops_mamba.models import sequence_stack
 import json
 import logging
 from mamba_ssm.models.mixer_seq_simple import MambaLMHeadModel
@@ -177,8 +178,6 @@ def validate_multi(
         for validation_length in val_lengths:
             old_positive = dataset_config.positive_rate
             dataset_config.positive_rate = 0.5
-            correct = 0
-            total = 0
             inputs, targets = generate_dataset_multi(
                 grammars=languages,
                 length=validation_length,
@@ -188,10 +187,11 @@ def validate_multi(
             )
             inputs = inputs.to(device)
             targets = targets.to(device)
-            outputs: torch.Tensor = model(inputs, num_last_tokens=1).logits
-            total += targets.size(0) * targets.size(1)
-            correct += (outputs.argmax(2) == targets).sum().item()
+            outputs: torch.Tensor = model(inputs, num_last_tokens=1).squeeze(dim=1)
+            total = targets.shape[0]
+            correct = (outputs.argmax(dim=1) == targets).sum().item()
             accuracy = 100 * correct / total
+            print(accuracy)
             log_object.append(dict(
                 accuracy=accuracy,
                 validation_length=validation_length,
@@ -199,6 +199,7 @@ def validate_multi(
                 **additional_params,
             ))
             dataset_config.positive_rate = old_positive
+    model.train()
     return log_object
 
 def train_multi(
@@ -244,8 +245,8 @@ def train_multi(
         )
         inputs = inputs.to(device)
         targets = targets.to(device)
-        outputs = model(inputs, num_last_tokens=1).logits
-        loss = criterion(torch.transpose(outputs, 1, 2), targets)
+        outputs = model(inputs, num_last_tokens=1).squeeze(dim=1)
+        loss = criterion(outputs, targets)
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
@@ -297,7 +298,8 @@ def main():
     for (training_config, dataset_config,
         mamba_config) in iterate_sweep(config_uri):
 
-        model = MambaLMHeadModelLstm(mamba_config, device=device)
+        model = sequence_stack.SequenceStack(mamba_config)
+        model.to(device)
 
         logger.info(f"Training {dict(
             **dataset_config.__dict__,

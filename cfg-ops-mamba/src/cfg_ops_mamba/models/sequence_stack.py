@@ -1,0 +1,55 @@
+from cfg_ops_mamba.models import simple_lstm
+import torch
+from torch import nn
+
+class SequenceStackConfig:
+    def __init__(self, config: dict[str, any]) -> None:
+        self.n_layer = int(config["n_layer"])
+        self.d_input = int(config["d_input"])
+        self.d_output = int(config["d_output"])
+        self.d_intermediate = int(config["d_intermediate"])
+        self.lstm_layer_idx = list(config["lstm_layer_idx"])
+        self.lstm_d_hidden = int(config["lstm_d_hidden"])
+
+class SequenceStack(nn.Module):
+    def __init__(
+        self,
+        config: SequenceStackConfig,
+    ) -> None:
+        super(SequenceStack, self).__init__()
+        self.config = config
+        layers = []
+        for i in range(config.n_layer):
+            if i in config.lstm_layer_idx:
+                layers.append(
+                    simple_lstm.SimpleLSTM(
+                        input_dim=config.d_intermediate,
+                        hidden_dim=config.lstm_d_hidden,
+                        output_dim=config.d_intermediate,
+                    )
+                )
+            else:
+                print("Error: Mamba not implemented yet!")
+        self.fc1 = nn.Linear(config.d_input, config.d_intermediate)
+        self.layers = nn.ModuleList(layers)
+        self.fc2 = nn.Linear(config.d_intermediate, config.d_output)
+    
+    def forward(self, x: torch.Tensor, num_last_tokens=None):
+        # The input must be a rank 3 tensor
+        assert len(x.shape) == 3
+        batch_size = x.shape[0]
+        length = x.shape[1]
+        assert x.shape[2] == self.config.d_input
+
+        x = self.fc1(x)
+        assert x.shape == (batch_size, length, self.config.d_intermediate)
+
+        for layer in self.layers:
+            x = layer(x)
+            assert x.shape == (batch_size, length, self.config.d_intermediate)
+        x = self.fc2(x)
+        assert x.shape == (batch_size, length, self.config.d_output)
+        if num_last_tokens != None:
+            x = x[:, -num_last_tokens:, :]
+        return x
+    

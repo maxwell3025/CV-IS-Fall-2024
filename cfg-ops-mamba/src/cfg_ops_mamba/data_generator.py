@@ -119,7 +119,7 @@ def regular_sample_multi(
         numerical_sequence.append(grammars[0].enumeration[sample[i]])
     x = torch.tensor(numerical_sequence, dtype=torch.long)
     y = torch.tensor((chosen_grammar_index,), dtype=torch.long)
-    if one_hot: x = F.one_hot(x, len(grammar.enumeration)).float()
+    if one_hot: x = F.one_hot(x, len(grammars[0].enumeration)).float()
     return x, y
 
 """
@@ -168,4 +168,4 @@ def generate_dataset_multi(
         )
         x.append(x_instance)
         y.append(y_instance)
-    return torch.stack(x), torch.stack(y)
+    return torch.stack(x), torch.cat(y)

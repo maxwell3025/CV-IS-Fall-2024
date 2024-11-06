@@ -1,5 +1,6 @@
-import typing
+from cfg_ops_mamba.models import sequence_stack
 import json
+import typing
 import yaml
 
 # Configuration for training
@@ -43,7 +44,7 @@ class MambaLstmConfig(MambaConfig):
         self.lstm_cfg: dict = dict(config["lstm_cfg"])
 
 def from_dict(data: dict[str, any]):
-    return TrainingConfig(data), DatasetConfig(data), MambaLstmConfig(data)
+    return TrainingConfig(data), DatasetConfig(data), sequence_stack.SequenceStackConfig(data)
 
 def from_json(json_file: typing.IO):
     data = json.load(json_file)

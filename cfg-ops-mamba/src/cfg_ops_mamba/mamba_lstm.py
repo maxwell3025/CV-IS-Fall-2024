@@ -7,6 +7,7 @@ class CompatibleLstm(nn.LSTM):
     """
     def __init__(self, **kwargs):
         super(CompatibleLstm, self).__init__(
+            batch_first=True,
             **kwargs,
         )
         self.linear = nn.Linear(kwargs["hidden_size"], kwargs["input_size"])
