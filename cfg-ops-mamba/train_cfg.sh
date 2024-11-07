@@ -17,7 +17,7 @@ if [ -f "./train_cfg.sh" ]; then
 
     module load cuda/12.6
 
-    python -m cfg_ops_mamba config/parity_lstm_new.yaml
+    python -m cfg_ops_mamba config/simple_sequence_stack_test.yaml
 
     deactivate
 else

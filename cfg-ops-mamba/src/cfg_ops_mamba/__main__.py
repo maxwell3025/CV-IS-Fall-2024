@@ -88,7 +88,7 @@ def train(
     training_config: TrainingConfig,
     dataset_config: DatasetConfig,
     mamba_config: MambaConfig,
-    model: MambaLMHeadModel,
+    model: sequence_stack.SequenceStack,
     device: torch.device,
     iteration: int,
 ):
@@ -132,7 +132,8 @@ def train(
 
         inputs = inputs.to(device)
         targets = targets.to(device)
-        outputs = model(inputs, num_last_tokens=1).squeeze(dim=1)
+        raw_output, dt = model.forward_debug(inputs, num_last_tokens=1)
+        outputs = raw_output.squeeze(dim=1)
         output_dim = outputs.shape[1]
         assert outputs.shape == (dataset_config.batch_size, output_dim)
 
