@@ -71,4 +71,4 @@ def iterate_sweep(filename: str):
             sweep_choice_index = case_index % len(sweep_choices)
             base[sweep_dim] = sweep_choices[sweep_choice_index]
             case_index = case_index // len(sweep_choices)
-        yield from_dict(base)
+        yield (*from_dict(base), base["iteration"])

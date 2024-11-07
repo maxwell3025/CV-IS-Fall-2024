@@ -9,7 +9,7 @@ class SimpleLSTM(nn.Module):
         output_dim: int,
         drop_prob=0.3,
     ) -> None:
-        super(SimpleLSTM,self).__init__()
+        super(SimpleLSTM, self).__init__()
  
         self.input_dim = input_dim
         self.output_dim = output_dim

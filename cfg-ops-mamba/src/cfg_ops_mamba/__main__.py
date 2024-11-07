@@ -90,6 +90,7 @@ def train(
     mamba_config: MambaConfig,
     model: MambaLMHeadModel,
     device: torch.device,
+    iteration: int,
 ):
     """Trains a model to differentiate between multiple languages.
 
@@ -148,6 +149,7 @@ def train(
                     step=step,
                     training_config=training_config.__dict__,
                     mamba_config=mamba_config.__dict__,
+                    iteration=iteration,
                 ),
                 val_lengths=training_config.val_lengths,
                 device=device,
@@ -168,7 +170,7 @@ def main():
     config_uri = sys.argv[1]
 
     # For this test, we will use the parity language
-    task=synthetic_languages.parity(64)
+    task=synthetic_languages.a_or_bb_plus(64)
 
     # We will put all of our logs and checkpoints into a subfolder in output,
     # where the subfolder name is a random adjective_noun name.
@@ -183,7 +185,7 @@ def main():
     logger.info(f'Using device: {device}')
 
     for (training_config, dataset_config,
-        mamba_config) in iterate_sweep(config_uri):
+        mamba_config, iteration) in iterate_sweep(config_uri):
 
         model = sequence_stack.SequenceStack(mamba_config)
         model.to(device)
@@ -194,14 +196,17 @@ def main():
             **mamba_config.__dict__
         )}")
 
-        model, validation_logs_object = train(
+        model, training_validation_logs = train(
             task=task,
             training_config=training_config,
             dataset_config=dataset_config,
             mamba_config=mamba_config,
             model=model,
             device=device,
+            iteration=iteration,
         )
+
+        validation_logs_object += training_validation_logs
 
         validation_logs_object += validate(
             task=task,
@@ -211,6 +216,7 @@ def main():
                 step=training_config.num_steps,
                 training_config=training_config.__dict__,
                 mamba_config=mamba_config.__dict__,
+                iteration=iteration,
             ),
             val_lengths=training_config.val_lengths,
             device=device,

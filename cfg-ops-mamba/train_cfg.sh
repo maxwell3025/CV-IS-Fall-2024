@@ -4,7 +4,7 @@
 #SBATCH -p gpu-preempt  # Partition
 #SBATCH -G 1  # Number of GPUs
 #SBATCH -t 04:00:00  # Job time limit
-#SBATCH -o train_mamba_%j.out  # %j = job ID
+#SBATCH -o latest.log  # %j = job ID
 #SBATCH --constraint sm_70
 #SBATCH --mail-type=ALL
 #

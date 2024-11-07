@@ -1,7 +1,7 @@
 base:
   batch_size: 64
   learning_rate: 0.001
-  num_steps: 10000
+  num_steps: 5000
   val_interval: 250
   val_lengths:
     - 1
@@ -68,22 +68,30 @@ base:
     - 62
     - 63
     - 64
+  training_length: 64
+  randomize_training_length: true
   positive_rate: 0.5
   one_hot: true
-  # Stack settings
-  n_layer: 2
+  ## Stack settings
+  # n_layer: 2
   d_input: 2
   d_intermediate: 16
   d_output: 2
+  skip_connection: true
+  ## MAMBA settings
+  mamba_d_model: 16
+  mamba_d_state: 256
+  mamba_d_conv: 4
+  ## LSTM settings
   lstm_layer_idx: [0, 1]
   lstm_d_hidden: 64
 
 sweep:
-  training_length:
-    - 64
-  d_model:
-    - 32
   n_layer:
     - 2
-  randomize_training_length:
-    - true
+    - 3
+    - 4
+    - 5
+  iteration:
+    - 1
+    - 2
