@@ -79,7 +79,7 @@ class SequenceStack(nn.Module):
         return x
     
     def forward_debug(self, x: torch.Tensor, num_last_tokens=None):
-        dt_info = []
+        dt_info: list[torch.Tensor] = []
 
         # The input must be a rank 3 tensor
         assert len(x.shape) == 3

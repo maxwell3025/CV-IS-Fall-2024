@@ -132,7 +132,7 @@ def train(
 
         inputs = inputs.to(device)
         targets = targets.to(device)
-        raw_output, dt = model.forward_debug(inputs, num_last_tokens=1)
+        raw_output = model(inputs, num_last_tokens=1)
         outputs = raw_output.squeeze(dim=1)
         output_dim = outputs.shape[1]
         assert outputs.shape == (dataset_config.batch_size, output_dim)
@@ -163,6 +163,39 @@ def train(
         f"Training instance completed in: {train_time_mins:.2f} minutes"
     )
     return model, log_object
+
+def manual_test(model: sequence_stack.SequenceStack, device: torch.device):
+    data = torch.Tensor([[
+        [0, 1],
+        [0, 1],
+        [0, 1],
+        [0, 1],
+        [1, 0],
+        [1, 0],
+        [1, 0],
+        [1, 0],
+        [0, 1],
+        [1, 0],
+        [0, 1],
+        [1, 0],
+        [0, 1],
+        [1, 0],
+        [0, 1],
+        [1, 0],
+    ]])
+    data = data.float()
+    data = data.to(device)
+    out, dt = model.forward_debug(data)
+    dt = torch.stack(dt)
+    dt = dt.cpu()
+    # layers, B, L, D
+    dt = dt.transpose(2, 3)
+    dt = dt.tolist()
+    print("=" * 80)
+    print(
+        json.dumps(dt, indent=4)
+    )
+    print( "=" * 80)
 
 def main():
     if len(sys.argv) != 2:
@@ -222,6 +255,8 @@ def main():
             val_lengths=training_config.val_lengths,
             device=device,
         )
+
+        manual_test(model=model, device=device)
 
         torch.save(
             model.state_dict(),
