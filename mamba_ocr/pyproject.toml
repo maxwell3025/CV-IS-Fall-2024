@@ -1,0 +1,10 @@
+[project]
+name = "mamba_ocr"
+version = "0.1.0"
+description = """\
+    This package is testing whether MAMBA is able to use in-context learning\
+    to do OCR.\
+    """
+
+[tool.distutils.egg_info]
+egg_base = "."
