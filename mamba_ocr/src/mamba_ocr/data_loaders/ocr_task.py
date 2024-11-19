@@ -1,5 +1,14 @@
 import torch
 class OcrTask:
+    def get_d_color() -> int:
+        pass
+
+    def get_d_positional_encoding() -> int:
+        pass
+
+    def get_d_alphabet() -> int:
+        pass
+
     def get_batch(
         batch_size: int,
         pad_length: int,
