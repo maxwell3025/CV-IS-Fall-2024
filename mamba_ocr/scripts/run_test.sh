@@ -21,7 +21,9 @@ echo "Remote working directory is $UNITY_WORK_HOME/$MODULE_NAME"
 ./scripts/push.sh
 
 if [[ "$1" == "--sync" ]]; then
+    echo "================================================================================"
     ssh -t unity "cd $UNITY_WORK_HOME/mamba_ocr ; srun ./scripts/unity_run_test.sh"
+    echo "================================================================================"
     ./scripts/pull.sh
 else
     ssh unity "cd $UNITY_WORK_HOME/mamba_ocr ; sbatch ./scripts/unity_run_test.sh"
