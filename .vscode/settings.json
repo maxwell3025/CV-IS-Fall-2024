@@ -2,5 +2,9 @@
     "python.defaultInterpreterPath": "${workspaceFolder/dfa-ops-mamba/.venv/bin/python}",
     "python.analysis.extraPaths": [
         "./mamba-debugger"
+    ],
+    "cSpell.words": [
+        "realpath",
+        "venv"
     ]
 }

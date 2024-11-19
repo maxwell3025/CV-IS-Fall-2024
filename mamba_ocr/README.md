@@ -17,6 +17,9 @@ python3 -m pip install -e .
 ## Folder Structure
 - `scripts`\
     This contains all of the utility scripts used by this project.
+    Any scripts prefixed with `unity_` should only be run on the Unity cluster,
+    and any scripts not prefixed with `unity_` should only be run on the local
+    dev machine.
 - `src/mamba_ocr`\
     This contains all of the source code for our project.
 
