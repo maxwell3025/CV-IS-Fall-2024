@@ -11,5 +11,4 @@ rsync \
     -R \
     .env \
     $(git ls-files --others --exclude-standard --cached) \
-    unity:$UNITY_WORK_HOME/$MODULE_NAME \
-    --ignore-missing-args
+    unity:$UNITY_WORK_HOME/$MODULE_NAME
