@@ -1,0 +1,3 @@
+[submodule "mamba_ocr/mamba-debugger"]
+	path = mamba_ocr/mamba-debugger
+	url = https://github.com/maxwell3025/mamba-debugger
