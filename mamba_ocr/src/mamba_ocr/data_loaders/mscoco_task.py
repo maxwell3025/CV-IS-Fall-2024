@@ -1,4 +1,4 @@
-from . import ocr_task
+from . import ocr_task_base
 import json
 import numpy
 import torch
@@ -6,21 +6,41 @@ from torch.nn import functional as torch_functional
 from torchvision.transforms import functional as torchvision_functional
 from PIL import Image
 
+class MsCocoAnnotation:
+    def __init__(self, data_object: dict[str, str]):
+        self.mask: list[float] = data_object["mask"]
+        self.clazz: str = data_object["class"]
+        self.bbox: list[float] = data_object["bbox"]
+        self.image_id: int = data_object["image_id"]
+        self.id: int = data_object["id"]
+        self.language: str = data_object["language"]
+        self.area: float = data_object["area"]
+        self.utf8_string: str = data_object["utf8_string"]
+        self.legibility: str = data_object["legibility"]
+        
 class MsCocoText:
     def __init__(self, data_object: dict[str, str]):
-        self.anns: dict[str, any] = data_object["anns"]
+        self.anns: dict[str, MsCocoAnnotation] = dict(
+            (key, MsCocoAnnotation(value)) for (key, value) in
+            data_object["anns"].items()
+        )
         self.imgs: dict[str, any] = data_object["imgs"]
         self.img_to_anns: dict[str, any] = data_object["imgToAnns"]
-        
-positional_encoding_vectors: list[tuple[float, float]] = [
-    (1, 0),
-    (0, 1),
-    (1, 1),
-]
 
-class MsCocoTask(ocr_task.OcrTask):
-    def __init__(self, data_path: str) -> None:
-        super().__init__()
+class MsCocoTask(ocr_task_base.OcrTaskBase):
+    def __init__(
+        self,
+        data_path: str,
+        positional_encoding_vectors: numpy.ndarray,
+        train_test_val_split: tuple[float, float],
+    ) -> None:
+        """Initializes an MsCocoTask instance.
+
+        Args:
+            data_path: A string referencing the base folder for the dataset.
+            positional_encoding_vectors: A numpy array with the shape [n, 2],
+                where n is the number of encoding vectors.
+        """
         with open(f"{data_path}/cocotext.v2.json") as annotation_file:
             data: dict[any, any] = json.load(annotation_file)
             dataset = MsCocoText(data)
@@ -28,82 +48,103 @@ class MsCocoTask(ocr_task.OcrTask):
         # Here, we populate alphabet_set, which is a map from characters to IDs
         alphabet_set: set[str] = set()
         for annotation in dataset.anns.values():
-            alphabet_set.update(list(annotation["utf8_string"]))
-        self.alphabet: dict[str, int] = dict((char, index) for (index, char) in
-                                             enumerate(alphabet_set))
-        self.d_alphabet = len(alphabet_set)
+            alphabet_set.update(list(annotation.utf8_string))
+        self.alphabet: dict[str, int] = dict(enumerate(alphabet_set))
+        self.reverse_alphabet: dict[str, int] = dict((char, index) for
+                                                     (index, char) in
+                                                     self.alphabet.items())
 
-        positional_encoding_size = len(positional_encoding_vectors) * 2
-        token_length = len(alphabet_set) + positional_encoding_size + 3
-        self.sequences: list[torch.Tensor] = []
-        self.masks: list[torch.Tensor] = []
+        self.positional_encoding_vectors = positional_encoding_vectors
+        features: list[list[torch.Tensor]] = []
+        masks: list[list[torch.Tensor]] = []
         for image_id, annotation_ids in dataset.img_to_anns.items():
             if len(annotation_ids) == 0:
                 continue
+
             file_name = dataset.imgs[image_id]["file_name"]
             with Image.open(f"{data_path}/train2014/{file_name}") as image:
-                current_sequence = []
-                current_mask = []
+                context_features = []
+                context_masks = []
                 for annotation_id in annotation_ids:
                     annotation = dataset.anns[str(annotation_id)]
-                    if(len(annotation["utf8_string"]) == 0):
+                    conversion_result = self.convert_to_sequence(image, annotation)
+                    if conversion_result == None:
                         continue
+                    feature, mask = conversion_result
+                    context_features.append(feature)
+                    context_masks.append(mask)
 
-                    x, y, w, h = annotation["bbox"]
-                    x, y, w, h = round(x), round(y), round(w), round(h)
-                    selection = image.crop((x, y, x+w, y+h))
-                    image_tensor = torchvision_functional.pil_to_tensor(selection)/255
-                    assert image_tensor.shape == (3, h, w)
+                if len(context_features) != 0:
+                    features.append(context_features)
+                    masks.append(context_masks)
+            break
+        super(MsCocoTask, self).__init__(features, masks, train_test_val_split)
 
-                    x_tensor = numpy.arange(w) + x
-                    x_tensor = x_tensor[numpy.newaxis, :]
-                    x_tensor = numpy.broadcast_to(x_tensor, (h, w))
-                    assert x_tensor.shape == (h, w)
+    def convert_to_sequence(
+        self,
+        image: Image.Image,
+        annotation: MsCocoAnnotation,
+    ) -> tuple[torch.Tensor, torch.Tensor] | None:
+        if(len(annotation.utf8_string) == 0):
+            return None
 
-                    y_tensor = numpy.arange(h) + y
-                    y_tensor = y_tensor[:, numpy.newaxis]
-                    y_tensor = numpy.broadcast_to(y_tensor, (h, w))
-                    assert y_tensor.shape == (h, w)
+        x, y, w, h = annotation.bbox
+        x, y, w, h = round(x), round(y), round(w), round(h)
+        selection = image.crop((x, y, x+w, y+h))
+        image_tensor = torchvision_functional.pil_to_tensor(selection)/255
+        assert image_tensor.shape == (3, h, w)
 
-                    positional_encoding: list[numpy.ndarray] = []
-                    for x_dependence, y_dependence in positional_encoding_vectors:
-                        dot_product = x_tensor * x_dependence + y_tensor * y_dependence
-                        positional_encoding.append(numpy.sin(dot_product))
-                        positional_encoding.append(numpy.cos(dot_product))
-                    positional_encoding: numpy.ndarray = numpy.stack(positional_encoding, axis=0)
-                    assert positional_encoding.shape == (positional_encoding_size, h, w)
-                    positional_encoding: torch.Tensor = torch.from_numpy(positional_encoding)
+        positional_encoding: torch.Tensor = self.get_position_tensor(
+            x, y, w, h
+        )
+        assert positional_encoding.shape == (self.get_d_positional_encoding(), h, w)
 
-                    channel_padding = torch.zeros((len(alphabet_set), h, w))
+        channel_padding = torch.zeros((self.get_d_alphabet(), h, w))
+        assert channel_padding.shape == (self.get_d_alphabet(), h, w)
 
-                    full_image = torch.cat((image_tensor, positional_encoding, channel_padding), dim=0)
-                    full_image = full_image.transpose(1, 2)
-                    sequence_image = full_image.flatten(1, 2)
-                    sequence_image = sequence_image.transpose(0, 1)
-                    assert sequence_image.shape == (w * h, token_length)
+        feature_image = torch.cat((
+            image_tensor,
+            positional_encoding,
+            channel_padding
+        ), dim=0)
+        assert feature_image.shape == (self.get_d_input(), h, w)
+        feature_image = feature_image.transpose(1, 2)
+        assert feature_image.shape == (self.get_d_input(), w, h)
+        feature_sequence_image = feature_image.flatten(1, 2)
+        assert feature_sequence_image.shape == (self.get_d_input(), w * h)
+        feature_sequence_image = feature_sequence_image.transpose(0, 1)
+        assert feature_sequence_image.shape == (w * h, self.get_d_input())
 
-                    text: str = annotation["utf8_string"]
-                    text_length = len(text)
+        label: str = annotation.utf8_string
+        label_length = len(label)
 
-                    text: list[str] = list(text)
-                    text: list[int] = [self.alphabet[char] for char in text]
-                    text: torch.Tensor = torch.tensor(text)
-                    text = torch_functional.one_hot(text, num_classes=len(alphabet_set))
-                    text = torch.cat((torch.zeros((text_length, positional_encoding_size + 3)), text), dim=1)
-                    assert text.shape == (len(annotation["utf8_string"]), token_length)
+        label: list[str] = list(label)
+        label: list[int] = [self.reverse_alphabet[char] for char in label]
+        label: torch.Tensor = torch.tensor(label)
+        label = torch_functional.one_hot(label, num_classes=self.get_d_alphabet())
+        assert label.shape == (label_length, self.get_d_alphabet())
+        channel_padding = torch.zeros((label_length, self.get_d_input() - self.get_d_alphabet()))
 
-                    current_sequence.append(sequence_image)
-                    current_sequence.append(text)
+        label = torch.cat((channel_padding, label), dim=1)
+        assert label.shape == (label_length, self.get_d_input())
 
-                    current_mask.append(torch.zeros(sequence_image.shape[0]))
-                    current_mask.append(torch.ones(text.shape[0]))
-                if len(current_sequence) != 0:
-                    self.sequences.append(torch.cat(current_sequence))
-                    self.masks.append(torch.cat(current_mask))
+        feature_sequence = torch.cat((feature_sequence_image, label), dim=0)
+
+        mask_sequence = torch.cat((
+            torch.zeros(feature_sequence_image.shape[0]),
+            torch.ones(label.shape[0])
+        ), dim=0)
+
+        return feature_sequence, mask_sequence
     
     def get_d_color(self):
         return 3
+
     def get_d_positional_encoding(self) -> int:
-        return len(positional_encoding_vectors) * 2
+        return self.positional_encoding_vectors.size
+
     def get_d_alphabet(self) -> int:
-        return self.d_alphabet
+        return len(self.alphabet)
+
+    def get_d_input(self) -> int:
+        return self.get_d_color() + self.get_d_alphabet() + self.get_d_positional_encoding()

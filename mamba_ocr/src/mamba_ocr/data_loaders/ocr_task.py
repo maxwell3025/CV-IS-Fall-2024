@@ -1,4 +1,5 @@
 import torch
+
 class OcrTask:
     def get_d_color(self) -> int:
         pass

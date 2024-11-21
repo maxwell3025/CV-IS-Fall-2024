@@ -1,5 +1,11 @@
 from . import mscoco_task
 from matplotlib import pyplot
-task = mscoco_task.MsCocoTask("./data/mscoco-text")
-pyplot.matshow(task.sequences[0].numpy().transpose())
+import numpy
+positional_encoding_vectors: numpy.ndarray = numpy.array([
+    [1, 0],
+    [0, 1],
+    [1, 1],
+])
+task = mscoco_task.MsCocoTask("./data/mscoco-text", positional_encoding_vectors)
+pyplot.matshow(task.features[0][0].numpy().transpose())
 pyplot.show()
