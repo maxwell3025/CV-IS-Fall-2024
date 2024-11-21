@@ -6,6 +6,8 @@
     <mapping directory="$PROJECT_DIR$/OmniXAI" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/SSD-tutorial" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/investigating-mamba-ioi" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/mamba-debugger" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/mamba_ocr/MedMamba" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/tensorflow-2-feature-visualization-notebooks" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/visualizing-cnn-feature-maps" vcs="Git" />
   </component>
