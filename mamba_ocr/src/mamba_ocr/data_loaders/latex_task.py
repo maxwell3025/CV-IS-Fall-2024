@@ -7,22 +7,14 @@ import torch
 from torch.nn import functional as torch_functional
 from torchvision.transforms import functional as torchvision_functional
 
-class IamTask(ocr_task_base.OcrTaskBase):
+class LatexTask(ocr_task_base.OcrTaskBase):
     def __init__(
         self,
         positional_encoding_vectors: numpy.ndarray,
         train_test_val_split: tuple[float, float],
     ) -> None:
         print("Loading IAM dataset...")
-        splits = dict(
-            train="data/train-00000-of-00001-bfc7b63751c36ab0.parquet",
-            test="data/test-00000-of-00001-4cae70e6a03872e2.parquet",
-            val="data/val-00000-of-00001-472467affea948eb.parquet",
-        )
-        df1 = pandas.read_parquet("hf://datasets/priyank-m/IAM_words_text_recognition/" + splits["train"])
-        df2 = pandas.read_parquet("hf://datasets/priyank-m/IAM_words_text_recognition/" + splits["test"])
-        df3 = pandas.read_parquet("hf://datasets/priyank-m/IAM_words_text_recognition/" + splits["val"])
-        df = pandas.concat([df1, df2, df3])
+        df = pandas.read_parquet("hf://datasets/linxy/LaTeX_OCR/full/train-00000-of-00001.parquet")
         print("Finished loading IAM dataset")
 
         print("Generating alphabet...")
@@ -47,7 +39,7 @@ class IamTask(ocr_task_base.OcrTaskBase):
             masks.append([mask])
             break
         print("Finished serializing dataset")
-        super(IamTask, self).__init__(features, masks, train_test_val_split)
+        super(LatexTask, self).__init__(features, masks, train_test_val_split)
 
     def convert_to_sequence(
         self,
@@ -102,7 +94,7 @@ class IamTask(ocr_task_base.OcrTaskBase):
         return feature_sequence, mask_sequence
     
     def get_d_color(self):
-        return 1
+        return 3
 
     def get_d_positional_encoding(self) -> int:
         return self.positional_encoding_vectors.size
