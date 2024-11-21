@@ -15,7 +15,7 @@
 	url = https://github.com/Phylliida/investigating-mamba-ioi.git
 [submodule "selective-copying-mamba"]
 	path = selective-copying-mamba
-	url = git@github.com:maxwell3025/selective-copying-mamba.git
+	url = https://github.com/maxwell3025/selective-copying-mamba.git
 [submodule "tensorflow-2-feature-visualization-notebooks"]
 	path = tensorflow-2-feature-visualization-notebooks
 	url = https://github.com/timsainb/tensorflow-2-feature-visualization-notebooks.git
