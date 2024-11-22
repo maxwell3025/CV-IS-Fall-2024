@@ -10,6 +10,10 @@
 #
 # This is the main run script for Unity
 
+source /etc/profile
+
+module load cuda/12.6
+
 ./scripts/unity_init_venv.sh || exit 1
 
 ./scripts/unity_install.sh || exit 1

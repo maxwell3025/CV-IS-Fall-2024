@@ -6,8 +6,6 @@ cd $(dirname $0)/..
 
 PYTHON_VERSION=3.12.3
 
-source /etc/profile
-
 if ! test -d ./.venv; then
     module load python/$PYTHON_VERSION
     python3 -m venv ./.venv
