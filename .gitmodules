@@ -22,6 +22,6 @@
 [submodule "visualizing-cnn-feature-maps"]
 	path = visualizing-cnn-feature-maps
 	url = https://github.com/fg91/visualizing-cnn-feature-maps.git
-[submodule "MedMamba"]
+[submodule "mamba_ocr/src/MedMamba"]
 	path = mamba_ocr/src/MedMamba
 	url = https://github.com/maxwell3025/MedMamba.git
