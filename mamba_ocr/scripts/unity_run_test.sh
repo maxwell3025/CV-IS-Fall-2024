@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH -c 6  # Number of Cores per Task
-#SBATCH --mem=8192  # Requested Memory
+#SBATCH --mem=16384  # Requested Memory
 #SBATCH -p gpu-preempt  # Partition
 #SBATCH -G 1  # Number of GPUs
 #SBATCH -t 04:00:00  # Job time limit
