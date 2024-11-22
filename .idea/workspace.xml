@@ -5,38 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="50b1cfec-6cdf-4a30-a287-a6cd083660ec" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.gitmodules" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/CV-IS-Fall-2024.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/active-tab-highlighter-v2.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/discord.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/gbrowser_project.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/git_toolbox_blame.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/material_theme_project_new.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/OmniXAI" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/cfg-ops-mamba/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dfa-ops-mamba/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/lstm-poc/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/mamba_ocr/MedMamba" beforeDir="false" afterPath="$PROJECT_DIR$/mamba_ocr/MedMamba" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/mamba_ocr/MedMamba/MedMamba.py" beforeDir="false" afterPath="$PROJECT_DIR$/mamba_ocr/MedMamba/MedMamba.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/mamba_ocr/MedMamba/train.py" beforeDir="false" afterPath="$PROJECT_DIR$/mamba_ocr/MedMamba/train.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/paper/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pytorch-quickstart/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pytorch-quickstart/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pytorch-quickstart/.idea/active-tab-highlighter-v2.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pytorch-quickstart/.idea/discord.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pytorch-quickstart/.idea/gbrowser_project.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pytorch-quickstart/.idea/git_toolbox_blame.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pytorch-quickstart/.idea/inspectionProfiles/profiles_settings.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pytorch-quickstart/.idea/material_theme_project_new.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pytorch-quickstart/.idea/misc.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pytorch-quickstart/.idea/modules.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pytorch-quickstart/.idea/pytorch-quickstart.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pytorch-quickstart/.idea/vcs.xml" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -63,7 +35,7 @@
     </option>
   </component>
   <component name="Git.Settings">
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/mamba-debugger" />
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="GitToolBoxStore">
     <option name="recentBranches">
@@ -213,27 +185,27 @@
     <option name="openDirectoriesWithSingleClick" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ASKED_MARK_IGNORED_FILES_AS_EXCLUDED": "true",
-    "Python.MedMamba.executor": "Run",
-    "Python.create_data_lists.executor": "Run",
-    "Python.detect.executor": "Run",
-    "Python.eval.executor": "Run",
-    "Python.setup.executor": "Run",
-    "Python.train.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "main",
-    "last_opened_file_path": "/Users/thewelcomer/Coding/CV-IS-Fall-2024",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "terminal",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_MARK_IGNORED_FILES_AS_EXCLUDED&quot;: &quot;true&quot;,
+    &quot;Python.MedMamba.executor&quot;: &quot;Run&quot;,
+    &quot;Python.create_data_lists.executor&quot;: &quot;Run&quot;,
+    &quot;Python.detect.executor&quot;: &quot;Run&quot;,
+    &quot;Python.eval.executor&quot;: &quot;Run&quot;,
+    &quot;Python.setup.executor&quot;: &quot;Run&quot;,
+    &quot;Python.train.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;crackingunity&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/thewelcomer/Coding/CV-IS-Fall-2024&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;terminal&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$" />
@@ -397,7 +369,8 @@
       <workItem from="1732206874873" duration="10713000" />
       <workItem from="1732219589137" duration="534000" />
       <workItem from="1732220137307" duration="47000" />
-      <workItem from="1732220196490" duration="2657000" />
+      <workItem from="1732220196490" duration="4563000" />
+      <workItem from="1732302585682" duration="1161000" />
     </task>
     <servers />
   </component>
