@@ -2,11 +2,9 @@
 \providecommand\MM{{\mathbb M}}
 
 \section{Background}
-\textit{Note: I am writing this assuming that the reader knows nothing about
-MAMBA or S4 and wants to learn everything that I learned}\\
-
 In this paper, we use a network architecture called MAMBA, which is centered
 around a type of sequence transformation called a state space model(SSM).
+\subsection{State Space Models}
 State space models take some variable-length sequence of data(text, audio, even
 image data), and convert it into some other variable-length sequence of data,
 similarly to what a transformer does.
@@ -39,6 +37,7 @@ $$\begin{aligned}
 \end{aligned}$$
 In addition, real models tend to work with multidimensional sequences, so each
 SSM layer is typically a stack of multiple SSMs.
+
 \subsection{hyperparameters}
 A common nomenclature for the hyperparameters of state space models is as
 follows:
@@ -70,6 +69,16 @@ more efficiently.
 Rather than requiring $\tilde O(LN^2)$ time to train as with direct computation,
 each S4 "channel" requires only $O(LN + N^2)$ time to train thanks to the
 \subsection{Mamba}
+Mamba\cite{mamba} adds variable timesteps. This has 2 main consequences.
+Firstly, it increases the cost 
+
+\subsection{Background on Formal Language Abilities}
+As proven in \cite{ssmformal}, State-Space models are not able 
+
+\subsection{Tests on Formal Language Abilities}
+It appears that 
+
+\subsubsection{Formation of "Bad Habits" with Mamba}
 
 % Here is a diagram
 % \begin{center}

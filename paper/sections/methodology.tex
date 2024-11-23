@@ -1,1 +1,35 @@
 \section{Methodology}
+In this section, we explain our setup for determining Mamba's ability to learn
+from context.
+In our paper, we test [TODO] different models which attempt to use Mamba for its
+in-context learning abilities against a variety of datasets, elaborated on
+below.
+\subsection{Data Format}
+We propose a simple encoding of OCR tasks as sequences.
+Each dataset that we use contains labeled images of words, which grouped
+together according to context. For instance, one context might mean a single
+photograph, and the images in that context would be the isolated words within
+that image.
+Since Mamba is a sequence-to-sequence model, we have to encode the task of
+labelling these images as a sequence-to-sequence task.
+We can do this be serializing the pixels in the image in column-first order. We
+use column-first order to preserve the ordering of the characters. This
+guarantees that substrings in each image correspond to subsequences in the
+corresponding sequence.
+This, however, destroys all of the positional data, so we append 2-D positional
+encodings to each token, similar to the encodings proposed in \cite{attention}.
+Finally, we predict text autoregressively, so we need to include existing
+predictions in the data.
+In order to have in-context prediction, we simply concatenate the different
+sequence samples between runs. This allows Mamba to "memorize" relevant data.
+In order to discern in-context learning from out-of-context learning, we will
+train the models on in-context data, and text them on more in context, and out
+of context(1 word per sample) data.
+\subsection{Mamba Stack}
+The first model architecture that we test is just a normal stack of Mamba
+layers. In our previous testing, we these to work for finite memorization tasks,
+so we expect this model to do relatively well.
+\subsection{Mamba With CNN}
+Another model architecture we look at [cite medmamba] they run CNN layers
+parallel to Mamba layers.
+\subsection{}
