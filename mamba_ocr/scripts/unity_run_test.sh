@@ -8,7 +8,7 @@
 #SBATCH --constraint sm_70
 #SBATCH --mail-type=ALL
 #
-# This is the main run script for Unity
+# Runs an experiment on Unity
 
 source /etc/profile
 
