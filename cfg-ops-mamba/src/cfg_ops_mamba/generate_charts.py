@@ -1,4 +1,6 @@
+import matplotlib.axes
 import numpy
+import matplotlib
 from matplotlib import pyplot
 from matplotlib.widgets import Slider
 import json
@@ -46,32 +48,36 @@ for (name, run) in runs.items():
 
     fig, ax = pyplot.subplots()
     fig.set_size_inches(
-        12.8,
-        19.2
+        6.4,
+        4.8
     )
-    ax.set_anchor("N")
-    image = ax.matshow(grid)
-    fig.colorbar(image)
+    image = ax.matshow(grid, vmin=0, vmax=100)
+    fig.colorbar(image, orientation="horizontal")
     ax.set_title("String Length and Timestep vs Accuracy")
     ax.set_xticks(
-        ticks=list(range(0, len(validation_length_list))),
-        labels=validation_length_list,
+        ticks=list(range(0, len(validation_length_list)))[::5],
+        labels=validation_length_list[::5],
     )
     ax.set_yticks(
-        ticks=list(range(0, len(step_list))),
-        labels=step_list,
+        ticks=list(range(0, len(step_list)))[::5],
+        labels=step_list[::5],
     )
     formatted_json_text = json.dumps(json.loads(name))
     pyplot.text(
-        0.4, 0.1,
-        formatted_json_text,
+        x=0.4,
+        y=0.1,
+        s=formatted_json_text,
         wrap=True,
         transform=fig.dpi_scale_trans,
+        fontsize=4,
+        width=10,
     )
+
     # pyplot.show()
     os.makedirs(f"output/{sys.argv[1]}/charts/", exist_ok=True)
     pyplot.savefig(
         f"output/{sys.argv[1]}/charts/{get_random_name(separator="_", style="lowercase")}.png",
+        dpi=500,
     )
     
     

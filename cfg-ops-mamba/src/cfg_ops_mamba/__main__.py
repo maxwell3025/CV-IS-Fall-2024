@@ -2,6 +2,7 @@ from cfg_ops_mamba.config import iterate_sweep, DatasetConfig, TrainingConfig, M
 from cfg_ops_mamba.mamba_lstm import MambaLMHeadModelLstm
 from cfg_ops_mamba.models import sequence_stack
 import json
+import yaml
 import logging
 from mamba_ssm.models.mixer_seq_simple import MambaLMHeadModel
 import os
@@ -204,7 +205,10 @@ def main():
     config_uri = sys.argv[1]
 
     # For this test, we will use the parity language
-    task=synthetic_languages.a_or_bb_plus(64)
+    with open(config_uri, "r") as config_file:
+        config_object = yaml.safe_load(config_file)
+        # task=synthetic_languages.get_arithmetic_expr_all(64)
+        task=synthetic_languages.__dict__[config_object["base"]["language"]](64)
 
     # We will put all of our logs and checkpoints into a subfolder in output,
     # where the subfolder name is a random adjective_noun name.
@@ -256,7 +260,7 @@ def main():
             device=device,
         )
 
-        manual_test(model=model, device=device)
+        # manual_test(model=model, device=device)
 
         torch.save(
             model.state_dict(),

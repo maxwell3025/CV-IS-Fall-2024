@@ -34,7 +34,7 @@ def sample_one(
     x = torch.tensor(sample, dtype=torch.long)
     y = torch.tensor((selection_index,), dtype=torch.long)
         
-    if one_hot: x = F.one_hot(x, task.language_count()).float()
+    if one_hot: x = F.one_hot(x, task.alphabet_size()).float()
     return x, y
 
 def sample_batch(

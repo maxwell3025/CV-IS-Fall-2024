@@ -216,4 +216,4 @@ def get_arithmetic_expr_all(limit: int) -> LanguageSelectTask:
     X.rules.append([X, prime])
     X.rules.append([x])
 
-    return CFGDiscriminationTask([G, F], limit)
+    return CFGDiscriminationTask([G, T], limit)

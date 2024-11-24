@@ -263,8 +263,9 @@ class CFGDiscriminationTask(LanguageSelectTask):
         for grammar in self.grammar_list:
             if len(grammar.cache) == 0:
                 grammar.init(max_length)
-            union_enumeration.update(*grammar.alphabet)
+            union_enumeration.update(grammar.alphabet)
         self.enumeration = {}
+        self.grammar = self.grammar_list[0]
         for i, symbol in enumerate(union_enumeration):
             self.enumeration[symbol] = i
 
