@@ -1,5 +1,5 @@
 
-\section{Background}
+\section{Background on State Space Models}
 In this paper, we use a network architecture called Mamba, which is centered
 around a type of sequence-to-sequence model called a state space model(SSM).
 
@@ -105,19 +105,51 @@ is crucial for in-context character recognition.
 
 \subsection{Background on Formal Language Abilities}
 % SSMs are only able to model star-free languages
+As noted by Sarrof et al.\cite{ssmformal}, discrete SSMs with positive timesteps
+are not capable of recognizing star-free languages.
+
+Consider the case of the PARITY language.
+
+
 
 % star-free language defintion
 
 \subsection{Tests on Formal Language Abilities}
-% Ability to parse (a|bb)+
+In this section, we test the ability for multi-layer Mamba models to parse
+non-star-free languages.
 
-% Failure to recognize (a|bb)+
+Our first experiment is with the language \texttt{(a|bb)+}
+
+\textbf{Dataset} The dataset that we train Mamba to recognize is a synthetic
+dataset.
+The instances are first randomly and uniformly assigned a length(from 1-64
+inclusive) and a label(either in the language or not).
+They are then randomly sampled given these constraints.
+For instance, the data generator might first choose a length of 37, and a label
+of true(in the language).
+Then, it uniformly samples from the set of all length 37 strings in
+\texttt{(a|bb)+}
+The sampling is done with an efficient dynamic programming algorithm.
+
+\textbf{Model} The model that we train is a stack of Mamba layers, each with 
+D=[TODO], N=[TODO], etc.
+The inputs and outputs also have linear projections to make the channel numbers
+match the task.
+
+\textbf{Results} Surprisingly, despite \texttt{(a|bb)+} being a star-free
+language, multi-layer Mamba manages to perform surprisingly well.
+We hypothesize that this is due to \texttt{(a|bb)+} being easy to approximate
+as the union of several star-free languages.
+% 
+In particular, we suspect that the Mamba layers are being trained to search for
+the strings \texttt{aba}, \texttt{abbba}, \texttt{abbbbba}, \texttt{abbbbbbba}.
+This becomes obvious if we separate validation accuracy into positive cases and
+negative cases.
 
 % Explain why CFGs might be interesting
+We also 
+
 \subsubsection{Formation of "Bad Habits" with Mamba}
 % Explain positive/negative test
 
 % Explain that Mamba is approximating (a|bb)+
-
-
-
