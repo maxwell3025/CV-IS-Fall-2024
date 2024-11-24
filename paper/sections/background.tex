@@ -1,86 +1,123 @@
-\providecommand\NN{{\mathbb N}}
-\providecommand\MM{{\mathbb M}}
 
 \section{Background}
-In this paper, we use a network architecture called MAMBA, which is centered
-around a type of sequence transformation called a state space model(SSM).
+In this paper, we use a network architecture called Mamba, which is centered
+around a type of sequence-to-sequence model called a state space model(SSM).
+
 \subsection{State Space Models}
-State space models take some variable-length sequence of data(text, audio, even
-image data), and convert it into some other variable-length sequence of data,
-similarly to what a transformer does.
-As for how state space models calculate their output sequences, all state space
-models are discretizations of the following model, where $x$ is the input
-sequence, and $y$ is the output sequence:
-$$\begin{aligned}
-    n \in \NN \qquad
-    A \in \MM^{n \times n} \qquad
-    B \in \MM^{n \times 1} \qquad
-    C \in \MM^{1 \times n} \\
-    \frac{d\vec{s}}{dt} = Bx + A\vec{s}\\
-    y = C\vec{s}
-\end{aligned}$$
-In English, state space models store an internal state that continuously changes
-w.r.t the input, and then compute the output at each timestep based on the
-internal state.
-Intuitively, $\vec{s}$ is the internal state of the model.
-For a language model, $\vec{s}$ might store the most recent sentence; For an
-image model, it might store nearby lines and shapes.
-Notice that this formula uses derivatives, meaning that it only applies to
-continuous sequences.
+State space models(abbreviated SSMs) are a type of sequence-to-sequence model
+that have recently found promising applications in language
+modeling\cite{mamba}, image processing\cite{medmamba}, and more\cite{s4}.
 
+The recent wave of SSMs has been discrete SSMs, which, as the name suggests, are
+discrete versions of continuous SSMs.
+Continuous SSMs introduced by Kalman\cite{kalman} for signal processing, and
+they assume that the system that they are modeling has some internal state $s$
+that is affected by an input signal $x$, and produces an output signal $y$ based
+on $x$ and $s$.
+The governing equations are as follows:
+$$\begin{aligned}
+    \frac{ds}{dt} &= \Ab\vec{s} + \Bb x \\
+    y &= \Cb\vec{s} + \Db x
+\end{aligned}$$
+where $x, y, s$ are vectors, and $\Ab, \Bb, \Cb, \Db$ are matrices.
+These models can simulate a variety of systems, such as physics equations,
+financial equations, and more.
+
+A key observation is that all of the relationships are linear. This is one of
+the key properties used by discrete SSMs.
+
+\subsubsection{Discretization}
 Since we can't store general continuous sequences in hardware, real
-implementations of SSMs use discretizations, with some finite timestep.
-This means that the actual dynamics of real SSMs are as follows:
+implementations of SSMs typically approximate the dynamics across discrete
+timesteps.
+A common method for discretizing SSMs is used by Gu et al. \cite{s4}
 $$\begin{aligned}
-    \vec{s}_{t+1} &= \exp(\Delta A)\vec{s}_{t} + \Delta B \vec x_{t} \\
-    y_{t} &= C \vec{s}_{t+1}
+    s_k &= \overline \Ab s_{k-1} + \overline \Bb x_k
+    &
+    \overline \Ab &=
+    \left(I - \frac{\Delta}{2}\Ab\right)^{-1}
+    \left(I + \frac{\Delta}{2}\Ab\right)
+    \\
+    y_k &= \overline \Cb s_k
+    &
+    \overline \Bb &=
+    \left(I - \frac{\Delta}{2}\Ab\right)^{-1}
+    \Delta \Bb
+    &
+    \overline \Cb &= \Cb
 \end{aligned}$$
-In addition, real models tend to work with multidimensional sequences, so each
-SSM layer is typically a stack of multiple SSMs.
+This scheme assumes that the input signal is constant within each timestep and
+uses the trapezoidal rule for integration.
+Note that $\Db$ is omitted. This is since the "pass-through" function of $\Db$
+can be easily emulated with this discretization.
 
-\subsection{hyperparameters}
-A common nomenclature for the hyperparameters of state space models is as
-follows:
+\subsection{Hyperparameters}
+In the style of Gu et al. \cite{s4}, we will use the following notation for
+dimensions:
 \begin{itemize}
-    \item $B$ - The batch size
-    \item $L$ - The length of the sequence
-    \item $D$ - The number of sequences per instance. This can be thought of as
-    the number of "channels" that the layer takes as input.
-    \item $N$ - The state size for one SSM
+    \item $B$ - The batch size.
+    \item $L$ - The length of the sequence.
+    \item $D$ - The number of individual SSMs to run in parallel. This is the
+    actual number of input channels.
+    \item $N$ - The state size for each SSM.
 \end{itemize}
-To give an example, at any given time step, the total size of the state would be
-$BDN$, since we have $B$ instances of SSMs, $D$ separate states vectors within
-each SSM, $N$ real number for each state vector.
+Note that the input and output sizes are omitted.
+These are generally both set to 1.
 
 \subsection{S4}
-S4\cite{gu2022efficiently} is one implementation of state space models.
-S4 makes all parameters($A$, $B$, $C$, and $\Delta$) fixed within any evaluation
-step, and it enforces a special structure on $A$.
-Since each parameter is constant with respect to the position in the sequence,
-the overall transformation is invariant to translations.
-In addition, it can be shown that discrete SSMs are linear transformations of
-the input.
-This means that SSMs are equivalent to convolutions, and one of the insights of
-S4 is that this allows the model to be computed efficiently using fourier
-transforms.
-In addition, the special structure on $A$ is that it is a normal plus low-rank
-(NPLR) matrix. This allows the authors to compute the convolutional kernel much
-more efficiently.
-Rather than requiring $\tilde O(LN^2)$ time to train as with direct computation,
-each S4 "channel" requires only $O(LN + N^2)$ time to train thanks to the
+S4\cite{s4} is one implementation of state space models that implements the
+scheme detailed above.
+S4 uses an initialization for $\Ab$ based on the HiPPO framework, which is
+designed to efficiently represent long-range dependencies.
+The key development introduced by S4 is that the S4 parametrizes $\Ab$ as a
+normal-plus-low-rank(NPLR) matrix. The authors then use the spectral properties
+of these matrices in an algorithm that brings the training complexity from
+$O(BLN^2)$ down to $O(BN(N \log N + L \log L) + B(L \log L)N)$\cite{s4}.
+This allows the authors to achieve much higher state sizes than normal.
+% TODO: How Much?
+As for parameterization, S4 makes $\Lambda$, $\Pb$(Components of
+$\Ab = \Lambda - \Pb\Pb^*$), $\Bb$ and $\Cb$ trainable parameters.
+$\Delta$ is indirectly trainable by scaling $\Bb$ and $\Ab$.
+
 \subsection{Mamba}
-Mamba\cite{mamba} adds variable timesteps. This has 2 main consequences.
-Firstly, it increases the cost 
+Mamba\cite{mamba} is the model architecture that we use in our experiments.
+Mamba introduces a new SSM architecture, called S6, and it provides a new block
+design for introducing gating.
+
+The S6 architecture is an improvement on the S4 architecture that introduces
+timesteps that vary within sequences.
+This breaks the algorithm introduced in S4, so the authors fall back on more
+general, existing optimizations in order to maintain performance with large
+state sizes.
+Variable timesteps allow the model to selectively "forget" and "ignore"
+different values.
+If the timestep for a given input is set to a high value, the existing state
+will decay to close to 0, allowing the model to "forget" all previous information.
+If the timestep for a given input is set to a low value, the state has very little
+time to be influences, and in the case of the timestep being 0 or almost 0, it
+is as if the model "skips over" the given input token.
+
+The block model introduced by the authors is an improvement on the existing
+H3\cite{h3} architecture, and adds explicit selection functionality.
+
+This allows the model to perform well on copying tasks, which we hypothesize
+is crucial for in-context character recognition.
 
 \subsection{Background on Formal Language Abilities}
-As proven in \cite{ssmformal}, State-Space models are not able 
+% SSMs are only able to model star-free languages
+
+% star-free language defintion
 
 \subsection{Tests on Formal Language Abilities}
-It appears that 
+% Ability to parse (a|bb)+
 
+% Failure to recognize (a|bb)+
+
+% Explain why CFGs might be interesting
 \subsubsection{Formation of "Bad Habits" with Mamba}
+% Explain positive/negative test
 
-% Here is a diagram
-% \begin{center}
-%     \includegraphics[width=0.5\textwidth]{resources/example-figure.pdf}
-% \end{center}
+% Explain that Mamba is approximating (a|bb)+
+
+
+

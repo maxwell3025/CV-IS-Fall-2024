@@ -5,26 +5,60 @@ In our paper, we test [TODO] different models which attempt to use Mamba for its
 in-context learning abilities against a variety of datasets, elaborated on
 below.
 \subsection{Data Format}
-We propose a simple encoding of OCR tasks as sequences.
+In plain English, the task we train is
+\begin{quote}
+    Each instance of our task is based on a \textbf{context image}, which
+    is a photograph of a scene containing one or more words(e.x. photograph of a
+    train station).
+    We are also provided a set of AABBs surrounding each English word/token in
+    the image(e.x. \verb|the|, \verb|,|).
+    Our task is to predict the text associated with each word image.
+\end{quote}
+Since are trying to make Mamba, a sequence-to-sequence model, learn this task,
+we propose an encodings of contexts as images.
+As it stands, there already exists a method for transforming raster images into
+sequences for Mamba, introduced in \cite{vmamba}.
+We are trying to demonstrate improvement based on context, however, so we need
+to add context to the sequences. We do this using 2 methods: Positional Encoding
+and Text Injection
+
+\subsubsection{Position Encoding}
+An issue with our sequence transformation is that we destroy all 2-D positional
+data.
+Thus, before the sequence transformation, we append new channels to the image,
+similar to the positional encodings mentioned in \cite{attention}.
+The encoding scheme we use is as follows:
+
+Finally, we predict text autoregressively, so we need to include existing
+predictions in the data.
+
+% This also allows the model to record in-context data, like position within
+% image, and text size.
+
+In order to have in-context prediction, we simply concatenate the different
+sequence samples between runs. This allows Mamba to "memorize" relevant data.
+In order to discern in-context learning from out-of-context learning, we will
+train the models on in-context data, and text them on more in context, and out
+of context(1 word per sample) data.
+
+\subsubsection{Text Injection}
 Each dataset that we use contains labeled images of words, which grouped
 together according to context. For instance, one context might mean a single
 photograph, and the images in that context would be the isolated words within
 that image.
 Since Mamba is a sequence-to-sequence model, we have to encode the task of
 labelling these images as a sequence-to-sequence task.
+% For most tests, we serialize images in column-major order to preserve
+% substrings
+
+
 We can do this be serializing the pixels in the image in column-first order. We
 use column-first order to preserve the ordering of the characters. This
 guarantees that substrings in each image correspond to subsequences in the
 corresponding sequence.
-This, however, destroys all of the positional data, so we append 2-D positional
-encodings to each token, similar to the encodings proposed in \cite{attention}.
-Finally, we predict text autoregressively, so we need to include existing
-predictions in the data.
-In order to have in-context prediction, we simply concatenate the different
-sequence samples between runs. This allows Mamba to "memorize" relevant data.
-In order to discern in-context learning from out-of-context learning, we will
-train the models on in-context data, and text them on more in context, and out
-of context(1 word per sample) data.
+% We rescale all text to a consistent height, since all samples are one line
+In orde
+
 \subsection{Mamba Stack}
 The first model architecture that we test is just a normal stack of Mamba
 layers. In our previous testing, we these to work for finite memorization tasks,
