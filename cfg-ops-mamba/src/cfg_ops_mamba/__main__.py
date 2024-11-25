@@ -73,7 +73,7 @@ def validate(
             correct = (outputs.argmax(dim=1) == targets).sum().item()
 
             accuracy = 100 * correct / total
-            print(accuracy)
+            logger.info(f"Accuracy: {accuracy}")
             log_object.append(dict(
                 accuracy=accuracy,
                 validation_length=validation_length,
@@ -157,7 +157,7 @@ def train(
                 device=device,
             )
             model.train()
-        print(step)
+        logger.info(f"Currently on step {step}")
     end_time = time.time()
     train_time_mins = (end_time - start_time)/60
     logger.info(
