@@ -217,3 +217,26 @@ def get_arithmetic_expr_all(limit: int) -> LanguageSelectTask:
     X.rules.append([x])
 
     return CFGDiscriminationTask([G, T], limit)
+
+def dyck_1(limit: int) -> LanguageSelectTask:
+    G = CFGSymbol(False, "G")
+    a = CFGSymbol(True, "(")
+    b = CFGSymbol(True, ")")
+    G.add_rule(a, G, b, G)
+    G.add_rule()
+
+    def is_dyck_1(string: list[CFGSymbol]):
+        counter = 0
+        for char in string:
+            if char == a:
+                counter += 1
+            elif char == b:
+                counter -= 1
+            else:
+                return False
+            if counter < 0:
+                return False
+        return counter == 0
+    G.provide_test(is_dyck_1)
+    return CFGRecognizerTask(G, limit)
+    

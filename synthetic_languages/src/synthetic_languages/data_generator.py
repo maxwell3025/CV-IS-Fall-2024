@@ -60,20 +60,47 @@ def sample_batch(
         A tuple (x, y) where x is a tuple of sentences and y is a tuple of
         labels
     """
+    if randomize:
+        result = None
+        while result == None:
+            result = try_sample_batch(
+            task=task,
+            length=length,
+            batch_size=batch_size,
+            randomize=randomize,
+            one_hot=one_hot
+        )
+    else:
+        return try_sample_batch(
+            task=task,
+            length=length,
+            batch_size=batch_size,
+            randomize=randomize,
+            one_hot=one_hot
+        )
 
+def try_sample_batch(
+    task: LanguageSelectTask,
+    length: int,
+    batch_size: int,
+    randomize: bool,
+    one_hot: bool,
+    ):
     if randomize: length = random.randrange(1, length + 1)
 
     x = []
     y = []
     for _ in range(batch_size):
-        x_instance, y_instance = sample_one(
+        result = sample_one(
             task=task,
             length=length,
             distribution=None,
             one_hot=one_hot,
         )
+        if result == None:
+            return None
+        x_instance, y_instance = result
         x.append(x_instance)
         y.append(y_instance)
-    if None in x: return None
 
     return torch.stack(x), torch.cat(y)

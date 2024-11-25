@@ -4,6 +4,7 @@
         "./mamba-debugger"
     ],
     "cSpell.words": [
+        "dyck",
         "realpath",
         "venv"
     ]

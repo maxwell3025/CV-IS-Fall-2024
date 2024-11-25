@@ -1,6 +1,7 @@
 import random
 import logging
 import time
+from typing import Callable
 
 from synthetic_languages.language_select_task import LanguageSelectTask
     
@@ -21,6 +22,7 @@ class CFGSymbol:
         self.string_repr = string_repr
         self.possibly_empty = False
         self.enumeration: dict[CFGSymbol, int] = {}
+        self.test_function: Callable[[list[CFGSymbol]], bool] | None = None
 
     def __str__(self) -> str:
         return self.string_repr
@@ -31,6 +33,9 @@ class CFGSymbol:
     def add_rule(self, *args: tuple["CFGSymbol", ...]):
         self.rules.append(list(args))
 
+    def provide_test(self, test: Callable[[list["CFGSymbol"]], bool]):
+        self.test_function = test
+        
     def _find_neighbors(self):
         searched: set[CFGSymbol] = set()
         to_search: set[CFGSymbol] = set((self,))
@@ -135,6 +140,8 @@ class CFGSymbol:
         self._init_enumeration()
 
     def test(self, string: list["CFGSymbol"]):
+        if self.test_function != None:
+            return self.test_function(string)
         segment_multibundle: list[list[tuple[tuple["CFGSymbol", ...], int]]] = [[] for _ in range(len(string))]
         for symbol_index, symbol in enumerate(string):
             segment_multibundle[symbol_index].append(((symbol,), symbol_index + 1))
