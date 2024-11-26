@@ -70,6 +70,7 @@ def sample_batch(
             randomize=randomize,
             one_hot=one_hot
         )
+        return result
     else:
         return try_sample_batch(
             task=task,

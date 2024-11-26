@@ -115,6 +115,12 @@ def train(
     log_object = []
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=training_config.learning_rate)
+    # optimizer = optim.SGD(
+    #     model.parameters(),
+    #     lr=training_config.learning_rate,
+    #     momentum=0.99,
+    #     nesterov=True,
+    # )
     model.train()
     start_time = time.time()
     for step in range(training_config.num_steps):
@@ -208,7 +214,7 @@ def main():
     with open(config_uri, "r") as config_file:
         config_object = yaml.safe_load(config_file)
         # task=synthetic_languages.get_arithmetic_expr_all(64)
-        task=synthetic_languages.__dict__[config_object["base"]["language"]](64)
+        task=synthetic_languages.__dict__[config_object["base"]["language"]](128)
 
     # We will put all of our logs and checkpoints into a subfolder in output,
     # where the subfolder name is a random adjective_noun name.

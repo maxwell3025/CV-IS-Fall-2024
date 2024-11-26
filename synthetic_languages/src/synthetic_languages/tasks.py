@@ -1,3 +1,4 @@
+import random
 from synthetic_languages.context_free_grammars import CFGSymbol, CFGDiscriminationTask, CFGRecognizerTask
 from synthetic_languages.language_select_task import LanguageSelectTask
 from synthetic_languages.regular_languages import DfaState, RegularRecognizerTask, precomputeSuffixCounts
@@ -223,7 +224,40 @@ def dyck_1(limit: int) -> LanguageSelectTask:
     a = CFGSymbol(True, "(")
     b = CFGSymbol(True, ")")
     G.add_rule(a, G, b, G)
-    G.add_rule()
+    G.add_rule(a, G, b)
+    G.add_rule(a, b, G)
+    G.add_rule(a, b)
+
+    def is_dyck_1(string: list[CFGSymbol]):
+        counter = 0
+        for char in string:
+            if char == a:
+                counter += 1
+            elif char == b:
+                counter -= 1
+            else:
+                return False
+            if counter < 0:
+                return False
+        return counter == 0
+    G.provide_test(is_dyck_1)
+    return CFGRecognizerTask(G, limit)
+    
+def dyck_1_modified(limit: int) -> LanguageSelectTask:
+    G = CFGSymbol(False, "G")
+    a = CFGSymbol(True, "(")
+    b = CFGSymbol(True, ")")
+    G.add_rule(a, G, b, G)
+    G.add_rule(a, G, b)
+    G.add_rule(a, b, G)
+    G.add_rule(a, b)
+
+    def sample_random_inv_modified(length: int):
+        if length % 2 != 0 or length < 6:
+            return CFGSymbol.sample_random_inv(G, length)
+        split = random.randrange(length // 6, length // 3)
+        return G.sample_random(split * 2) + [b, a] + G.sample_random(length - split * 2 - 2)
+    G.sample_random_inv = sample_random_inv_modified
 
     def is_dyck_1(string: list[CFGSymbol]):
         counter = 0

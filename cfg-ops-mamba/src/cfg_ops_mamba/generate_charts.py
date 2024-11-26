@@ -70,7 +70,7 @@ for (name, run) in runs.items():
         wrap=True,
         transform=fig.dpi_scale_trans,
         fontsize=4,
-        width=10,
+        # width=10,
     )
 
     # pyplot.show()
