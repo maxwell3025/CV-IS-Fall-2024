@@ -3,6 +3,7 @@ from . import util
 import itertools
 import json
 import logging
+import math
 import numpy
 import torch
 from torchvision.transforms import functional as torchvision_functional
@@ -97,6 +98,21 @@ class MsCocoTask(ocr_task_base.OcrTaskBase):
         rare_letters = set(
             char for char in alphabet_map.keys() if alphabet_map[char] < 100
         )
+
+        #region entropy calculation
+        total_chars = sum(alphabet_map.values())
+        entropy = sum(
+            -alphabet_map[char] / total_chars * math.log(
+                alphabet_map[char] / total_chars
+            )
+            for char in common_letters
+        )
+        total_rare = sum(alphabet_map[char] for char in rare_letters)
+        entropy -= total_rare / total_chars * math.log(
+            total_rare / total_chars
+        )
+        logger.info(f"Character-wise entropy of mscoco: {entropy}")
+        #endregion
 
         self.alphabet = dict(enumerate(common_letters))
 
