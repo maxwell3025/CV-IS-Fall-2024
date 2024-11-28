@@ -20,6 +20,6 @@ module load cuda/12.6
 
 source .venv/bin/activate
 
-python -m mamba_ocr.train
+CUDA_LAUNCH_BLOCKING=1 python -m mamba_ocr.train
 
 deactivate

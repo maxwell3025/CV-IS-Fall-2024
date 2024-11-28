@@ -7,5 +7,8 @@
         "dyck",
         "realpath",
         "venv"
-    ]
+    ],
+    "python.analysis.diagnosticSeverityOverrides": {
+        "reportPrivateImportUsage": "none"
+    }
 }

@@ -2,6 +2,7 @@ import mamba_ssm
 from mamba_ssm.modules import mamba_simple
 import torch
 from torch import nn
+from typing import Any
 
 class SimpleMAMBA(nn.Module):
     def __init__(
@@ -125,13 +126,13 @@ class SimpleMAMBA(nn.Module):
         # We want dt to have d as the slowest moving dimension
         # and L as the fastest moving dimension, since those are what the ssm_scan kernel expects.
         x_dbl = self.layer.x_proj(mamba_simple.rearrange(x, "b d l -> (b l) d"))  # (bl d)
-        dt, B, C = torch.split(x_dbl, [self.layer.dt_rank, self.layer.d_state, self.layer.d_state], dim=-1)
+        dt, B, C = torch.split(x_dbl, [self.layer.dt_rank, self.layer.d_state, self.layer.d_state], dim=-1) # type: ignore
         dt = self.layer.dt_proj.weight @ dt.t()
         dt = mamba_simple.rearrange(dt, "d (b l) -> b d l", l=seqlen)
         B = mamba_simple.rearrange(B, "(b l) dstate -> b dstate l", l=seqlen).contiguous()
         C = mamba_simple.rearrange(C, "(b l) dstate -> b dstate l", l=seqlen).contiguous()
         assert self.layer.activation in ["silu", "swish"]
-        y = mamba_simple.selective_scan_fn(
+        y: Any = mamba_simple.selective_scan_fn(
             x,
             dt,
             A,
