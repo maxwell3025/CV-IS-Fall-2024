@@ -78,6 +78,8 @@ class SequenceStack(ocr_model.OcrModel):
         x = torch.unsqueeze(x, 0)
         batch_size = x.shape[0]
         length = x.shape[1]
+        # logger.info(f"Actual dim count: {x.shape[2]}")
+        # logger.info(f"Expected dim count: {self.config.d_input}")
         assert x.shape[2] == self.config.d_input
 
         x = self.fc1(x)
@@ -88,6 +90,7 @@ class SequenceStack(ocr_model.OcrModel):
             assert x_new.shape == (batch_size, length,
                                    self.config.d_intermediate)
 
+            x_new = nn.functional.layer_norm(x_new, x.shape)
             if self.config.skip_connection:
                 x = x + x_new
             else:
@@ -105,7 +108,7 @@ class SequenceStack(ocr_model.OcrModel):
             output.append(x[0, index:index + labels[i].shape[0], :])
             index += len_label
         
-        return torch.cat(output)
+        return output
     
     def forward_debug(self, x: torch.Tensor, num_last_tokens=None):
         dt_info: list[torch.Tensor] = []
