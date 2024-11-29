@@ -31,6 +31,37 @@ def image_to_sequence_ss2d(image: torch.Tensor):
 
     return a, b, c, d
 
+def sequence_to_image_ss2d(
+    sequences: tuple[
+        torch.Tensor,
+        torch.Tensor,
+        torch.Tensor,
+        torch.Tensor,
+    ],
+    H: int,
+    W: int,
+) -> tuple[
+    torch.Tensor,
+    torch.Tensor,
+    torch.Tensor,
+    torch.Tensor,
+]:
+    """Converts [L, D] Sequences back into the [C, H, W] sequences from the inverse.
+
+    Args:
+        sequences: _description_
+
+    Returns:
+        _description_
+    """
+    a, b, c, d = sequences
+    return (
+        a.unflatten(0, (H, W)).permute(2, 0, 1),
+        b.flip(dims=(0,)).unflatten(0, (H, W)).permute(2, 0, 1),
+        c.unflatten(0, (W, H)).transpose(1, 2).permute(2, 0, 1),
+        d.flip(dims=(0,)).unflatten(0, (W, H)).transpose(1, 2).permute(2, 0, 1),
+    )
+
 def inject_sequence_labels(
     features: list[torch.Tensor],
     labels: list[torch.Tensor],
