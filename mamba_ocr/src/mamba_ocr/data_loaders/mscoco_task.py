@@ -1,3 +1,4 @@
+import PIL.ImageTransform
 from . import ocr_task_base
 from . import util
 import itertools
@@ -5,6 +6,7 @@ import json
 import logging
 import math
 import numpy
+import PIL
 from PIL import Image
 import random
 import torch
@@ -178,7 +180,24 @@ class MsCocoTask(ocr_task_base.OcrTaskBase):
                     x_max = x + w
                     y_min = y
                     y_max = y + h
-                    feature = context_image.crop((x_min, y_min, x_max, y_max))
+
+                    if len(annotation.mask) == 8:
+                        mask = annotation.mask
+                        x1, y1, x2, y2, x3, y3, x4, y4 = mask
+                        mask = [(x1, y1), (x2, y2), (x3, y3), (x4, y4)]
+                        mask.sort(key=lambda point: point[0])
+                        a, d, b, c = mask
+                        if(a[1] > d[1]):
+                            a, d = d, a
+                        if(b[1] > c[1]):
+                            b, c = c, b
+                        feature = context_image.transform(
+                            (round(w), round(h)),
+                            Image.Transform.QUAD,
+                            (*a, *d, *c, *b),
+                        )
+                    else:
+                        feature = context_image.crop((x_min, y_min, x_max, y_max))
                     rescale_factor = self.default_height / h
                     w_new = round(w * rescale_factor)
                     h_new = round(h * rescale_factor)
