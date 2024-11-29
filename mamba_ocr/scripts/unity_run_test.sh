@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH -c 6  # Number of Cores per Task
 #SBATCH --mem=16384  # Requested Memory
-#SBATCH -p gpu-preempt  # Partition
+#SBATCH -p gpu  # Partition
 #SBATCH -G 1  # Number of GPUs
 #SBATCH -t 04:00:00  # Job time limit
 #SBATCH -o latest.log  # %j = job ID
@@ -20,6 +20,6 @@ module load cuda/12.6
 
 source .venv/bin/activate
 
-CUDA_LAUNCH_BLOCKING=1 python -m mamba_ocr.train
+python -m mamba_ocr.train
 
 deactivate
