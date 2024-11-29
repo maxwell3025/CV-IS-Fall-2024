@@ -2,6 +2,7 @@ from .. import data_loaders
 from .. import models
 from . import config
 import logging
+import math
 from MedMamba.train import main
 import numpy
 import torch
@@ -22,7 +23,7 @@ if __name__ == '__main__':
 
     log_object = []
     # TODO grab this from command line args
-    for conf in config.generate_cases("config/basic.yaml"):
+    for conf in config.generate_cases("config/basic_pe.yaml"):
         dataset_type = data_loaders.datasets[conf["dataset_type"]]
         dataset: data_loaders.ocr_task_base.OcrTaskBase = dataset_type(
             **conf["dataset_config"]
@@ -52,15 +53,18 @@ if __name__ == '__main__':
             logger.info(f"Began training epoch {epoch + 1}")
 
             # Train the model on the training dataset
+            train_loss = 0
+            n_train = 0
             model.train()
             for batch in dataset_train.batches(conf["train_config"]["batch_size"]):
                 for features, labels in batch:
                     features = [feature.to(device) for feature in features]
                     labels = [label.to(device) for label in labels]
-                    result = model(features, labels)
+                    result = torch.cat(model(features, labels)[1:])
                     label = torch.cat(labels)
                     loss: torch.Tensor = criterion(result, torch.argmax(label, dim=1))
-                    logger.info(f"Train loss: {loss.item()}")
+                    train_loss += loss.item()
+                    n_train += 1
                     loss.backward()
                     optimizer.step()
                     model.zero_grad()
@@ -70,6 +74,8 @@ if __name__ == '__main__':
             logger.info("=" * 80)
             logger.info(f"Epoch {epoch + 1}")
             logger.info("-" * 80)
+            logger.info(f"Per-token train loss: {train_loss/n_train}")
+            logger.info("-" * 80)
             total_tokens = 0
             total_loss = 0
             total_correct = 0
@@ -78,7 +84,7 @@ if __name__ == '__main__':
                 for features, labels in batch:
                     features = [feature.to(device) for feature in features]
                     labels = [label.to(device) for label in labels]
-                    result: torch.Tensor = model(features, labels)
+                    result: torch.Tensor = torch.cat(model(features, labels)[1:])
                     total_tokens += result.shape[0]
                     total_loss += sum_criterion(result, torch.argmax(torch.cat(labels), dim=1)).item()
                     result_argmax = torch.argmax(result, dim=1)
@@ -95,7 +101,7 @@ if __name__ == '__main__':
                 for features, labels in batch:
                     features = [feature.to(device) for feature in features]
                     labels = [label.to(device) for label in labels]
-                    result: torch.Tensor = model(features, labels)
+                    result: torch.Tensor = model(features, labels)[0]
                     total_tokens += result.shape[0]
                     total_loss += sum_criterion(result, torch.argmax(torch.cat(labels), dim=1)).item()
                     result_argmax = torch.argmax(result, dim=1)
