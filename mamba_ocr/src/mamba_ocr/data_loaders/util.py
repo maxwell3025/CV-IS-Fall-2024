@@ -35,6 +35,6 @@ def get_position_tensor(
     ], 2)
     assert positional_encoding.shape == (h, w, positional_encoding_vectors.shape[0] * 2)
 
-    positional_encoding = torch.from_numpy(positional_encoding)
+    positional_encoding = torch.from_numpy(positional_encoding).float()
     positional_encoding = positional_encoding.permute((2, 0, 1))
     return positional_encoding
