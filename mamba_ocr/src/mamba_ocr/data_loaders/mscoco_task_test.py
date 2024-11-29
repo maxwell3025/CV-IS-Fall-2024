@@ -6,7 +6,7 @@ positional_encoding_vectors = [
     [0.0, 1.0],
     [1.0, 1.0],
 ]
-task = mscoco_task.MsCocoTask("./data/mscoco-text", positional_encoding_vectors, 64, False, False, False, False)
+task = mscoco_task.MsCocoTask("./data/mscoco-text", positional_encoding_vectors, 32, False, False, False, False)
 for batch in task.batches(1):
     [feature1, feature2, *_], [label1, label2, *_] = batch[0]
 

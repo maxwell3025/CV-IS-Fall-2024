@@ -128,7 +128,7 @@ class MsCocoTask(ocr_task_base.OcrTaskBase):
         # We populate `_contexts` by iterating through the annotations for each
         # image.
         self._contexts = []
-        for image_id, annotation_ids in itertools.islice(metadata.img_to_anns.items(), 6400):
+        for image_id, annotation_ids in metadata.img_to_anns.items():
             if len(annotation_ids) == 0:
                 continue
             file_name = metadata.imgs[image_id]["file_name"]
@@ -136,30 +136,44 @@ class MsCocoTask(ocr_task_base.OcrTaskBase):
             total_image_size = 0
             MAX_IMAGE_SIZE = self.default_height*self.default_height*100
 
+            # In order to avoid unnecessary reads, we first make sure that there
+            # are good text blobs in here.
+            def annotation_filter(annotation: MsCocoAnnotation):
+                label = list(annotation.utf8_string)
+                if len(label) <= 1:
+                    return False
+                if len(label) >= 10:
+                    return False
+                if annotation.legibility != "legible":
+                    return False
+                x, y, w, h = annotation.bbox
+                if h < 32:
+                    return False
+                if w < h or w < h * len(label) * 0.5 or w > h * len(label) * 1.5:
+                    return False
+                return True
+                
+            num_valid = 0
+            for annotation_id in annotation_ids:
+                annotation = metadata.anns[str(annotation_id)]
+                if annotation_filter(annotation):
+                    num_valid += 1
+            if num_valid < 2:
+                continue
+
             with Image.open(f"{data_path}/train2014/{file_name}") as context_image:
                 for annotation_id in annotation_ids:
                     annotation = metadata.anns[str(annotation_id)]
 
+                    if not annotation_filter(annotation):
+                        continue
                     label = list(annotation.utf8_string)
-                    if len(label) <= 1:
-                        continue
-                    if len(label) >= 10:
-                        continue
-                    if annotation.legibility != "legible":
-                        continue
-                    if annotation.clazz != "machine printed":
-                        continue
-
                     label = map(lambda x: self.get_alphabet_index(x), label)
                     label = list(label) + [self.d_alphabet - 1]
                     label = torch.tensor(label)
                     label = torch.nn.functional.one_hot(label)
 
                     x, y, w, h = annotation.bbox
-                    if h < 32:
-                        continue
-                    if w < h or w < h * len(label) * 0.5:
-                        continue
                     x_min = x
                     x_max = x + w
                     y_min = y
@@ -231,9 +245,8 @@ class MsCocoTask(ocr_task_base.OcrTaskBase):
 
                     current_context[0].append(feature.cpu())
                     current_context[1].append(label.cpu())
-
-            if len(current_context[0]) > 1:
                 self._contexts.append(current_context)
+        logger.info(f"Dataset size: {len(self._contexts)}")
         SHUFFLE_SEED = 1234
         logger.info(f"Shuffling dataset with seed {SHUFFLE_SEED}")
         random.Random(SHUFFLE_SEED).shuffle(self._contexts)
