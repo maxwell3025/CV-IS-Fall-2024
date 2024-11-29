@@ -5,10 +5,12 @@ import json
 import logging
 import math
 import numpy
+from PIL import Image
+import random
 import torch
 from torchvision.transforms import functional as torchvision_functional
 from typing import Any
-from PIL import Image
+
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
 logger = logging.getLogger()
@@ -132,7 +134,7 @@ class MsCocoTask(ocr_task_base.OcrTaskBase):
             file_name = metadata.imgs[image_id]["file_name"]
             current_context = ([], [])
             total_image_size = 0
-            MAX_IMAGE_SIZE = 64*64*100
+            MAX_IMAGE_SIZE = self.default_height*self.default_height*100
 
             with Image.open(f"{data_path}/train2014/{file_name}") as context_image:
                 for annotation_id in annotation_ids:
@@ -141,12 +143,23 @@ class MsCocoTask(ocr_task_base.OcrTaskBase):
                     label = list(annotation.utf8_string)
                     if len(label) <= 1:
                         continue
+                    if len(label) >= 10:
+                        continue
+                    if annotation.legibility != "legible":
+                        continue
+                    if annotation.clazz != "machine printed":
+                        continue
+
                     label = map(lambda x: self.get_alphabet_index(x), label)
                     label = list(label) + [self.d_alphabet - 1]
                     label = torch.tensor(label)
                     label = torch.nn.functional.one_hot(label)
 
                     x, y, w, h = annotation.bbox
+                    if h < 32:
+                        continue
+                    if w < h or w < h * len(label) * 0.5:
+                        continue
                     x_min = x
                     x_max = x + w
                     y_min = y
@@ -219,8 +232,11 @@ class MsCocoTask(ocr_task_base.OcrTaskBase):
                     current_context[0].append(feature.cpu())
                     current_context[1].append(label.cpu())
 
-            if len(current_context[0]) != 0:
+            if len(current_context[0]) > 1:
                 self._contexts.append(current_context)
+        SHUFFLE_SEED = 1234
+        logger.info(f"Shuffling dataset with seed {SHUFFLE_SEED}")
+        random.Random(SHUFFLE_SEED).shuffle(self._contexts)
         logger.info("Finished loading mscoco")
 
     @property
@@ -237,7 +253,7 @@ class MsCocoTask(ocr_task_base.OcrTaskBase):
 
     @property
     def d_positional_encoding(self) -> int:
-        return self.positional_encoding_vectors.shape[0] * (
+        return self.positional_encoding_vectors.shape[0] * 2 * (
             self.encode_absolute_position_norm +
             self.encode_absolute_position_px +
             self.encode_relative_position_norm +
@@ -248,4 +264,7 @@ class MsCocoTask(ocr_task_base.OcrTaskBase):
         return self.reverse_alphabet[char]
         
     def get_index_alphabet(self, index: int) -> str:
-        return self.alphabet[index]
+        if index in self.alphabet:
+            return self.alphabet[index]
+        else:
+            return ""
