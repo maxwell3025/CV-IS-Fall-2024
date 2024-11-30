@@ -1,6 +1,6 @@
 from mamba_ssm.models.mixer_seq_simple import MambaLMHeadModel
 from torch import nn
-from cfg_ops_mamba.config import MambaLstmConfig
+from mamba_formal.config import MambaLstmConfig
 
 class CompatibleLstm(nn.LSTM):
     """The default pytorch LSTM modified to fit the block interface for MAMBA.

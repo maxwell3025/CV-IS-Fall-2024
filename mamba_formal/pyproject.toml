@@ -1,5 +1,5 @@
 [project]
-name = "cfg_ops_mamba"
+name = "mamba_formal"
 version = "0.1.0"
 description = "Tests for MAMBA's ability to parse CFGs"
 

@@ -1,5 +1,5 @@
-from cfg_ops_mamba.models import simple_lstm
-from cfg_ops_mamba.models import simple_mamba
+from mamba_formal.models import simple_lstm
+from mamba_formal.models import simple_mamba
 import mamba_ssm
 import torch
 from torch import nn

@@ -1,6 +1,6 @@
-from cfg_ops_mamba.config import iterate_sweep, DatasetConfig, TrainingConfig, MambaConfig
-from cfg_ops_mamba.mamba_lstm import MambaLMHeadModelLstm
-from cfg_ops_mamba.models import sequence_stack
+from mamba_formal.config import iterate_sweep, DatasetConfig, TrainingConfig, MambaConfig
+from mamba_formal.mamba_lstm import MambaLMHeadModelLstm
+from mamba_formal.models import sequence_stack
 import json
 import yaml
 import logging

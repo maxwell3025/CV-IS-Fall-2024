@@ -17,7 +17,7 @@ if [ -f "./train_cfg.sh" ]; then
 
     module load cuda/12.6
 
-    python -m cfg_ops_mamba config/dyck_1_modified_mamba_only_small.yaml
+    python -m mamba_formal config/dyck_1_modified_mamba_only_small.yaml
 
     deactivate
 else

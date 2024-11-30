@@ -1,4 +1,4 @@
-from cfg_ops_mamba.models import sequence_stack
+from mamba_formal.models import sequence_stack
 import json
 import typing
 import yaml
