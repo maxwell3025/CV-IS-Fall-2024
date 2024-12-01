@@ -1,23 +1,34 @@
 \section{Exploratory testing with Mamba}
+The inductive biases and thoeretical capabilities of Mamba are an active area of
+research. In this section we 
 This section(and the background on SSMs and Mamba) constitute Maxwell's
-independent portion.
+independent portion. In this section, we attempt to recreate some
 
-\subsection{Background on Formal Language Abilities}
+\subsection{Known Results For State-Space Models}
 % SSMs are only able to model star-free languages
-As noted by Sarrof et al.\cite{ssmformal}, discrete SSMs with positive timesteps
-are not capable of recognizing star-free languages.
-
-Consider the case of the PARITY language.
-
-
-
-% star-free language defintion
+It is known that state space models are only capable of recognizing a subset of
+the regular languages\cite{ssmformal}, called the star-free languages.
+The authors define the star-free languages are as the languages that can be
+defined with empty set, the empty string, individual symbols, concatenation, and
+Boolean combinations.
+One important subset of the star free languages is a language class that we will
+denote $\SEARCH$.
+\begin{definition}
+    $\SEARCH$ is the class of all $\SEARCH_{s}$, where $\SEARCH_{s}$ is defined
+    as the set of all strings containing $s$ as a substring.
+\end{definition}
+For instance, $\SEARCH_{\text{xyz}}$ is defined as $\Sigma^{*}xyz\Sigma^{*}$.
+Mamba has been found to perform as well as transformers on finite n-gram
+memorization tasks, but fails to generalize on multiple n-gram memorization
+\cite{mambangram}.
 
 \subsection{Star-Free Approximation with Mamba}
-In this section, we test the ability for multi-layer Mamba models to parse
-non-star-free languages.
+Despite their inability to perfectly predict non-star-free regular languages,
+we find that Mamba is capable of recognizing certain non-star-free regular
+languages with limited accuracy.
 
-Our first experiment is with the language \texttt{(a|bb)+}
+In our first experiment, we test Mamba's ability to recognize the language
+\texttt{(a|bb)+}.
 
 \textbf{Dataset} The dataset that we train Mamba to recognize is a synthetic
 dataset.
@@ -48,12 +59,18 @@ negative cases.
 % Explain why CFGs might be interesting
 We also 
 
-\subsubsection{Formation of "Bad Habits" with Mamba}
 % Explain positive/negative test
 
 % Explain that Mamba is approximating (a|bb)+
 
+\subsubsection{Formation of "Bad Habits" with Mamba}
 % Mamba interferes with LSTMs
+These strong inductive biases 
+% Mention that MedMamba places layers in parallel and does dropout
+
+% Explain A/B test with Drop path
+
+This 
 
 \subsection{Weak Generalization on Counter CFGs}
 % explain that hyperparameters in original paper were unreasonable and risking
