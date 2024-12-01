@@ -44,6 +44,7 @@ class SequenceStack(ocr_model.OcrModel):
         mamba_d_state: int,
         mamba_d_conv: int,
     ) -> None:
+        super().__init__()
         self.d_feature = d_feature
         self.d_label = d_label
         self.n_layer = n_layer

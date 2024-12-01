@@ -30,6 +30,7 @@ class MedmambaStack(ocr_model.OcrModel):
             stack_options: A list of dictionaries that will be passed to the
                 stack layers as initialization options.
         """
+        super().__init__()
         self.d_feature = d_feature
         self.d_label = d_label
 
