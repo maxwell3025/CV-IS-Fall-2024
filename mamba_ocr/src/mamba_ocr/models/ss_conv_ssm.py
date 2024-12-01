@@ -35,7 +35,8 @@ class SsConvSsm(nn.Module):
     """
     def __init__(
         self,
-        hidden_dim: int,
+        d_hidden: int,
+        d_label: int,
         drop_path: float = 0,
         norm_layer: Callable[..., torch.nn.Module] = partial(nn.LayerNorm, eps=1e-6),
         attn_drop_rate: float = 0,
@@ -45,7 +46,8 @@ class SsConvSsm(nn.Module):
         """Initialize an instance of SsConvSsm
 
         Args:
-            hidden_dim: Equal to both the input and output dimension
+            d_hidden: Equal to both the input and output dimension for images.
+            d_label: Equal to the number of channels in the labels
             drop_path: Probability that the Mamba layer is ignored. Defaults to
                 0.
             norm_layer: A constructor for the normalization layer. Defaults to
@@ -56,9 +58,10 @@ class SsConvSsm(nn.Module):
                 16.
         """
         super().__init__()
-        self.ln_1 = norm_layer(hidden_dim//2)
+        self.ln_1 = norm_layer(d_hidden//2)
         self.self_attention = vanilla_vss.VanillaVss(
-            d_model=hidden_dim//2,
+            d_model=d_hidden//2,
+            d_label=d_label,
             dropout=attn_drop_rate,
             d_state=d_state,
             **kwargs,
@@ -66,28 +69,28 @@ class SsConvSsm(nn.Module):
         self.drop_path = drop_path
 
         self.conv33conv33conv11 = nn.Sequential(
-            nn.BatchNorm2d(hidden_dim // 2),
+            nn.BatchNorm2d(d_hidden // 2),
             nn.Conv2d(
-                in_channels=hidden_dim // 2,
-                out_channels=hidden_dim // 2,
+                in_channels=d_hidden // 2,
+                out_channels=d_hidden // 2,
                 kernel_size=3,
                 stride=1,
                 padding=1,
             ),
-            nn.BatchNorm2d(hidden_dim // 2),
+            nn.BatchNorm2d(d_hidden // 2),
             nn.ReLU(),
             nn.Conv2d(
-                in_channels=hidden_dim // 2,
-                out_channels=hidden_dim // 2,
+                in_channels=d_hidden // 2,
+                out_channels=d_hidden // 2,
                 kernel_size=3,
                 stride=1,
                 padding=1,
             ),
-            nn.BatchNorm2d(hidden_dim // 2),
+            nn.BatchNorm2d(d_hidden // 2),
             nn.ReLU(),
             nn.Conv2d(
-                in_channels=hidden_dim // 2,
-                out_channels=hidden_dim // 2,
+                in_channels=d_hidden // 2,
+                out_channels=d_hidden // 2,
                 kernel_size=1,
                 stride=1
             ),

@@ -20,7 +20,8 @@ class VanillaVss(nn.Module):
     """
     def __init__(
         self,
-        d_model,
+        d_model: int,
+        d_label: int,
         d_state=16,
         d_conv=3,
         expand=2,
@@ -40,7 +41,8 @@ class VanillaVss(nn.Module):
         """Initializes an instance of SsConvSsm
 
         Args:
-            d_model: The number of input channels.
+            d_model: The number of image input channels.
+            d_label: the number of channels in the labels.
             d_state: The size of each instance of the internal state. Defaults
                 to 16.
             d_conv: The kernel size for the convolution kernel. This must be an
@@ -66,7 +68,8 @@ class VanillaVss(nn.Module):
         """
         factory_kwargs = {"device": device, "dtype": dtype}
         super().__init__()
-        self.d_model = d_model
+        self.d_model = d_model + d_label
+        self.d_label = d_label
         self.d_state = d_state
         self.d_conv = d_conv
         self.expand = expand
@@ -108,7 +111,7 @@ class VanillaVss(nn.Module):
         self.Ds = self.D_init(self.d_inner, copies=4, merge=True) # (K=4, D, N)
 
         self.out_norm = nn.LayerNorm(self.d_inner)
-        self.out_proj = nn.Linear(self.d_inner, self.d_model, bias=bias, **factory_kwargs)
+        self.out_proj = nn.Linear(self.d_inner, d_model, bias=bias, **factory_kwargs)
         self.dropout = nn.Dropout(dropout) if dropout > 0. else None
 
     @staticmethod
