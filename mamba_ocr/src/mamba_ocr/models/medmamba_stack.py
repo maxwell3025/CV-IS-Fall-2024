@@ -7,7 +7,7 @@ import torch
 from torch import nn
 from typing import Any
 
-class MambaCnnStack(ocr_model.OcrModel):
+class MedmambaStack(ocr_model.OcrModel):
     """Rough copy of MedMamba with context injection.
     """
     def __init__(
