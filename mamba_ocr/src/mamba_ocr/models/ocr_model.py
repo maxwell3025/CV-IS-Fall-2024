@@ -4,7 +4,11 @@ from torch import nn
 
 class OcrModel(nn.Module):
     @abstractmethod
-    def forward(self, features: list[torch.Tensor], labels: list[torch.Tensor]) -> torch.Tensor:
+    def forward(
+        self,
+        features: list[torch.Tensor],
+        labels: list[torch.Tensor],
+    ) -> list[torch.Tensor]:
         """Evaluates the model on an instance of an OCR task
 
         Args:
