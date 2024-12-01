@@ -2,20 +2,20 @@ from . import sequence_stack
 import torch
 from torch import nn
 
-class CnnSequenceStackConfig(sequence_stack.SequenceStackConfig):
+class SequenceStackCnnConfig(sequence_stack.SequenceStackConfig):
     def __init__(self, config: dict[str, any]) -> None:
-        super(CnnSequenceStackConfig, self).__init__(config)
+        super(SequenceStackCnnConfig, self).__init__(config)
         self.conv_n_layer = int(config["conv_n_layer"])
         self.conv_d_input = int(config["conv_d_input"])
         self.conv_d_intermediate = int(config["conv_d_intermediate"])
         self.conv_d_output = int(config["conv_d_input"])
         
-class CnnSequenceStack(sequence_stack.SequenceStack):
+class SequenceStackCnn(sequence_stack.SequenceStack):
     def __init__(
         self,
-        config: CnnSequenceStackConfig,
+        config: SequenceStackCnnConfig,
     ) -> None:
-        super(CnnSequenceStack, self).__init__(config)
+        super(SequenceStackCnn, self).__init__(config)
         self.cnn_layers = nn.ModuleList
     
     def forward(self, x: torch.Tensor, num_last_tokens=None):
