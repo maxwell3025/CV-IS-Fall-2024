@@ -2,7 +2,6 @@ from . import simple_lstm
 from . import simple_mamba
 from . import ocr_model
 import logging
-import mamba_ssm
 import torch
 from torch import nn
 from typing import Any
@@ -34,34 +33,52 @@ class SequenceStack(ocr_model.OcrModel):
     """
     def __init__(
         self,
-        **kwargs
+        d_feature: int,
+        d_label: int,
+        n_layer: int,
+        d_intermediate: int,
+        skip_connection: bool,
+        lstm_layer_idx: list[int],
+        lstm_d_hidden: int,
+        mamba_d_model: int,
+        mamba_d_state: int,
+        mamba_d_conv: int,
     ) -> None:
-        super(SequenceStack, self).__init__()
+        self.d_feature = d_feature
+        self.d_label = d_label
+        self.n_layer = n_layer
+        self.d_intermediate = d_intermediate
+        self.skip_connection = skip_connection
+        self.lstm_layer_idx = lstm_layer_idx
+        self.lstm_d_hidden = lstm_d_hidden
+        self.mamba_d_model = mamba_d_model
+        self.mamba_d_state = mamba_d_state
+        self.mamba_d_conv = mamba_d_conv
 
-        self.config = SequenceStackConfig(**kwargs)
         layers = []
-        for i in range(self.config.n_layer):
-            if i in self.config.lstm_layer_idx:
+        for i in range(self.n_layer):
+            if i in self.lstm_layer_idx:
                 layers.append(
                     simple_lstm.SimpleLSTM(
-                        input_dim=self.config.d_intermediate,
-                        hidden_dim=self.config.lstm_d_hidden,
-                        output_dim=self.config.d_intermediate,
+                        input_dim=self.d_intermediate,
+                        hidden_dim=self.lstm_d_hidden,
+                        output_dim=self.d_intermediate,
                     )
                 )
             else:
                 layers.append(
                     simple_mamba.SimpleMAMBA(
-                        d_input=self.config.d_intermediate,
-                        d_output=self.config.d_intermediate,
-                        d_model=self.config.mamba_d_model,
-                        d_conv=self.config.mamba_d_conv,
-                        d_state=self.config.mamba_d_state,
+                        d_input=self.d_intermediate,
+                        d_output=self.d_intermediate,
+                        d_model=self.mamba_d_model,
+                        d_conv=self.mamba_d_conv,
+                        d_state=self.mamba_d_state,
                     )
                 )
-        self.fc1 = nn.Linear(self.config.d_input, self.config.d_intermediate)
+
+        self.fc1 = nn.Linear(self.d_feature + self.d_label, self.d_intermediate)
         self.layers = nn.ModuleList(layers)
-        self.fc2 = nn.Linear(self.config.d_intermediate, self.config.d_output)
+        self.fc2 = nn.Linear(self.d_intermediate, self.d_label)
     
     def forward(
         self,
@@ -70,6 +87,7 @@ class SequenceStack(ocr_model.OcrModel):
     ):
         # The input must be a rank 3 tensor
         def sequencify(image: torch.Tensor) -> torch.Tensor:
+            """Converts a [C, H, W] image into a [L, D] sequence"""
             assert len(image.shape) == 3
             return image.transpose(1, 2).flatten(1, 2).transpose(0, 1)
         
@@ -78,26 +96,24 @@ class SequenceStack(ocr_model.OcrModel):
         x = torch.unsqueeze(x, 0)
         batch_size = x.shape[0]
         length = x.shape[1]
-        # logger.info(f"Actual dim count: {x.shape[2]}")
-        # logger.info(f"Expected dim count: {self.config.d_input}")
-        assert x.shape[2] == self.config.d_input
+        assert x.shape[2] == self.d_feature
 
         x = self.fc1(x)
-        assert x.shape == (batch_size, length, self.config.d_intermediate)
+        assert x.shape == (batch_size, length, self.d_intermediate)
 
         for layer in self.layers:
             x_new = layer(x)
             assert x_new.shape == (batch_size, length,
-                                   self.config.d_intermediate)
+                                   self.d_intermediate)
 
             x_new = nn.functional.layer_norm(x_new, x.shape)
-            if self.config.skip_connection:
+            if self.skip_connection:
                 x = x + x_new
             else:
                 x = x_new
 
         x = self.fc2(x)
-        assert x.shape == (batch_size, length, self.config.d_output)
+        assert x.shape == (batch_size, length, self.d_label)
 
         index = -1
         output = []

@@ -35,8 +35,8 @@ if __name__ == '__main__':
 
         model_type = models.models[conf["model_type"]]
         model: models.ocr_model.OcrModel = model_type(
-            d_input=dataset.d_feature,
-            d_output=dataset.d_alphabet,
+            d_feature=dataset.d_feature,
+            d_label=dataset.d_alphabet,
             **conf["model_config"]
         )
         model = model.to(device)
