@@ -1,5 +1,6 @@
 from . import vanilla_vss
 from functools import partial
+import random
 from timm.models.layers import DropPath
 from torch import Tensor
 import torch
@@ -27,15 +28,33 @@ def channel_shuffle(x: Tensor, groups: int) -> Tensor:
     return x
 
 class SsConvSsm(nn.Module):
+    """An implementation of the SS-Conv-SSM layer from MedMamba with context.
+
+    A detailed diagram of the architecture can be found at
+    [MedMamba: Vision Mamba for Medical Image Classification](https://arxiv.org/html/2403.03849v5#S3.F1).
+    """
     def __init__(
         self,
-        hidden_dim: int = 0,
+        hidden_dim: int,
         drop_path: float = 0,
         norm_layer: Callable[..., torch.nn.Module] = partial(nn.LayerNorm, eps=1e-6),
         attn_drop_rate: float = 0,
         d_state: int = 16,
         **kwargs,
     ):
+        """Initialize an instance of SsConvSsm
+
+        Args:
+            hidden_dim: Equal to both the input and output dimension
+            drop_path: Probability that the Mamba layer is ignored. Defaults to
+                0.
+            norm_layer: A constructor for the normalization layer. Defaults to
+                `partial(nn.LayerNorm, eps=1e-6)`.
+            attn_drop_rate: The dropout probability for the Mamba layer.
+                Defaults to 0.
+            d_state: The internal state size for the Mamba Layer. Defaults to
+                16.
+        """
         super().__init__()
         self.ln_1 = norm_layer(hidden_dim//2)
         self.self_attention = vanilla_vss.VanillaVss(
@@ -44,7 +63,7 @@ class SsConvSsm(nn.Module):
             d_state=d_state,
             **kwargs,
         )
-        self.drop_path = DropPath(drop_path)
+        self.drop_path = drop_path
 
         self.conv33conv33conv11 = nn.Sequential(
             nn.BatchNorm2d(hidden_dim // 2),
@@ -86,7 +105,8 @@ class SsConvSsm(nn.Module):
 
         input_right = [self.ln_1(input_right_) for input_right_ in input_right]
         input_right = self.self_attention(input_right, labels)
-        input_right = [self.drop_path(input_right_) for input_right_ in input_right]
+        if random.random() < self.drop_path:
+            input_right = [input_right_ * 0 for input_right_ in input_right]
 
         input_left = [input_left_.permute(0,3,1,2).contiguous() for input_left_ in input_left]
         input_left = [self.conv33conv33conv11(input_left_) for input_left_ in input_left]
