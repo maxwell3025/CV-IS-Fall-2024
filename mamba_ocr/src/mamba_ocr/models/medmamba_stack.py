@@ -14,6 +14,7 @@ class MedmambaStack(ocr_model.OcrModel):
         self,
         d_feature: int,
         d_label: int,
+        d_input_stack: int,
         stack: list[str],
         stack_options: list[dict[str, Any]],
         final_mamba_options: dict[str, Any],
@@ -23,6 +24,7 @@ class MedmambaStack(ocr_model.OcrModel):
         Args:
             d_feature: The number of input channels.
             d_label: The number of output channels.
+            d_input_stack: The number of input channels for the stack.
             stack: A list of strings equal to "ss_conv_ssm" or patch_merging_2d"
                 defining the layer architecture.
             stack_options: A list of dictionaries that will be passed to the
@@ -31,14 +33,10 @@ class MedmambaStack(ocr_model.OcrModel):
         self.d_feature = d_feature
         self.d_label = d_label
 
-        stack_d_input = (stack_options[0]["d_hidden"]
-                         if stack[0] == "ss_conv_ssm"
-                         else stack_options[0]["d_input"])
-
-        self.input_projection = nn.Linear(self.d_feature, stack_d_input)
+        self.input_projection = nn.Linear(self.d_feature, d_input_stack)
 
         self.layers = nn.ModuleList()
-        channel_num = stack_d_input
+        channel_num = d_input_stack
         for layer_index, layer_type in enumerate(stack):
             if layer_type == "ss_conv_ssm":
                 self.layers.append(ss_conv_ssm.SsConvSsm(
