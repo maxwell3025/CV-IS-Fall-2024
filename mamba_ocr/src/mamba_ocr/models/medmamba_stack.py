@@ -21,8 +21,8 @@ class MedmambaStack(ocr_model.OcrModel):
         """Initialize an instance of MambaCnnStack
 
         Args:
-            d_input: The number of input channels.
-            d_output: The number of output channels.
+            d_feature: The number of input channels.
+            d_label: The number of output channels.
             stack: A list of strings equal to "ss_conv_ssm" or patch_merging_2d"
                 defining the layer architecture.
             stack_options: A list of dictionaries that will be passed to the
