@@ -1,6 +1,7 @@
 \section{Exploratory testing with Mamba}
 The inductive biases and thoeretical capabilities of Mamba are an active area of
-research. In this section we 
+research. In this section we run a multitude of mini-experiments on the Mamba
+architecture in order to understand it's capabilities better.
 This section(and the background on SSMs and Mamba) constitute Maxwell's
 independent portion. In this section, we attempt to recreate some
 
@@ -63,15 +64,21 @@ We also
 
 % Explain that Mamba is approximating (a|bb)+
 
-\subsubsection{Formation of "Bad Habits" with Mamba}
+\subsection{Formation of "Bad Habits" with Mamba}
 % Mamba interferes with LSTMs
-These strong inductive biases 
+Given Mamba's limited ability to recognize regular languages, it would be useful
+to place it alongside more powerful models such as LSTMs, which can trivially
+model general regular languages given large enough parameters.
+
+Unfortunately, our testing found
 % Mention that MedMamba places layers in parallel and does dropout
+Something that is seen in other 
 
 % Explain A/B test with Drop path
 
 This 
 
 \subsection{Weak Generalization on Counter CFGs}
+Another interesting finding from the literature is that 
 % explain that hyperparameters in original paper were unreasonable and risking
 % overfitting
