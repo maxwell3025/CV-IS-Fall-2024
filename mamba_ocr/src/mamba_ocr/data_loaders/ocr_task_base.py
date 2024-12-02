@@ -1,6 +1,7 @@
 from . import ocr_task
 import logging
 import numpy
+import random
 import torch
 from abc import abstractmethod
 
@@ -61,6 +62,27 @@ class OcrTaskBase(ocr_task.OcrTask):
         while context_id <= len(self.contexts) - batch_size:
             yield self.contexts[context_id:context_id + batch_size]
             context_id += batch_size
+    
+    def batches_shuffled(
+        self,
+        batch_size: int
+    ):
+        context_id = 0
+        while context_id <= len(self.contexts) - batch_size:
+
+            batch = self.contexts[context_id:context_id + batch_size]
+            context_id += batch_size
+            new_batch = []
+
+            for features, labels in batch:
+                new_features, new_labels = [], []
+                for instance_index in range(len(features)):
+                    new_context = random.randrange(len(self.contexts))
+                    new_instance = random.randrange(len(self.contexts[new_context][0]))
+                    new_features.append(self.contexts[new_context][0][new_instance])
+                    new_labels.append(self.contexts[new_context][1][new_instance])
+                new_batch.append((new_features, new_labels))
+            yield new_batch
 
     def batches_no_context(self, batch_size: int):
         context_id, instance_id = 0, 0
