@@ -1,0 +1,75 @@
+base:
+  dataset_type: "synthetic_text"
+  dataset_config: 
+    n_contexts: 1000
+    context_size: 10
+    positional_encoding_vectors: 
+      - [1, 0]
+      - [0, 1]
+      - [2, 0]
+      - [0, 2]
+      - [4, 0]
+      - [0, 4]
+      - [8, 0]
+      - [0, 8]
+      - [16, 0]
+      - [0, 16]
+      - [32, 0]
+      - [0, 32]
+      - [64, 0]
+      - [0, 64]
+    default_height: 16
+    encode_relative_position_norm: true
+    encode_relative_position_px: true
+
+  model_type: "medmamba_stack"
+  model_config:
+    d_input_stack: 64
+    stack:
+      - "ss_conv_ssm"
+      - "ss_conv_ssm"
+      - "patch_merging_2d"
+      - "ss_conv_ssm"
+      - "ss_conv_ssm"
+      - "patch_merging_2d"
+      - "ss_conv_ssm"
+      - "ss_conv_ssm"
+    stack_options:
+      - drop_path: 0.5
+        attn_drop_rate: 0
+        d_state: 16
+      - drop_path: 0.5
+        attn_drop_rate: 0
+        d_state: 16
+      - {}
+      - drop_path: 0.5
+        attn_drop_rate: 0
+        d_state: 16
+      - drop_path: 0.5
+        attn_drop_rate: 0
+        d_state: 16
+      - {}
+      - drop_path: 0.5
+        attn_drop_rate: 0
+        d_state: 16
+      - drop_path: 0.5
+        attn_drop_rate: 0
+        d_state: 16
+    final_mamba_options:
+        d_model: 256
+        d_state: 16
+        d_conv: 4
+
+  optimizer_type: "adam"
+  optimizer_config:
+    lr: 0.0001
+
+  train_config:
+    epochs: 5
+    batch_size: 16
+
+  val_config:
+    batch_size: 16
+    
+cases: [{}]
+
