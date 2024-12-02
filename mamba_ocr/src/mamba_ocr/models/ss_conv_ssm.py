@@ -1,5 +1,6 @@
 from . import vanilla_vss
 from functools import partial
+import logging
 import random
 from timm.models.layers import DropPath
 from torch import Tensor
@@ -11,19 +12,22 @@ try:
 except:
     pass
 
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
+logger = logging.getLogger()
+
 def channel_shuffle(x: Tensor, groups: int) -> Tensor:
 
-    batch_size, height, width, num_channels = x.size()
+    num_channels, height, width, = x.size()
     channels_per_group = num_channels // groups
 
     # reshape
     # [batch_size, num_channels, height, width] -> [batch_size, groups, channels_per_group, height, width]
-    x = x.view(batch_size, height, width, groups, channels_per_group)
+    x = x.view(groups, channels_per_group, height, width)
 
-    x = torch.transpose(x, 3, 4).contiguous()
+    x = x.transpose(0, 1).contiguous()
 
     # flatten
-    x = x.view(batch_size, height, width, -1)
+    x = x.view(-1, height, width)
 
     return x
 
@@ -60,7 +64,7 @@ class SsConvSsm(nn.Module):
         super().__init__()
         self.ln_1 = norm_layer(d_hidden//2)
         self.self_attention = vanilla_vss.VanillaVss(
-            d_model=d_hidden//2,
+            d_feature=d_hidden//2,
             d_label=d_label,
             dropout=attn_drop_rate,
             d_state=d_state,
@@ -102,19 +106,21 @@ class SsConvSsm(nn.Module):
         features: list[torch.Tensor],
         labels: list[torch.Tensor],
     ):
-        input_left: list[torch.Tensor]
-        input_right: list[torch.Tensor]
-        input_left, input_right = [list(chunk) for chunk in zip(feature.chunk(2,dim=0) for feature in features)] # type: ignore
+        input_left: list[torch.Tensor] = []
+        input_right: list[torch.Tensor] = []
+        for left, right in (feature.chunk(2,dim=0) for feature in features):
+            input_left.append(left)
+            input_right.append(right)
 
+        input_right = [input_right_.permute(1, 2, 0) for input_right_ in input_right]
         input_right = [self.ln_1(input_right_) for input_right_ in input_right]
+        input_right = [input_right_.permute(2, 0, 1) for input_right_ in input_right]
         input_right = self.self_attention(input_right, labels)
-        if random.random() < self.drop_path:
+        if random.random() < self.drop_path and not self.training:
             input_right = [input_right_ * 0 for input_right_ in input_right]
 
-        input_left = [input_left_.permute(0,3,1,2).contiguous() for input_left_ in input_left]
-        input_left = [self.conv33conv33conv11(input_left_) for input_left_ in input_left]
-        input_left = [input_left_.permute(0,2,3,1).contiguous() for input_left_ in input_left]
+        input_left = [self.conv33conv33conv11(input_left_.unsqueeze(0)).squeeze(0) for input_left_ in input_left]
 
-        output = [torch.cat((input_left_,x_),dim=-1) for input_left_, x_ in zip(input_left, input_right)]
+        output = [torch.cat((input_left_,input_right_),dim=0) for input_left_, input_right_ in zip(input_left, input_right)]
         output = [channel_shuffle(output_,groups=2) for output_ in output]
         return [feature + output_ for feature, output_ in zip(features, output)]

@@ -29,7 +29,12 @@ def image_to_sequence_ss2d(image: torch.Tensor):
     d = c.flip(1)
     assert d.shape == (C, H*W)
 
-    return a, b, c, d
+    return (
+        a.transpose(0, 1),
+        b.transpose(0, 1),
+        c.transpose(0, 1),
+        d.transpose(0, 1),
+    )
 
 def sequence_to_image_ss2d(
     sequences: tuple[
@@ -58,8 +63,8 @@ def sequence_to_image_ss2d(
     return (
         a.unflatten(0, (H, W)).permute(2, 0, 1),
         b.flip(dims=(0,)).unflatten(0, (H, W)).permute(2, 0, 1),
-        c.unflatten(0, (W, H)).transpose(1, 2).permute(2, 0, 1),
-        d.flip(dims=(0,)).unflatten(0, (W, H)).transpose(1, 2).permute(2, 0, 1),
+        c.unflatten(0, (W, H)).transpose(0, 1).permute(2, 0, 1),
+        d.flip(dims=(0,)).unflatten(0, (W, H)).transpose(0, 1).permute(2, 0, 1),
     )
 
 def inject_sequence_labels(
@@ -127,7 +132,7 @@ def inject_sequence_labels(
     for i in range(len(features)):
         feature = features[i]
         label = labels[i]
-        assert feature.shape[1] == d_feature
+        assert feature.shape[1] == d_feature, f"Expected {d_feature}, got {feature.shape}"
         assert label.shape[1] == d_label
 
         feature_padding = torch.zeros((feature.shape[0], d_label), device=feature.device)

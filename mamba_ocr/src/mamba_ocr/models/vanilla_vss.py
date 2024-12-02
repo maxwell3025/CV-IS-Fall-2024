@@ -1,5 +1,6 @@
 from . import util
 from einops import rearrange, repeat
+import logging
 import math
 import torch
 from torch import nn
@@ -7,6 +8,9 @@ try:
     from mamba_ssm.ops.selective_scan_interface import selective_scan_fn, selective_scan_ref
 except:
     pass
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
+logger = logging.getLogger()
 
 class VanillaVss(nn.Module):
     """Modified from MedMamba
@@ -20,7 +24,7 @@ class VanillaVss(nn.Module):
     """
     def __init__(
         self,
-        d_model: int,
+        d_feature: int,
         d_label: int,
         d_state=16,
         d_conv=3,
@@ -68,15 +72,15 @@ class VanillaVss(nn.Module):
         """
         factory_kwargs = {"device": device, "dtype": dtype}
         super().__init__()
-        self.d_model = d_model + d_label
+        self.d_feature = d_feature
         self.d_label = d_label
         self.d_state = d_state
         self.d_conv = d_conv
         self.expand = expand
-        self.d_inner = int(self.expand * self.d_model)
-        self.dt_rank: int = math.ceil(self.d_model / 16) if dt_rank == "auto" else dt_rank # type: ignore
+        self.d_inner = int(self.expand * self.d_feature)
+        self.dt_rank: int = math.ceil(self.d_feature / 16) if dt_rank == "auto" else dt_rank # type: ignore
 
-        self.in_proj = nn.Linear(self.d_model, self.d_inner * 2, bias=bias, **factory_kwargs)
+        self.in_proj = nn.Linear(self.d_feature, self.d_inner * 2, bias=bias, **factory_kwargs)
         self.conv2d = nn.Conv2d(
             in_channels=self.d_inner,
             out_channels=self.d_inner,
@@ -89,29 +93,30 @@ class VanillaVss(nn.Module):
         self.act = nn.SiLU()
 
         self.x_proj = (
-            nn.Linear(self.d_inner, (self.dt_rank + self.d_state * 2), bias=False, **factory_kwargs), 
-            nn.Linear(self.d_inner, (self.dt_rank + self.d_state * 2), bias=False, **factory_kwargs), 
-            nn.Linear(self.d_inner, (self.dt_rank + self.d_state * 2), bias=False, **factory_kwargs), 
-            nn.Linear(self.d_inner, (self.dt_rank + self.d_state * 2), bias=False, **factory_kwargs), 
+            nn.Linear(self.d_inner + self.d_label, (self.dt_rank + self.d_state * 2), bias=False, **factory_kwargs), 
+            nn.Linear(self.d_inner + self.d_label, (self.dt_rank + self.d_state * 2), bias=False, **factory_kwargs), 
+            nn.Linear(self.d_inner + self.d_label, (self.dt_rank + self.d_state * 2), bias=False, **factory_kwargs), 
+            nn.Linear(self.d_inner + self.d_label, (self.dt_rank + self.d_state * 2), bias=False, **factory_kwargs), 
         )
         self.x_proj_weight = nn.Parameter(torch.stack([t.weight for t in self.x_proj], dim=0)) # (K=4, N, inner)
         del self.x_proj
 
         self.dt_projs = (
-            self.dt_init(self.dt_rank, self.d_inner, dt_scale, dt_init, dt_min, dt_max, dt_init_floor, **factory_kwargs),
-            self.dt_init(self.dt_rank, self.d_inner, dt_scale, dt_init, dt_min, dt_max, dt_init_floor, **factory_kwargs),
-            self.dt_init(self.dt_rank, self.d_inner, dt_scale, dt_init, dt_min, dt_max, dt_init_floor, **factory_kwargs),
-            self.dt_init(self.dt_rank, self.d_inner, dt_scale, dt_init, dt_min, dt_max, dt_init_floor, **factory_kwargs),
+            self.dt_init(self.dt_rank, self.d_inner + self.d_label, dt_scale, dt_init, dt_min, dt_max, dt_init_floor, **factory_kwargs),
+            self.dt_init(self.dt_rank, self.d_inner + self.d_label, dt_scale, dt_init, dt_min, dt_max, dt_init_floor, **factory_kwargs),
+            self.dt_init(self.dt_rank, self.d_inner + self.d_label, dt_scale, dt_init, dt_min, dt_max, dt_init_floor, **factory_kwargs),
+            self.dt_init(self.dt_rank, self.d_inner + self.d_label, dt_scale, dt_init, dt_min, dt_max, dt_init_floor, **factory_kwargs),
         )
         self.dt_projs_weight = nn.Parameter(torch.stack([t.weight for t in self.dt_projs], dim=0)) # (K=4, inner, rank)
         self.dt_projs_bias = nn.Parameter(torch.stack([t.bias for t in self.dt_projs], dim=0)) # (K=4, inner)
         del self.dt_projs
         
-        self.A_logs = self.A_log_init(self.d_state, self.d_inner, copies=4, merge=True) # (K=4, D, N)
-        self.Ds = self.D_init(self.d_inner, copies=4, merge=True) # (K=4, D, N)
+        self.A_logs = self.A_log_init(self.d_state, self.d_inner + self.d_label, copies=4, merge=True) # (K=4, D, N)
+        self.Ds = self.D_init(self.d_inner + self.d_label, copies=4, merge=True) # (K=4, D, N)
 
+        self.pre_scale_proj = nn.Linear(self.d_inner + self.d_label, self.d_inner, bias=False, **factory_kwargs)
         self.out_norm = nn.LayerNorm(self.d_inner)
-        self.out_proj = nn.Linear(self.d_inner, d_model, bias=bias, **factory_kwargs)
+        self.out_proj = nn.Linear(self.d_inner, d_feature, bias=bias, **factory_kwargs)
         self.dropout = nn.Dropout(dropout) if dropout > 0. else None
 
     @staticmethod
@@ -194,11 +199,13 @@ class VanillaVss(nn.Module):
         s4 = util.inject_sequence_labels(s4, labels)
         K = 4
 
-        xs = torch.stack([s1, s2, s3, s4])
-        xs = xs.flip(2, 3)
-        xs = xs.unsqueeze(0)
         B = 1
+        xs = torch.stack([s1, s2, s3, s4])
+        xs = xs.unsqueeze(0)
+        xs = xs.transpose(2, 3)
+        D = xs.shape[2]
         L = xs.shape[3]
+
 
         x_dbl = torch.einsum("b k d l, k c d -> b k c l", xs.view(B, K, -1, L), self.x_proj_weight)
         # x_dbl = x_dbl + self.x_proj_bias.view(1, K, -1, 1)
@@ -206,7 +213,7 @@ class VanillaVss(nn.Module):
         dts = torch.einsum("b k r l, k d r -> b k d l", dts.view(B, K, -1, L), self.dt_projs_weight)
         # dts = dts + self.dt_projs_bias.view(1, K, -1, 1)
 
-        xs = xs.float().view(B, -1, L) # (b, k * d, l)
+        xs = xs.contiguous().float().view(B, -1, L) # (b, k * d, l)
         dts = dts.contiguous().float().view(B, -1, L) # (b, k * d, l)
         Bs = Bs.float().view(B, K, -1, L) # (b, k, d_state, l)
         Cs = Cs.float().view(B, K, -1, L) # (b, k, d_state, l)
@@ -221,13 +228,14 @@ class VanillaVss(nn.Module):
             delta_softplus=True,
             return_last_state=False,
         ).view(B, K, -1, L) # type: ignore
+
         assert out_y.dtype == torch.float
 
         a, b, c, d = out_y[0, 0, :, :], out_y[0, 1, :, :], out_y[0, 2, :, :], out_y[0, 3, :, :]
-        a = a.transpose()
-        b = b.transpose()
-        c = c.transpose()
-        d = d.transpose()
+        a = a.transpose(0, 1)
+        b = b.transpose(0, 1)
+        c = c.transpose(0, 1)
+        d = d.transpose(0, 1)
         a_new, b_new, c_new, d_new = [], [], [], []
         index = 0
         for i in range(len(features)):
@@ -255,17 +263,49 @@ class VanillaVss(nn.Module):
         labels: list[torch.Tensor],
         **kwargs,
     ):
-        xz = [self.in_proj(x) for x in features]
-        x, z = (list(seq) for seq in zip(xz_.chunk(2, dim=0) for xz_ in xz)) # (c, h, w)
+        assert len(features[0].shape) == 3, ("Expected features to be a list "
+        "of [C, H, W] tensors. Received a tensor with shape "
+        f"{features[0].shape}.")
 
-        x = [x_.permute(0, 3, 1, 2).contiguous() for x_ in x]
+        C, H_0, W_0 = features[0].shape
+        assert C == self.d_feature, (f"Expected images with {self.d_feature} "
+        f"channels. Received a tensor with shape {features[0].shape}")
+
+        assert len(labels[0].shape) == 2, ("Expected labels to be a list of "
+        f"[L, D] tensors. Received a tensor with shape {labels[0].shape}")
+
+        L_0, D = labels[0].shape
+        assert D == self.d_label, (f"Expected labels to have {self.d_label} "
+        f"channels. Received a tensor with shape {labels[0].shape}")
+
+        features = [feature.permute(1, 2, 0) for feature in features]
+        xz = [self.in_proj(feature) for feature in features]
+        xz = [xz_.permute(2, 0, 1) for xz_ in xz]
+
+        x, z = [], []
+        for x_, z_ in (xz_.chunk(2, dim=0) for xz_ in xz):
+            x.append(x_)
+            z.append(z_)
+
         x = [self.act(self.conv2d(x_)) for x_ in x] # (c, h, w)
         y1, y2, y3, y4 = self.forward_core(x, labels)
         assert y1[0].dtype == torch.float32
         y = [y1_ + y2_ + y3_ + y4_ for y1_, y2_, y3_, y4_ in zip(y1, y2, y3, y4)]
+
+        y = [y_.permute(1, 2, 0) for y_ in y]
+        y = [self.pre_scale_proj(y_) for y_ in y]
+        y = [y_.permute(2, 0, 1) for y_ in y]
+
+        y = [y_.permute(1, 2, 0) for y_ in y]
         y = [self.out_norm(y_) for y_ in y]
+        y = [y_.permute(2, 0, 1) for y_ in y]
+
         y = [y_ * nn.functional.silu(z_) for y_, z_ in zip(y, z)]
+
+        y = [y_.permute(1, 2, 0) for y_ in y]
         out = [self.out_proj(y_) for y_ in y]
+        out = [out_.permute(2, 0, 1) for out_ in out]
+
         if self.dropout is not None:
             out = [self.dropout(out_) for out_ in out]
         return out

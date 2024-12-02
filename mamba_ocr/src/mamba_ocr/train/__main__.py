@@ -23,7 +23,7 @@ if __name__ == '__main__':
 
     log_object = []
     # TODO grab this from command line args
-    for conf in config.generate_cases("config/basic_pe.yaml"):
+    for conf in config.generate_cases("config/basic_medmamba.yaml"):
         dataset_type = data_loaders.datasets[conf["dataset_type"]]
         dataset: data_loaders.ocr_task_base.OcrTaskBase = dataset_type(
             **conf["dataset_config"]
@@ -60,7 +60,7 @@ if __name__ == '__main__':
                 for features, labels in batch:
                     features = [feature.to(device) for feature in features]
                     labels = [label.to(device) for label in labels]
-                    result = torch.cat(model(features, labels)[1:])
+                    result = torch.cat(model(features, labels))
                     label = torch.cat(labels)
                     loss: torch.Tensor = criterion(result, torch.argmax(label, dim=1))
                     train_loss += loss.item()
@@ -84,7 +84,7 @@ if __name__ == '__main__':
                 for features, labels in batch:
                     features = [feature.to(device) for feature in features]
                     labels = [label.to(device) for label in labels]
-                    result: torch.Tensor = torch.cat(model(features, labels)[1:])
+                    result: torch.Tensor = torch.cat(model(features, labels))
                     total_tokens += result.shape[0]
                     total_loss += sum_criterion(result, torch.argmax(torch.cat(labels), dim=1)).item()
                     result_argmax = torch.argmax(result, dim=1)

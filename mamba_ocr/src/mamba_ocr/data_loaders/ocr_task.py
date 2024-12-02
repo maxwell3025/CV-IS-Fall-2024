@@ -15,7 +15,7 @@ class OcrTask(ABC):
 
     @property
     def d_feature(self) -> int:
-        return self.d_alphabet + self.d_color + self.d_positional_encoding
+        return self.d_color + self.d_positional_encoding
 
     @property
     @abstractmethod

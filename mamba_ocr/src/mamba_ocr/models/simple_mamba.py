@@ -51,9 +51,14 @@ class SimpleMAMBA(nn.Module):
         self.fc2 = nn.Linear(self.d_model, self.d_output)
 
     def forward(self, x: torch.Tensor):
+        assert len(x.shape) == 3, ("Expected a [B, L, D] tensor. Received a "
+        f"Tensor with shape {x.shape}.")
         batch_size = x.shape[0]
         length = x.shape[1]
-        assert x.shape == (batch_size, length, self.d_input)
+
+        assert x.shape == (batch_size, length, self.d_input), ("Expected "
+        f"tensor with shape {(batch_size, length, self.d_input)}, recieved "
+        f"tensor with shape {x.shape}.")
 
         x = self.fc1(x)
         assert x.shape == (batch_size, length, self.d_model)
