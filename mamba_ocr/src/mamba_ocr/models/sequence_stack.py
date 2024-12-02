@@ -97,7 +97,7 @@ class SequenceStack(ocr_model.OcrModel):
         x = torch.unsqueeze(x, 0)
         batch_size = x.shape[0]
         length = x.shape[1]
-        assert x.shape[2] == self.d_feature
+        assert x.shape[2] == self.d_feature + self.d_label
 
         x = self.fc1(x)
         assert x.shape == (batch_size, length, self.d_intermediate)
