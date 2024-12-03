@@ -12,6 +12,7 @@ import time
 import torch
 from torch import nn
 from torch import optim
+from typing import Any
 from unique_names_generator import get_random_name
 
 # We set up a global logger for debugging purposes.
@@ -24,7 +25,7 @@ def validate(
     dataset_config: DatasetConfig,
     val_lengths: list[int],
     device: torch.device,
-    additional_params: dict[str, any],
+    additional_params: dict[str, Any],
 ):
     """Test the ability for a model to distinguish multiple context free
     languages.

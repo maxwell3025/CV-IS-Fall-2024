@@ -1,11 +1,11 @@
 from mamba_formal.models import simple_lstm
 from mamba_formal.models import simple_mamba
-import mamba_ssm
 import torch
 from torch import nn
+from typing import Any
 
 class SequenceStackConfig:
-    def __init__(self, config: dict[str, any]) -> None:
+    def __init__(self, config: dict[str, Any]) -> None:
         self.n_layer = int(config["n_layer"])
         self.d_input = int(config["d_input"])
         self.d_output = int(config["d_output"])
