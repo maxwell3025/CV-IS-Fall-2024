@@ -43,6 +43,7 @@ def sample_batch(
     batch_size: int,
     randomize: bool,
     one_hot: bool,
+    positive_rate: float | None,
     ):
     """
     Generate a dataset based on the provided configuration.
@@ -68,7 +69,8 @@ def sample_batch(
             length=length,
             batch_size=batch_size,
             randomize=randomize,
-            one_hot=one_hot
+            one_hot=one_hot,
+            positive_rate=positive_rate,
         )
         return result
     else:
@@ -77,7 +79,8 @@ def sample_batch(
             length=length,
             batch_size=batch_size,
             randomize=randomize,
-            one_hot=one_hot
+            one_hot=one_hot,
+            positive_rate=positive_rate,
         )
 
 def try_sample_batch(
@@ -86,6 +89,7 @@ def try_sample_batch(
     batch_size: int,
     randomize: bool,
     one_hot: bool,
+    positive_rate: float | None,
     ):
     if randomize: length = random.randrange(1, length + 1)
 
@@ -95,7 +99,7 @@ def try_sample_batch(
         result = sample_one(
             task=task,
             length=length,
-            distribution=None,
+            distribution=None if positive_rate is None else [positive_rate, 1 - positive_rate],
             one_hot=one_hot,
         )
         if result == None:

@@ -51,14 +51,13 @@ def validate(
     model.eval()
     with torch.no_grad():
         for validation_length in val_lengths:
-            old_positive = dataset_config.positive_rate
-            dataset_config.positive_rate = 0.5
             inputs, targets = synthetic_languages.sample_batch(
                 task=task,
                 length=validation_length,
                 batch_size=dataset_config.batch_size,
                 randomize=False,
                 one_hot=dataset_config.one_hot,
+                positive_rate=dataset_config.positive_rate,
             )
             alphabet_length = inputs.shape[2]
             assert inputs.shape == (dataset_config.batch_size, validation_length, alphabet_length)
@@ -81,7 +80,6 @@ def validate(
                 dataset_config=dataset_config.__dict__,
                 **additional_params,
             ))
-            dataset_config.positive_rate = old_positive
     model.train()
     return log_object
 
