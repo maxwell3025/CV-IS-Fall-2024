@@ -2,3 +2,4 @@
 wandb
 .logs
 output
+experiment_outputs

@@ -14,7 +14,7 @@ if len(sys.argv) != 2:
     exit(1)
 log_location = sys.argv[1]
 if not os.path.isfile(log_location):
-    log_location = f"./output/{log_location}/validation_logs.json"
+    log_location = f"./{log_location}/validation_logs.json"
 
 with open(log_location) as log_file:
     data = json.load(log_file)
@@ -74,9 +74,9 @@ for (name, run) in runs.items():
     )
 
     # pyplot.show()
-    os.makedirs(f"output/{sys.argv[1]}/charts/", exist_ok=True)
+    os.makedirs(f"{sys.argv[1]}/charts/", exist_ok=True)
     pyplot.savefig(
-        f"output/{sys.argv[1]}/charts/{get_random_name(separator="_", style="lowercase")}.png",
+        f"{sys.argv[1]}/charts/{get_random_name(separator="_", style="lowercase")}.png",
         dpi=500,
     )
     
