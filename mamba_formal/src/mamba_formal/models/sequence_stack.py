@@ -18,6 +18,7 @@ class SequenceStackConfig:
         self.mamba_d_model = int(config["mamba_d_model"])
         self.mamba_d_state = int(config["mamba_d_state"])
         self.mamba_d_conv = int(config["mamba_d_conv"])
+        self.mamba_drop_prob = 0 if "mamba_drop_path" not in config else config["mamba_drop_prob"]
 
 class SequenceStack(nn.Module):
     def __init__(
@@ -45,6 +46,7 @@ class SequenceStack(nn.Module):
                         d_model=config.mamba_d_model,
                         d_conv=config.mamba_d_conv,
                         d_state=config.mamba_d_state,
+                        drop_path=config.mamba_drop_prob,
                     )
                 )
         self.fc1 = nn.Linear(config.d_input, config.d_intermediate)

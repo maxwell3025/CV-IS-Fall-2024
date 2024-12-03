@@ -2,6 +2,8 @@ import mamba_ssm
 from mamba_ssm.modules import mamba_simple
 import torch
 from torch import nn
+from . import drop
+
 
 class SimpleMAMBA(nn.Module):
     def __init__(
@@ -11,6 +13,7 @@ class SimpleMAMBA(nn.Module):
         d_conv: int,
         d_input: int,
         d_output: int,
+        drop_path: float,
     ):
         """This is a simple wrapper for a MAMBA layer.
 
@@ -47,6 +50,7 @@ class SimpleMAMBA(nn.Module):
             d_state=self.d_state,
             d_conv=self.d_conv,
         )
+        self.drop_path = drop.DropPath(drop_prob=drop_path)
         self.fc2 = nn.Linear(self.d_model, self.d_output)
 
     def forward(self, x: torch.Tensor):
@@ -58,6 +62,9 @@ class SimpleMAMBA(nn.Module):
         assert x.shape == (batch_size, length, self.d_model)
 
         x = self.layer(x)
+        assert x.shape == (batch_size, length, self.d_model)
+
+        x = self.drop_path(x)
         assert x.shape == (batch_size, length, self.d_model)
 
         x = self.fc2(x)
@@ -74,6 +81,9 @@ class SimpleMAMBA(nn.Module):
         assert x.shape == (batch_size, length, self.d_model)
 
         x, dt = self.get_debug_info(x)
+        assert x.shape == (batch_size, length, self.d_model)
+
+        x = self.drop_path(x)
         assert x.shape == (batch_size, length, self.d_model)
 
         x = self.fc2(x)
