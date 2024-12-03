@@ -144,7 +144,7 @@ class SimpleMAMBA(nn.Module):
             return_last_state=ssm_state is not None,
         )
         if ssm_state is not None:
-            y, last_state = y
+            y, last_state = y # type: ignore
             ssm_state.copy_(last_state)
         y = mamba_simple.rearrange(y, "b d l -> b l d")
         out = self.layer.out_proj(y)
