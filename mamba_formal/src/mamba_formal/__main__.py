@@ -130,6 +130,7 @@ def train(
             batch_size=dataset_config.batch_size,
             randomize=dataset_config.randomize_training_length,
             one_hot=dataset_config.one_hot,
+            positive_rate=None,
         )
         train_length_actual = inputs.shape[1]
         alphabet_length = inputs.shape[2]
