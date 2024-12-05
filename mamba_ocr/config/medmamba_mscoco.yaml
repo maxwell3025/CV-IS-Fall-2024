@@ -1,0 +1,76 @@
+base:
+  dataset_type: "mscoco"
+  dataset_config: 
+    data_path: "./data/data/mscoco-text"
+    positional_encoding_vectors:
+      - [1, 0]
+      - [0, 1]
+      - [2, 0]
+      - [0, 2]
+      - [4, 0]
+      - [0, 4]
+      - [8, 0]
+      - [0, 8]
+      - [16, 0]
+      - [0, 16]
+      - [32, 0]
+      - [0, 32]
+      - [64, 0]
+      - [0, 64]
+    default_height: 16
+    encode_absolute_position_norm: true
+    encode_absolute_position_px: false
+    encode_relative_position_norm: true
+    encode_relative_position_px: false
+
+  model_type: "medmamba_stack"
+  model_config:
+    d_input_stack: 4
+    stack:
+      - "ss_conv_ssm"
+      - "ss_conv_ssm"
+      - "patch_merging_2d"
+      - "ss_conv_ssm"
+      - "ss_conv_ssm"
+      - "patch_merging_2d"
+      - "ss_conv_ssm"
+      - "ss_conv_ssm"
+    stack_options:
+      - drop_path: 0.5
+        attn_drop_rate: 0
+        d_state: 256
+      - drop_path: 0.5
+        attn_drop_rate: 0
+        d_state: 256
+      - {}
+      - drop_path: 0.5
+        attn_drop_rate: 0
+        d_state: 256
+      - drop_path: 0.5
+        attn_drop_rate: 0
+        d_state: 256
+      - {}
+      - drop_path: 0.5
+        attn_drop_rate: 0
+        d_state: 256
+      - drop_path: 0.5
+        attn_drop_rate: 0
+        d_state: 256
+    final_mamba_options:
+        d_model: 256
+        d_state: 16
+        d_conv: 4
+
+  optimizer_type: "adam"
+  optimizer_config:
+    lr: 0.0001
+
+  train_config:
+    epochs: 20
+    batch_size: 16
+
+  val_config:
+    batch_size: 16
+    
+cases: [{}]
+

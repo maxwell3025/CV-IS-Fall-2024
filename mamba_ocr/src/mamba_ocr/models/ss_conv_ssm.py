@@ -116,7 +116,7 @@ class SsConvSsm(nn.Module):
         input_right = [self.ln_1(input_right_) for input_right_ in input_right]
         input_right = [input_right_.permute(2, 0, 1) for input_right_ in input_right]
         input_right = self.self_attention(input_right, labels)
-        if random.random() < self.drop_path and self.training:
+        if (random.random() < self.drop_path) and self.training:
             input_right = [input_right_ * 0 for input_right_ in input_right]
 
         input_left = [self.conv33conv33conv11(input_left_.unsqueeze(0)).squeeze(0) for input_left_ in input_left]

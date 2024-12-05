@@ -4,7 +4,7 @@
 #SBATCH -p gpu  # Partition
 #SBATCH -G 1  # Number of GPUs
 #SBATCH -t 04:00:00  # Job time limit
-#SBATCH -o latest.log  # %j = job ID
+#SBATCH -o latest-5.log  # %j = job ID
 #SBATCH --constraint sm_70
 #SBATCH --mail-type=ALL
 #
@@ -20,6 +20,6 @@ module load cuda/12.6
 
 source .venv/bin/activate
 
-python -m mamba_ocr.train
+python -m mamba_ocr.train config/medmamba_mscoco.yaml
 
 deactivate

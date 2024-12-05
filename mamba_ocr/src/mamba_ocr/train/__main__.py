@@ -2,6 +2,7 @@ from .. import data_loaders
 from .. import models
 from . import config
 import logging
+import sys
 import torch
 from torch import optim
 from torch import nn
@@ -20,7 +21,7 @@ if __name__ == '__main__':
 
     log_object = []
     # TODO grab this from command line args
-    for conf in config.generate_cases("config/medmamba_synth_mnist_like.yaml"):
+    for conf in config.generate_cases(sys.argv[1]):
         dataset_type = data_loaders.datasets[conf["dataset_type"]]
         dataset: data_loaders.ocr_task_base.OcrTaskBase = dataset_type(
             **conf["dataset_config"]

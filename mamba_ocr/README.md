@@ -13,6 +13,7 @@ python3 -m pip install -e .
 ```
 
 ### Run on unity
+In order to run this project on the Unity cluster, 
 
 ## Folder Structure
 - `scripts`\
@@ -21,5 +22,7 @@ python3 -m pip install -e .
     and any scripts not prefixed with `unity_` should only be run on the local
     dev machine.
 - `src/mamba_ocr`\
+    This contains all of the source code for our project.
+- `src/mamba_ocr/`\
     This contains all of the source code for our project.
 
