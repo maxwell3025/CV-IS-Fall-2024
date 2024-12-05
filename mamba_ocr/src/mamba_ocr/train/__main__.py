@@ -20,7 +20,7 @@ if __name__ == '__main__':
 
     log_object = []
     # TODO grab this from command line args
-    for conf in config.generate_cases("config/basic_pe_synth_mamba_like.yaml"):
+    for conf in config.generate_cases("config/medmamba_synth_mnist_like.yaml"):
         dataset_type = data_loaders.datasets[conf["dataset_type"]]
         dataset: data_loaders.ocr_task_base.OcrTaskBase = dataset_type(
             **conf["dataset_config"]
@@ -67,7 +67,7 @@ if __name__ == '__main__':
                     model.zero_grad()
 
             # Evaluate the model
-            model.eval()
+            # model.eval()
             logger.info("=" * 80)
             logger.info(f"Epoch {epoch + 1}")
             logger.info("-" * 80)
@@ -124,4 +124,4 @@ if __name__ == '__main__':
             logger.info(f"Per-token shuffled-context loss: {total_loss / total_tokens}")
             logger.info(f"Per-token shuffled-context accuracy: {total_correct / total_tokens}")
             logger.info("=" * 80)
-
+            model.zero_grad()
