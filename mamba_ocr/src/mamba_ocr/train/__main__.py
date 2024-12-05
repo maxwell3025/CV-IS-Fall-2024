@@ -111,11 +111,11 @@ if __name__ == '__main__':
             total_loss = 0
             total_correct = 0
             sum_criterion = torch.nn.CrossEntropyLoss(reduction="sum")
-            for batch in dataset_val.batches(conf["val_config"]["batch_size"]):
+            for batch in dataset_val.batches_shuffled(conf["val_config"]["batch_size"]):
                 for features, labels in batch:
                     features = [feature.to(device) for feature in features]
                     labels = [label.to(device) for label in labels]
-                    result: torch.Tensor = model(features, labels)[0]
+                    result: torch.Tensor = torch.cat(model(features, labels))
                     total_tokens += result.shape[0]
                     total_loss += sum_criterion(result, torch.argmax(torch.cat(labels), dim=1)).item()
                     result_argmax = torch.argmax(result, dim=1)
