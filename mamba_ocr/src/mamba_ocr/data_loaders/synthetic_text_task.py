@@ -19,6 +19,8 @@ class SyntheticTextTask(ocr_task_base.OcrTaskBase):
         default_height: int,
         encode_relative_position_norm: bool = True,
         encode_relative_position_px: bool = True,
+        single_words: bool = False,
+        monochrome: bool = False,
     ):
         self.default_height = default_height
         self.positional_encoding_vectors = numpy.array(positional_encoding_vectors)
@@ -32,28 +34,43 @@ class SyntheticTextTask(ocr_task_base.OcrTaskBase):
         )
         words = list(words)
 
+        if single_words:
+            words = [
+                '1',
+                '2',
+                '3',
+                '4',
+                '5',
+                '6',
+                '7',
+                '8',
+                '9',
+                '0'
+            ]
         self._contexts = []
         for context_number in range(n_contexts):
-            # background_color = (
-            #     random.randint(0, 255), 
-            #     random.randint(0, 255), 
-            #     random.randint(0, 255), 
-            # )
-            # foreground_color = (
-            #     random.randint(0, 255), 
-            #     random.randint(0, 255), 
-            #     random.randint(0, 255), 
-            # )
-            background_color = (
-                random.randint(255, 255), 
-                random.randint(255, 255), 
-                random.randint(255, 255), 
-            )
-            foreground_color = (
-                random.randint(0, 0), 
-                random.randint(0, 0), 
-                random.randint(0, 0), 
-            )
+            if monochrome :
+                background_color = (
+                    random.randint(255, 255), 
+                    random.randint(255, 255), 
+                    random.randint(255, 255), 
+                )
+                foreground_color = (
+                    random.randint(0, 0), 
+                    random.randint(0, 0), 
+                    random.randint(0, 0), 
+                )
+            else:
+                background_color = (
+                    random.randint(0, 255), 
+                    random.randint(0, 255), 
+                    random.randint(0, 255), 
+                )
+                foreground_color = (
+                    random.randint(0, 255), 
+                    random.randint(0, 255), 
+                    random.randint(0, 255), 
+                )
 
             # font = ImageFont.truetype(
             #     # "Pillow/Tests/fonts/ArefRuqaa-Regular.ttf",
@@ -87,7 +104,7 @@ class SyntheticTextTask(ocr_task_base.OcrTaskBase):
                 label = map(lambda x: self.get_alphabet_index(x), label)
                 label = list(label) + [self.d_alphabet - 1]
                 label = torch.tensor(label)
-                label = torch.nn.functional.one_hot(label)
+                label = torch.nn.functional.one_hot(label, self.d_alphabet)
 
                 w, h = feature.width, feature.height
 
