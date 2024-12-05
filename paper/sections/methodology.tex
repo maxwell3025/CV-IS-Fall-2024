@@ -1,7 +1,7 @@
 \section{Methodology}
 In this section, we explain our setup for determining Mamba's ability to learn
 from context.
-In our paper, we test [TODO] different models which attempt to use Mamba for its
+In our paper, we test 2 different models which attempt to use Mamba for its
 in-context learning abilities against a variety of datasets, elaborated on
 below.
 \subsection{Data Format}
@@ -27,43 +27,42 @@ An issue with our sequence transformation is that we destroy all 2-D positional
 data.
 Thus, before the sequence transformation, we append new channels to the image,
 similar to the positional encodings mentioned in \cite{attention}.
-The encoding scheme we use is as follows:
-
-Finally, we predict text autoregressively, so we need to include existing
-predictions in the data.
-
-% This also allows the model to record in-context data, like position within
-% image, and text size.
-
-In order to have in-context prediction, we simply concatenate the different
-sequence samples between runs. This allows Mamba to "memorize" relevant data.
-In order to discern in-context learning from out-of-context learning, we will
-train the models on in-context data, and text them on more in context, and out
-of context(1 word per sample) data.
 
 \subsubsection{Text Injection}
-Each dataset that we use contains labeled images of words, which grouped
-together according to context. For instance, one context might mean a single
-photograph, and the images in that context would be the isolated words within
-that image.
-Since Mamba is a sequence-to-sequence model, we have to encode the task of
-labelling these images as a sequence-to-sequence task.
-% For most tests, we serialize images in column-major order to preserve
-% substrings
+\begin{figure}
+    \includegraphics[width=\textwidth]{figures/in_context_encoding.pdf}
+    \caption{In-Context Encoding}
+    \label{incontextencoding}
+\end{figure}
 
+In order to supply context to the models, we encode our dataset using a scheme
+that involves what we will call in-context encoding.
+Before in-context encoding, all of the images within a context need to be
+transformed into sequences.
+We will call these sequences the image matrices, where each column corresponds
+to a pixel in the image(with positional encodings and other per-pixel metadata)
+Then, we encode the labels as one-hot tokens such that each label is represented
+as a matrix of one-hot columns.
+We now apply the in-context encoding transformation on these 2 lists of tensors.
+First, we diagonally append the label tensors to the image sequence tensors such
+that they are in separate channel spaces.
+Then, we append all of the combined tensors lengthwise to get the final tensor.
+This process is shown in Figure \ref{incontextencoding}.
 
-We can do this be serializing the pixels in the image in column-first order. We
-use column-first order to preserve the ordering of the characters. This
-guarantees that substrings in each image correspond to subsequences in the
-corresponding sequence.
-% We rescale all text to a consistent height, since all samples are one line
-In orde
+With this encoding scheme, we assume that the data is being processed by an
+auto-regressive model, where each output token is evaluated based on the
+previous (correct) output tokens, and previous predictions in context.
+
+We hypothesize that Mamba's ability to do in-context learning\cite{mamba} will
+allow model architectures containing Mamba to perform well on in-context
+image prediction.
 
 \subsection{Mamba Stack}
-The first model architecture that we test is just a normal stack of Mamba
-layers. In our previous testing, we these to work for finite memorization tasks,
+The first model architecture that we test is a stack of Mamba layers. In our
+previous testing, we found these to perform well on finite memorization tasks,
 so we expect this model to do relatively well.
+
 \subsection{Mamba With CNN}
-Another model architecture we look at [cite medmamba] they run CNN layers
+Another model architecture we look at  they run CNN layers
 parallel to Mamba layers.
 \subsection{}

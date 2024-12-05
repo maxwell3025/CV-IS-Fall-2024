@@ -20,7 +20,7 @@ if __name__ == '__main__':
 
     log_object = []
     # TODO grab this from command line args
-    for conf in config.generate_cases("config/basic_medmamba.yaml"):
+    for conf in config.generate_cases("config/basic_pe_synth.yaml"):
         dataset_type = data_loaders.datasets[conf["dataset_type"]]
         dataset: data_loaders.ocr_task_base.OcrTaskBase = dataset_type(
             **conf["dataset_config"]

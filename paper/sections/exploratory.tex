@@ -24,12 +24,30 @@ memorization tasks, but fails to generalize on multiple n-gram memorization
 \cite{mambangram}.
 
 \subsection{Star-Free Approximation with Mamba}
+\begin{figure}
+    \includegraphics[width=\textwidth]{figures/sequence_stack_simple.pdf}
+    \caption{Simple Mamba Stack Architecture}
+    \label{simplestack}
+\end{figure}
+
+\begin{figure}
+    \includegraphics[width=\textwidth]{figures/a_or_bb_plus_dfa.pdf}
+    \caption{DFA for \texttt{(a|bb)+}}
+    \label{a_or_bb_plus_dfa}
+\end{figure}
+
+
 Despite their inability to perfectly predict non-star-free regular languages,
 we find that Mamba is capable of recognizing certain non-star-free regular
 languages with limited accuracy.
 
-In our first experiment, we test Mamba's ability to recognize the language
-\texttt{(a|bb)+}.
+Preliminary testing on the regular language \texttt{(a|bb)+} shows a
+surprisingly strong ability to recognize instances of the language, with lower
+accuracy on medium-length strings.
+If we construct the DFA for the language(see Figure \ref{a_or_bb_plus_dfa}), it
+is clear that recognizing
+the language requires recognizing odd-length runs of \verb|b|
+We hypothesize that Mamba is searching for specific odd-length runs of \verb|b|.
 
 \textbf{Dataset} The dataset that we train Mamba to recognize is a synthetic
 dataset.
@@ -42,41 +60,47 @@ Then, it uniformly samples from the set of all length 37 strings in
 \texttt{(a|bb)+}
 The sampling is done with an efficient dynamic programming algorithm.
 
-\textbf{Model} The model that we train is a stack of Mamba layers, each with 
-D=[TODO], N=[TODO], etc.
+\textbf{Model} The model that we train is a stack of Mamba layers with linear
+projection in-between(see Figure \ref{simplestack}).
 The inputs and outputs also have linear projections to make the channel numbers
 match the task.
+The primary hyperparameters are \verb|n_layer = 2|, \verb|mamba_d_model = 16|,
+and \verb|mamba_d_state = 16|.
+The rest of the hyperparameters can be found on
+Github\footnote{\url{https://github.com/maxwell3025/CV-IS-Fall-2024/blob/main/mamba_formal/config/experiment_a_or_bb.yaml}}.
 
-\textbf{Results} Surprisingly, despite \texttt{(a|bb)+} being a star-free
-language, multi-layer Mamba manages to perform surprisingly well.
-We hypothesize that this is due to \texttt{(a|bb)+} being easy to approximate
-as the union of several star-free languages.
-% 
-In particular, we suspect that the Mamba layers are being trained to search for
-the strings \texttt{aba}, \texttt{abbba}, \texttt{abbbbba}, \texttt{abbbbbbba}.
-This becomes obvious if we separate validation accuracy into positive cases and
-negative cases.
-
-% Explain why CFGs might be interesting
-We also 
-
-% Explain positive/negative test
-
-% Explain that Mamba is approximating (a|bb)+
+\textbf{Results} 
+We find that the model quickly attains nearly perfect performance on positive
+cases, with the trained model only making errors with negative cases.
+This strongly suggests that our hypothesis is true.
+The model is correctly identifying that positive cases lack the forbidden
+strings that the model memorized, and the model is failing to recognize some
+negative cases, since they contain odd-length forbidden strings that were not
+memorized.
 
 \subsection{Formation of "Bad Habits" with Mamba}
 % Mamba interferes with LSTMs
 Given Mamba's limited ability to recognize regular languages, it would be useful
-to place it alongside more powerful models such as LSTMs, which can trivially
-model general regular languages given large enough parameters.
+to place it alongside more formally powerful models such as LSTMs, which can
+trivially model general regular languages given large enough
+parameters\cite{lstmformal}. Unfortunately, preliminary testing found that the
+inclusion of Mamba in series with LSTMs leads to a degradation of generalization
+ability.
 
-Unfortunately, our testing found
-% Mention that MedMamba places layers in parallel and does dropout
-Something that is seen in other 
-
-% Explain A/B test with Drop path
-
-This 
+We suspect that this explains the inclusion of drop-path in many ML
+architectures.
+Drop-path is a normalization layer introduced by FractalNet\cite{fractalnet} in
+which the outputs of entire layers in an architecture are "zeroed-out".
+As stated by the authors, this trains the model to do the task without certain
+components.
+In the literature, we find that machine learning architectures like
+MedMamba\cite{medmamba}, VMamba\cite{vmamba}, and MambaND\cite{mamband} apply
+drop-path to the output of Mamba layers.
+We suspect this is done since Mamba learns certain tasks very quickly, leading to
+the derivatives produced by Mamba to "drown out" the derivatives coming from the
+other layers.
+Drop-path would allow the other layers to then learn to solve the tasks without
+being influenced by the Mamba layer.
 
 \subsection{Weak Generalization on Counter CFGs}
 Another interesting finding from the literature is that 
