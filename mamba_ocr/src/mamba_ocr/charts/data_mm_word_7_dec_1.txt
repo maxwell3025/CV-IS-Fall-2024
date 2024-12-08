@@ -1,749 +1,749 @@
 ================================================================================
 Epoch 1
 --------------------------------------------------------------------------------
-Per-token train loss: 2.285742466337979
+Per-token train loss: 2.569395210327847
 --------------------------------------------------------------------------------
-Per-token in-context loss: 2.0414367187662705
-Per-token in-context accuracy: 0.3478840386537821
+Per-token in-context loss: 2.35814611302595
+Per-token in-context accuracy: 0.2520552449852022
 --------------------------------------------------------------------------------
-Per-token out-of-context loss: 2.0465778799922876
-Per-token out-of-context accuracy: 0.3468670076726343
+Per-token out-of-context loss: 2.3558653143326906
+Per-token out-of-context accuracy: 0.25303484155762257
 --------------------------------------------------------------------------------
-Per-token shuffled-context loss: 2.065150835479538
-Per-token shuffled-context accuracy: 0.3404361578158815
+Per-token shuffled-context loss: 2.3499086676951793
+Per-token shuffled-context accuracy: 0.25329428989751096
 ================================================================================
 Began training epoch 2
 ================================================================================
 Epoch 2
 --------------------------------------------------------------------------------
-Per-token train loss: 1.9688838188137328
+Per-token train loss: 2.2939331752381156
 --------------------------------------------------------------------------------
-Per-token in-context loss: 1.9280510774972794
-Per-token in-context accuracy: 0.3915361546151283
+Per-token in-context loss: 2.2423193849101346
+Per-token in-context accuracy: 0.2860901019401513
 --------------------------------------------------------------------------------
-Per-token out-of-context loss: 1.9310216659780048
-Per-token out-of-context accuracy: 0.3906649616368286
+Per-token out-of-context loss: 2.2443193453410326
+Per-token out-of-context accuracy: 0.28645751221819327
 --------------------------------------------------------------------------------
-Per-token shuffled-context loss: 1.9123141475941863
-Per-token shuffled-context accuracy: 0.38873192620907426
+Per-token shuffled-context loss: 2.234385274888973
+Per-token shuffled-context accuracy: 0.279115803365226
 ================================================================================
 Began training epoch 3
 ================================================================================
 Epoch 3
 --------------------------------------------------------------------------------
-Per-token train loss: 1.835182941385678
+Per-token train loss: 2.1800403114674345
 --------------------------------------------------------------------------------
-Per-token in-context loss: 1.870568127681398
-Per-token in-context accuracy: 0.4105298233922026
+Per-token in-context loss: 2.1471941871730875
+Per-token in-context accuracy: 0.32489312726076947
 --------------------------------------------------------------------------------
-Per-token out-of-context loss: 1.8711178668624604
-Per-token out-of-context accuracy: 0.41128516624040923
+Per-token out-of-context loss: 2.1439373719096464
+Per-token out-of-context accuracy: 0.32145672394765884
 --------------------------------------------------------------------------------
-Per-token shuffled-context loss: 1.8804404864695459
-Per-token shuffled-context accuracy: 0.40885072655217963
+Per-token shuffled-context loss: 2.121895877994182
+Per-token shuffled-context accuracy: 0.3198620009857072
 ================================================================================
 Began training epoch 4
 ================================================================================
 Epoch 4
 --------------------------------------------------------------------------------
-Per-token train loss: 1.7203470139897294
+Per-token train loss: 2.101658997658108
 --------------------------------------------------------------------------------
-Per-token in-context loss: 1.8407367272839392
-Per-token in-context accuracy: 0.4286904365211596
+Per-token in-context loss: 2.098999542768203
+Per-token in-context accuracy: 0.3322920092074975
 --------------------------------------------------------------------------------
-Per-token out-of-context loss: 1.84147568965507
-Per-token out-of-context accuracy: 0.42838874680306904
+Per-token out-of-context loss: 2.0902449293465866
+Per-token out-of-context accuracy: 0.3343843607125966
 --------------------------------------------------------------------------------
-Per-token shuffled-context loss: 1.8250084655478962
-Per-token shuffled-context accuracy: 0.4386168100595632
+Per-token shuffled-context loss: 2.1118528067347513
+Per-token shuffled-context accuracy: 0.33190295428288497
 ================================================================================
 Began training epoch 5
 ================================================================================
 Epoch 5
 --------------------------------------------------------------------------------
-Per-token train loss: 1.616353269400341
+Per-token train loss: 2.046601124773068
 --------------------------------------------------------------------------------
-Per-token in-context loss: 1.8527287016388418
-Per-token in-context accuracy: 0.43502165944685106
+Per-token in-context loss: 2.0508211807607233
+Per-token in-context accuracy: 0.34380138112463005
 --------------------------------------------------------------------------------
-Per-token out-of-context loss: 1.8543121404660023
-Per-token out-of-context accuracy: 0.434462915601023
+Per-token out-of-context loss: 2.041781201453572
+Per-token out-of-context accuracy: 0.34652372694308686
 --------------------------------------------------------------------------------
-Per-token shuffled-context loss: 1.8252393091857992
-Per-token shuffled-context accuracy: 0.4390896921017403
+Per-token shuffled-context loss: 2.052686525562707
+Per-token shuffled-context accuracy: 0.3449397982427595
 ================================================================================
 Began training epoch 6
 ================================================================================
 Epoch 6
 --------------------------------------------------------------------------------
-Per-token train loss: 1.5263826289613331
+Per-token train loss: 2.006532072621797
 --------------------------------------------------------------------------------
-Per-token in-context loss: 1.8445662867423098
-Per-token in-context accuracy: 0.4540153282239254
+Per-token in-context loss: 2.0153505751193648
+Per-token in-context accuracy: 0.3500493258796449
 --------------------------------------------------------------------------------
-Per-token out-of-context loss: 1.8528972444936747
-Per-token out-of-context accuracy: 0.45460358056265987
+Per-token out-of-context loss: 2.0069467847361917
+Per-token out-of-context accuracy: 0.35424877818067163
 --------------------------------------------------------------------------------
-Per-token shuffled-context loss: 1.9025472709248792
-Per-token shuffled-context accuracy: 0.44176232275489535
+Per-token shuffled-context loss: 2.01541386338531
+Per-token shuffled-context accuracy: 0.35065573770491804
 ================================================================================
 Began training epoch 7
 ================================================================================
 Epoch 7
 --------------------------------------------------------------------------------
-Per-token train loss: 1.4409356694668531
+Per-token train loss: 1.9745374883392028
 --------------------------------------------------------------------------------
-Per-token in-context loss: 1.8277590178680674
-Per-token in-context accuracy: 0.4485171609463512
+Per-token in-context loss: 1.9730555450630125
+Per-token in-context accuracy: 0.3666557053600789
 --------------------------------------------------------------------------------
-Per-token out-of-context loss: 1.8345918635578107
-Per-token out-of-context accuracy: 0.4475703324808184
+Per-token out-of-context loss: 1.969957451517417
+Per-token out-of-context accuracy: 0.37001418886962006
 --------------------------------------------------------------------------------
-Per-token shuffled-context loss: 1.78906851304046
-Per-token shuffled-context accuracy: 0.4521985343104597
+Per-token shuffled-context loss: 1.9569783551908715
+Per-token shuffled-context accuracy: 0.38173799411956877
 ================================================================================
 Began training epoch 8
 ================================================================================
 Epoch 8
 --------------------------------------------------------------------------------
-Per-token train loss: 1.3658947223531348
+Per-token train loss: 1.9489666790302311
 --------------------------------------------------------------------------------
-Per-token in-context loss: 1.838758410790967
-Per-token in-context accuracy: 0.45318227257580806
+Per-token in-context loss: 1.9599013499467242
+Per-token in-context accuracy: 0.37257481091746136
 --------------------------------------------------------------------------------
-Per-token out-of-context loss: 1.8467523592817203
-Per-token out-of-context accuracy: 0.4522058823529412
+Per-token out-of-context loss: 1.9535938254219114
+Per-token out-of-context accuracy: 0.37600504493142045
 --------------------------------------------------------------------------------
-Per-token shuffled-context loss: 1.8734211042615536
-Per-token shuffled-context accuracy: 0.44275447100117
+Per-token shuffled-context loss: 1.9831617479135695
+Per-token shuffled-context accuracy: 0.37256825241131275
 ================================================================================
 Began training epoch 9
 ================================================================================
 Epoch 9
 --------------------------------------------------------------------------------
-Per-token train loss: 1.3043953347951174
+Per-token train loss: 1.9276556723884173
 --------------------------------------------------------------------------------
-Per-token in-context loss: 1.900858049351388
-Per-token in-context accuracy: 0.4566811062979007
+Per-token in-context loss: 1.952732880230759
+Per-token in-context accuracy: 0.3791515948701085
 --------------------------------------------------------------------------------
-Per-token out-of-context loss: 1.9184907737290462
-Per-token out-of-context accuracy: 0.4541240409207161
+Per-token out-of-context loss: 1.9439954883233241
+Per-token out-of-context accuracy: 0.38246886331388935
 --------------------------------------------------------------------------------
-Per-token shuffled-context loss: 1.8469022260213115
-Per-token shuffled-context accuracy: 0.46220016542597187
+Per-token shuffled-context loss: 1.9492451872334176
+Per-token shuffled-context accuracy: 0.378666229723087
 ================================================================================
 Began training epoch 10
 ================================================================================
 Epoch 10
 --------------------------------------------------------------------------------
-Per-token train loss: 1.2484541422953563
+Per-token train loss: 1.9086201119103603
 --------------------------------------------------------------------------------
-Per-token in-context loss: 2.053425240699389
-Per-token in-context accuracy: 0.44951682772409196
+Per-token in-context loss: 1.9242113057581542
+Per-token in-context accuracy: 0.39214074317658665
 --------------------------------------------------------------------------------
-Per-token out-of-context loss: 2.071982519629666
-Per-token out-of-context accuracy: 0.4512468030690537
+Per-token out-of-context loss: 1.9205017841597114
+Per-token out-of-context accuracy: 0.3917704556203689
 --------------------------------------------------------------------------------
-Per-token shuffled-context loss: 2.050811930365673
-Per-token shuffled-context accuracy: 0.45040840140023336
+Per-token shuffled-context loss: 1.9142583899263932
+Per-token shuffled-context accuracy: 0.39381176089421677
 ================================================================================
 Began training epoch 11
 ================================================================================
 Epoch 11
 --------------------------------------------------------------------------------
-Per-token train loss: 1.1951625642499752
+Per-token train loss: 1.8920470532029867
 --------------------------------------------------------------------------------
-Per-token in-context loss: 2.2038114878861994
-Per-token in-context accuracy: 0.45234921692769076
+Per-token in-context loss: 1.9162401489739511
+Per-token in-context accuracy: 0.39510029595527785
 --------------------------------------------------------------------------------
-Per-token out-of-context loss: 2.2542245768372666
-Per-token out-of-context accuracy: 0.45092710997442453
+Per-token out-of-context loss: 1.9118453411768048
+Per-token out-of-context accuracy: 0.4001261232855116
 --------------------------------------------------------------------------------
-Per-token shuffled-context loss: 2.332626111848807
-Per-token shuffled-context accuracy: 0.4387161150839847
+Per-token shuffled-context loss: 1.9255381479963691
+Per-token shuffled-context accuracy: 0.3862563100472236
 ================================================================================
 Began training epoch 12
 ================================================================================
 Epoch 12
 --------------------------------------------------------------------------------
-Per-token train loss: 1.1384929475773657
+Per-token train loss: 1.8783191510343127
 --------------------------------------------------------------------------------
-Per-token in-context loss: 2.1899627512671556
-Per-token in-context accuracy: 0.44918360546484504
+Per-token in-context loss: 1.9074626672977446
+Per-token in-context accuracy: 0.3985531075304176
 --------------------------------------------------------------------------------
-Per-token out-of-context loss: 2.2594681685537936
-Per-token out-of-context accuracy: 0.4467710997442455
+Per-token out-of-context loss: 1.9021541420901853
+Per-token out-of-context accuracy: 0.4028062431026328
 --------------------------------------------------------------------------------
-Per-token shuffled-context loss: 2.2224867174478087
-Per-token shuffled-context accuracy: 0.4439291038595329
+Per-token shuffled-context loss: 1.927090586216656
+Per-token shuffled-context accuracy: 0.3904494382022472
 ================================================================================
 Began training epoch 13
 ================================================================================
 Epoch 13
 --------------------------------------------------------------------------------
-Per-token train loss: 1.1097093277078653
+Per-token train loss: 1.8660393155046873
 --------------------------------------------------------------------------------
-Per-token in-context loss: 2.1779343180162276
-Per-token in-context accuracy: 0.45701432855714763
+Per-token in-context loss: 1.900776334672882
+Per-token in-context accuracy: 0.401677079907925
 --------------------------------------------------------------------------------
-Per-token out-of-context loss: 2.2328540776544217
-Per-token out-of-context accuracy: 0.4547634271099744
+Per-token out-of-context loss: 1.8946980760993217
+Per-token out-of-context accuracy: 0.40548636291975404
 --------------------------------------------------------------------------------
-Per-token shuffled-context loss: 2.205632401212873
-Per-token shuffled-context accuracy: 0.4510261972301018
+Per-token shuffled-context loss: 1.8746023933346847
+Per-token shuffled-context accuracy: 0.39695031972454503
 ================================================================================
 Began training epoch 14
 ================================================================================
 Epoch 14
 --------------------------------------------------------------------------------
-Per-token train loss: 1.0738041551916726
+Per-token train loss: 1.8546413082097257
 --------------------------------------------------------------------------------
-Per-token in-context loss: 2.167743226521335
-Per-token in-context accuracy: 0.4561812729090303
+Per-token in-context loss: 1.8776215688447662
+Per-token in-context accuracy: 0.41219993423216045
 --------------------------------------------------------------------------------
-Per-token out-of-context loss: 2.2094967632799807
-Per-token out-of-context accuracy: 0.45508312020460356
+Per-token out-of-context loss: 1.8746830624359818
+Per-token out-of-context accuracy: 0.41273845183667035
 --------------------------------------------------------------------------------
-Per-token shuffled-context loss: 2.1558143322089687
-Per-token shuffled-context accuracy: 0.44973457199734573
+Per-token shuffled-context loss: 1.8404846040801324
+Per-token shuffled-context accuracy: 0.4151998683994078
 ================================================================================
 Began training epoch 15
 ================================================================================
 Epoch 15
 --------------------------------------------------------------------------------
-Per-token train loss: 1.0361777618527412
+Per-token train loss: 1.8431011129702841
 --------------------------------------------------------------------------------
-Per-token in-context loss: 2.237713885919049
-Per-token in-context accuracy: 0.45051649450183273
+Per-token in-context loss: 1.8710673669967475
+Per-token in-context accuracy: 0.4153239066096679
 --------------------------------------------------------------------------------
-Per-token out-of-context loss: 2.2791081822436787
-Per-token out-of-context accuracy: 0.45044757033248084
+Per-token out-of-context loss: 1.867851727245246
+Per-token out-of-context accuracy: 0.4154185716537916
 --------------------------------------------------------------------------------
-Per-token shuffled-context loss: 2.211367580268297
-Per-token shuffled-context accuracy: 0.45327336331834084
+Per-token shuffled-context loss: 1.864043550978884
+Per-token shuffled-context accuracy: 0.41322044936502766
 ================================================================================
 Began training epoch 16
 ================================================================================
 Epoch 16
 --------------------------------------------------------------------------------
-Per-token train loss: 1.0080025146848388
+Per-token train loss: 1.834511054147567
 --------------------------------------------------------------------------------
-Per-token in-context loss: 2.249605216331698
-Per-token in-context accuracy: 0.4543485504831723
+Per-token in-context loss: 1.861164003953617
+Per-token in-context accuracy: 0.4174613613942782
 --------------------------------------------------------------------------------
-Per-token out-of-context loss: 2.3017960020038477
-Per-token out-of-context accuracy: 0.4514066496163683
+Per-token out-of-context loss: 1.8589507305488664
+Per-token out-of-context accuracy: 0.4177833832571338
 --------------------------------------------------------------------------------
-Per-token shuffled-context loss: 2.2658050765230806
-Per-token shuffled-context accuracy: 0.446843853820598
+Per-token shuffled-context loss: 1.824041490110091
+Per-token shuffled-context accuracy: 0.43037564766839376
 ================================================================================
 Began training epoch 17
 ================================================================================
 Epoch 17
 --------------------------------------------------------------------------------
-Per-token train loss: 0.998734923212656
+Per-token train loss: 1.8242863859715206
 --------------------------------------------------------------------------------
-Per-token in-context loss: 2.262275144125135
-Per-token in-context accuracy: 0.4605131622792403
+Per-token in-context loss: 1.852756353476768
+Per-token in-context accuracy: 0.42272278855639595
 --------------------------------------------------------------------------------
-Per-token out-of-context loss: 2.2950356281017097
-Per-token out-of-context accuracy: 0.45524296675191817
+Per-token out-of-context loss: 1.85045631627602
+Per-token out-of-context accuracy: 0.4203058489673656
 --------------------------------------------------------------------------------
-Per-token shuffled-context loss: 2.2787299130252543
-Per-token shuffled-context accuracy: 0.4641503214109115
+Per-token shuffled-context loss: 1.8535282346589628
+Per-token shuffled-context accuracy: 0.42336724647193963
 ================================================================================
 Began training epoch 18
 ================================================================================
 Epoch 18
 --------------------------------------------------------------------------------
-Per-token train loss: 0.9761340584206794
+Per-token train loss: 1.814564078381019
 --------------------------------------------------------------------------------
-Per-token in-context loss: 2.3227637601431033
-Per-token in-context accuracy: 0.45201599466844383
+Per-token in-context loss: 1.8448416130670549
+Per-token in-context accuracy: 0.42584676093390333
 --------------------------------------------------------------------------------
-Per-token out-of-context loss: 2.376934549540205
-Per-token out-of-context accuracy: 0.45012787723785164
+Per-token out-of-context loss: 1.8432417955568456
+Per-token out-of-context accuracy: 0.42487781806716063
 --------------------------------------------------------------------------------
-Per-token shuffled-context loss: 2.2553844019205567
-Per-token shuffled-context accuracy: 0.4547110448749793
+Per-token shuffled-context loss: 1.8415603178616442
+Per-token shuffled-context accuracy: 0.4234834932509351
 ================================================================================
 Began training epoch 19
 ================================================================================
 Epoch 19
 --------------------------------------------------------------------------------
-Per-token train loss: 0.9554712271450886
+Per-token train loss: 1.8056527957586306
 --------------------------------------------------------------------------------
-Per-token in-context loss: 2.403243611789234
-Per-token in-context accuracy: 0.45851382872375873
+Per-token in-context loss: 1.8377039770435557
+Per-token in-context accuracy: 0.42666885892798423
 --------------------------------------------------------------------------------
-Per-token out-of-context loss: 2.4838710435668525
-Per-token out-of-context accuracy: 0.4555626598465473
+Per-token out-of-context loss: 1.8358044328889542
+Per-token out-of-context accuracy: 0.42582374270849754
 --------------------------------------------------------------------------------
-Per-token shuffled-context loss: 2.360193867043527
-Per-token shuffled-context accuracy: 0.45183447813704136
+Per-token shuffled-context loss: 1.859291639668936
+Per-token shuffled-context accuracy: 0.41767792718924235
 ================================================================================
 Began training epoch 20
 ================================================================================
 Epoch 20
 --------------------------------------------------------------------------------
-Per-token train loss: 0.9358919173079941
+Per-token train loss: 1.7969967015087605
 --------------------------------------------------------------------------------
-Per-token in-context loss: 2.4860695213208555
-Per-token in-context accuracy: 0.46017994001999335
+Per-token in-context loss: 1.8288138432551355
+Per-token in-context accuracy: 0.4309437684972049
 --------------------------------------------------------------------------------
-Per-token out-of-context loss: 2.5913858989163128
-Per-token out-of-context accuracy: 0.45668158567774936
+Per-token out-of-context loss: 1.8277298139319254
+Per-token out-of-context accuracy: 0.4285038625256188
 --------------------------------------------------------------------------------
-Per-token shuffled-context loss: 2.5282800936470395
-Per-token shuffled-context accuracy: 0.456028249537582
+Per-token shuffled-context loss: 1.8279638677801702
+Per-token shuffled-context accuracy: 0.43324162485839135
 ================================================================================
 Began training epoch 21
 ================================================================================
 Epoch 21
 --------------------------------------------------------------------------------
-Per-token train loss: 0.9248653704832707
+Per-token train loss: 1.7883979260389293
 --------------------------------------------------------------------------------
-Per-token in-context loss: 2.7043419532559785
-Per-token in-context accuracy: 0.45418193935354884
+Per-token in-context loss: 1.8267001346787588
+Per-token in-context accuracy: 0.42880631371259453
 --------------------------------------------------------------------------------
-Per-token out-of-context loss: 2.864536333495699
-Per-token out-of-context accuracy: 0.45188618925831203
+Per-token out-of-context loss: 1.82523759787492
+Per-token out-of-context accuracy: 0.42676966734983446
 --------------------------------------------------------------------------------
-Per-token shuffled-context loss: 2.7156834163975963
-Per-token shuffled-context accuracy: 0.45287089279787585
+Per-token shuffled-context loss: 1.811069689564285
+Per-token shuffled-context accuracy: 0.42722616884189657
 ================================================================================
 Began training epoch 22
 ================================================================================
 Epoch 22
 --------------------------------------------------------------------------------
-Per-token train loss: 0.9219959315045604
+Per-token train loss: 1.779310551205916
 --------------------------------------------------------------------------------
-Per-token in-context loss: 2.7213608876183524
-Per-token in-context accuracy: 0.4555148283905365
+Per-token in-context loss: 1.8215705823913995
+Per-token in-context accuracy: 0.430121670503124
 --------------------------------------------------------------------------------
-Per-token out-of-context loss: 2.8637190597593936
-Per-token out-of-context accuracy: 0.4520460358056266
+Per-token out-of-context loss: 1.8201897001860365
+Per-token out-of-context accuracy: 0.42913447895317675
 --------------------------------------------------------------------------------
-Per-token shuffled-context loss: 2.714117336833707
-Per-token shuffled-context accuracy: 0.4497061293031066
+Per-token shuffled-context loss: 1.8343471615639493
+Per-token shuffled-context accuracy: 0.42072572736188296
 ================================================================================
 Began training epoch 23
 ================================================================================
 Epoch 23
 --------------------------------------------------------------------------------
-Per-token train loss: 0.8953111564208355
+Per-token train loss: 1.7698410862524594
 --------------------------------------------------------------------------------
-Per-token in-context loss: 2.8527682595791637
-Per-token in-context accuracy: 0.45201599466844383
+Per-token in-context loss: 1.8069815969671006
+Per-token in-context accuracy: 0.4332456428806314
 --------------------------------------------------------------------------------
-Per-token out-of-context loss: 3.010255264732844
-Per-token out-of-context accuracy: 0.44789002557544755
+Per-token out-of-context loss: 1.8060690839076745
+Per-token out-of-context accuracy: 0.4333911398391928
 --------------------------------------------------------------------------------
-Per-token shuffled-context loss: 2.893855659820988
-Per-token shuffled-context accuracy: 0.4520365752285952
+Per-token shuffled-context loss: 1.8211080448348593
+Per-token shuffled-context accuracy: 0.43534123143667613
 ================================================================================
 Began training epoch 24
 ================================================================================
 Epoch 24
 --------------------------------------------------------------------------------
-Per-token train loss: 0.8841065167050276
+Per-token train loss: 1.7586942033043929
 --------------------------------------------------------------------------------
-Per-token in-context loss: 2.8841794734396804
-Per-token in-context accuracy: 0.4490169943352216
+Per-token in-context loss: 1.797277714617352
+Per-token in-context accuracy: 0.43735613285103586
 --------------------------------------------------------------------------------
-Per-token out-of-context loss: 3.1070009182633647
-Per-token out-of-context accuracy: 0.4427749360613811
+Per-token out-of-context loss: 1.7954695317603504
+Per-token out-of-context accuracy: 0.4379631089389879
 --------------------------------------------------------------------------------
-Per-token shuffled-context loss: 3.0167198406134488
-Per-token shuffled-context accuracy: 0.4369266055045872
+Per-token shuffled-context loss: 1.7991573215128784
+Per-token shuffled-context accuracy: 0.4361417586091608
 ================================================================================
 Began training epoch 25
 ================================================================================
 Epoch 25
 --------------------------------------------------------------------------------
-Per-token train loss: 0.8743368751103324
+Per-token train loss: 1.745681278806712
 --------------------------------------------------------------------------------
-Per-token in-context loss: 2.971360041037753
-Per-token in-context accuracy: 0.44768410529823394
+Per-token in-context loss: 1.780806383699306
+Per-token in-context accuracy: 0.4391647484380138
 --------------------------------------------------------------------------------
-Per-token out-of-context loss: 3.196801667704302
-Per-token out-of-context accuracy: 0.44501278772378516
+Per-token out-of-context loss: 1.7785774146309603
+Per-token out-of-context accuracy: 0.441904461611225
 --------------------------------------------------------------------------------
-Per-token shuffled-context loss: 2.8702406294748255
-Per-token shuffled-context accuracy: 0.46531020680453633
+Per-token shuffled-context loss: 1.76100608042342
+Per-token shuffled-context accuracy: 0.4395840211290855
 ================================================================================
 Began training epoch 26
 ================================================================================
 Epoch 26
 --------------------------------------------------------------------------------
-Per-token train loss: 0.87214004321556
+Per-token train loss: 1.7323763512873225
 --------------------------------------------------------------------------------
-Per-token in-context loss: 2.9995430803664402
-Per-token in-context accuracy: 0.4488503832055981
+Per-token in-context loss: 1.7700020972932102
+Per-token in-context accuracy: 0.44442617560013153
 --------------------------------------------------------------------------------
-Per-token out-of-context loss: 3.1863367931007422
-Per-token out-of-context accuracy: 0.44517263427109977
+Per-token out-of-context loss: 1.7680146482564778
+Per-token out-of-context accuracy: 0.44537285196279364
 --------------------------------------------------------------------------------
-Per-token shuffled-context loss: 3.0993484897208927
-Per-token shuffled-context accuracy: 0.4421246033071655
+Per-token shuffled-context loss: 1.759561713895765
+Per-token shuffled-context accuracy: 0.45358478296211996
 ================================================================================
 Began training epoch 27
 ================================================================================
 Epoch 27
 --------------------------------------------------------------------------------
-Per-token train loss: 0.8554991178347596
+Per-token train loss: 1.720695468597114
 --------------------------------------------------------------------------------
-Per-token in-context loss: 2.9966331998017264
-Per-token in-context accuracy: 0.44668443852049317
+Per-token in-context loss: 1.761976001843619
+Per-token in-context accuracy: 0.4475501479776389
 --------------------------------------------------------------------------------
-Per-token out-of-context loss: 3.279164406649597
-Per-token out-of-context accuracy: 0.44165601023017903
+Per-token out-of-context loss: 1.7596212233276223
+Per-token out-of-context accuracy: 0.4488412423143623
 --------------------------------------------------------------------------------
-Per-token shuffled-context loss: 3.0912015963301003
-Per-token shuffled-context accuracy: 0.43991989319092123
+Per-token shuffled-context loss: 1.7304534258735667
+Per-token shuffled-context accuracy: 0.45454545454545453
 ================================================================================
 Began training epoch 28
 ================================================================================
 Epoch 28
 --------------------------------------------------------------------------------
-Per-token train loss: 0.8382828705944121
+Per-token train loss: 1.7094999118042844
 --------------------------------------------------------------------------------
-Per-token in-context loss: 3.024789341764822
-Per-token in-context accuracy: 0.44951682772409196
+Per-token in-context loss: 1.7505948694863236
+Per-token in-context accuracy: 0.45429135152910227
 --------------------------------------------------------------------------------
-Per-token out-of-context loss: 3.2939704969106125
-Per-token out-of-context accuracy: 0.4459718670076726
+Per-token out-of-context loss: 1.7504964950575956
+Per-token out-of-context accuracy: 0.4557780230174996
 --------------------------------------------------------------------------------
-Per-token shuffled-context loss: 3.1221064910116727
-Per-token shuffled-context accuracy: 0.445531197301855
+Per-token shuffled-context loss: 1.7508430530985848
+Per-token shuffled-context accuracy: 0.45081967213114754
 ================================================================================
 Began training epoch 29
 ================================================================================
 Epoch 29
 --------------------------------------------------------------------------------
-Per-token train loss: 0.8324903598986566
+Per-token train loss: 1.699206689638751
 --------------------------------------------------------------------------------
-Per-token in-context loss: 3.084302818961876
-Per-token in-context accuracy: 0.4445184938353882
+Per-token in-context loss: 1.7449118034967424
+Per-token in-context accuracy: 0.453140414337389
 --------------------------------------------------------------------------------
-Per-token out-of-context loss: 3.3220164934387597
-Per-token out-of-context accuracy: 0.43845907928388744
+Per-token out-of-context loss: 1.7425471573020312
+Per-token out-of-context accuracy: 0.45546271480372064
 --------------------------------------------------------------------------------
-Per-token shuffled-context loss: 2.9803802317990407
-Per-token shuffled-context accuracy: 0.4493691899070385
+Per-token shuffled-context loss: 1.7378439448160514
+Per-token shuffled-context accuracy: 0.45539521154476875
 ================================================================================
 Began training epoch 30
 ================================================================================
 Epoch 30
 --------------------------------------------------------------------------------
-Per-token train loss: 0.8300052062342209
+Per-token train loss: 1.6884138123797519
 --------------------------------------------------------------------------------
-Per-token in-context loss: 3.035639596676596
-Per-token in-context accuracy: 0.44518493835388206
+Per-token in-context loss: 1.7379217150963204
+Per-token in-context accuracy: 0.45429135152910227
 --------------------------------------------------------------------------------
-Per-token out-of-context loss: 3.3363584062022626
-Per-token out-of-context accuracy: 0.43877877237851665
+Per-token out-of-context loss: 1.7373221653146396
+Per-token out-of-context accuracy: 0.4567239476588365
 --------------------------------------------------------------------------------
-Per-token shuffled-context loss: 2.959316935111325
-Per-token shuffled-context accuracy: 0.43991887780970085
+Per-token shuffled-context loss: 1.6963352798726516
+Per-token shuffled-context accuracy: 0.4581337737407102
 ================================================================================
 Began training epoch 31
 ================================================================================
 Epoch 31
 --------------------------------------------------------------------------------
-Per-token train loss: 0.8141060965135694
+Per-token train loss: 1.6796382891812496
 --------------------------------------------------------------------------------
-Per-token in-context loss: 3.1307353878053017
-Per-token in-context accuracy: 0.4501832722425858
+Per-token in-context loss: 1.7341655491606571
+Per-token in-context accuracy: 0.45544228872081555
 --------------------------------------------------------------------------------
-Per-token out-of-context loss: 3.429650161424866
-Per-token out-of-context accuracy: 0.44501278772378516
+Per-token out-of-context loss: 1.7332924526045606
+Per-token out-of-context accuracy: 0.4589311051552893
 --------------------------------------------------------------------------------
-Per-token shuffled-context loss: 3.31548910967108
-Per-token shuffled-context accuracy: 0.4321274477265184
+Per-token shuffled-context loss: 1.7668974272855766
+Per-token shuffled-context accuracy: 0.452885555917835
 ================================================================================
 Began training epoch 32
 ================================================================================
 Epoch 32
 --------------------------------------------------------------------------------
-Per-token train loss: 0.818038301010217
+Per-token train loss: 1.6700323170849256
 --------------------------------------------------------------------------------
-Per-token in-context loss: 3.0664491332479016
-Per-token in-context accuracy: 0.44868377207597465
+Per-token in-context loss: 1.7216245782332216
+Per-token in-context accuracy: 0.46234791187109503
 --------------------------------------------------------------------------------
-Per-token out-of-context loss: 3.3650960152411398
-Per-token out-of-context accuracy: 0.44421355498721227
+Per-token out-of-context loss: 1.7200142515959207
+Per-token out-of-context accuracy: 0.4652372694308687
 --------------------------------------------------------------------------------
-Per-token shuffled-context loss: 2.9648631155450844
-Per-token shuffled-context accuracy: 0.4511417058428476
+Per-token shuffled-context loss: 1.713308777015982
+Per-token shuffled-context accuracy: 0.46729125575279423
 ================================================================================
 Began training epoch 33
 ================================================================================
 Epoch 33
 --------------------------------------------------------------------------------
-Per-token train loss: 0.8133175899939877
+Per-token train loss: 1.660428483571325
 --------------------------------------------------------------------------------
-Per-token in-context loss: 3.040858664380753
-Per-token in-context accuracy: 0.4521826057980673
+Per-token in-context loss: 1.7193860295805952
+Per-token in-context accuracy: 0.4649786254521539
 --------------------------------------------------------------------------------
-Per-token out-of-context loss: 3.3238132452720874
-Per-token out-of-context accuracy: 0.44820971867007675
+Per-token out-of-context loss: 1.7177939850994979
+Per-token out-of-context accuracy: 0.46492196121708973
 --------------------------------------------------------------------------------
-Per-token shuffled-context loss: 3.0210764242220325
-Per-token shuffled-context accuracy: 0.44638655462184873
+Per-token shuffled-context loss: 1.7054832019040953
+Per-token shuffled-context accuracy: 0.4647631622379931
 ================================================================================
 Began training epoch 34
 ================================================================================
 Epoch 34
 --------------------------------------------------------------------------------
-Per-token train loss: 0.7948245601728559
+Per-token train loss: 1.6523869137412734
 --------------------------------------------------------------------------------
-Per-token in-context loss: 3.251168032083381
-Per-token in-context accuracy: 0.4521826057980673
+Per-token in-context loss: 1.7140168977465844
+Per-token in-context accuracy: 0.4646497862545215
 --------------------------------------------------------------------------------
-Per-token out-of-context loss: 3.581619905541315
-Per-token out-of-context accuracy: 0.4493286445012788
+Per-token out-of-context loss: 1.7120938725075323
+Per-token out-of-context accuracy: 0.46665615639287406
 --------------------------------------------------------------------------------
-Per-token shuffled-context loss: 3.3744306115785547
-Per-token shuffled-context accuracy: 0.4410835964766495
+Per-token shuffled-context loss: 1.7288183725008401
+Per-token shuffled-context accuracy: 0.458560794044665
 ================================================================================
 Began training epoch 35
 ================================================================================
 Epoch 35
 --------------------------------------------------------------------------------
-Per-token train loss: 0.7904336181735354
+Per-token train loss: 1.6437283070491893
 --------------------------------------------------------------------------------
-Per-token in-context loss: 3.112501017930547
-Per-token in-context accuracy: 0.4586804398533822
+Per-token in-context loss: 1.7072075966430784
+Per-token in-context accuracy: 0.4697467938178231
 --------------------------------------------------------------------------------
-Per-token out-of-context loss: 3.5034760413572306
-Per-token out-of-context accuracy: 0.44948849104859334
+Per-token out-of-context loss: 1.7086860718231707
+Per-token out-of-context accuracy: 0.46870565978243733
 --------------------------------------------------------------------------------
-Per-token shuffled-context loss: 3.0430231688722773
-Per-token shuffled-context accuracy: 0.4633538308126974
+Per-token shuffled-context loss: 1.72261493193124
+Per-token shuffled-context accuracy: 0.46597802918511233
 ================================================================================
 Began training epoch 36
 ================================================================================
 Epoch 36
 --------------------------------------------------------------------------------
-Per-token train loss: 0.7838936831935176
+Per-token train loss: 1.6329493287152477
 --------------------------------------------------------------------------------
-Per-token in-context loss: 3.1600533230866406
-Per-token in-context accuracy: 0.4576807730756415
+Per-token in-context loss: 1.696984576771268
+Per-token in-context accuracy: 0.47402170338704375
 --------------------------------------------------------------------------------
-Per-token out-of-context loss: 3.4701411317071647
-Per-token out-of-context accuracy: 0.4534846547314578
+Per-token out-of-context loss: 1.6966194010449944
+Per-token out-of-context accuracy: 0.4731199747753429
 --------------------------------------------------------------------------------
-Per-token shuffled-context loss: 3.1299659921990277
-Per-token shuffled-context accuracy: 0.4534569983136594
+Per-token shuffled-context loss: 1.6811664045452974
+Per-token shuffled-context accuracy: 0.47992132437305357
 ================================================================================
 Began training epoch 37
 ================================================================================
 Epoch 37
 --------------------------------------------------------------------------------
-Per-token train loss: 0.7723730922277484
+Per-token train loss: 1.6229446579569153
 --------------------------------------------------------------------------------
-Per-token in-context loss: 3.2551591842025966
-Per-token in-context accuracy: 0.4465178273908697
+Per-token in-context loss: 1.6859317818428097
+Per-token in-context accuracy: 0.4766524169681026
 --------------------------------------------------------------------------------
-Per-token out-of-context loss: 3.6032832655912777
-Per-token out-of-context accuracy: 0.4430946291560102
+Per-token out-of-context loss: 1.6859148863868045
+Per-token out-of-context accuracy: 0.47674601923380105
 --------------------------------------------------------------------------------
-Per-token shuffled-context loss: 3.272211853169902
-Per-token shuffled-context accuracy: 0.4457791124457791
+Per-token shuffled-context loss: 1.6620596289478466
+Per-token shuffled-context accuracy: 0.4886959370904325
 ================================================================================
 Began training epoch 38
 ================================================================================
 Epoch 38
 --------------------------------------------------------------------------------
-Per-token train loss: 0.7954601881626461
+Per-token train loss: 1.6124605214489358
 --------------------------------------------------------------------------------
-Per-token in-context loss: 3.22889387365263
-Per-token in-context accuracy: 0.43868710429856717
+Per-token in-context loss: 1.6781273076346892
+Per-token in-context accuracy: 0.4805984873396909
 --------------------------------------------------------------------------------
-Per-token out-of-context loss: 3.624626193509992
-Per-token out-of-context accuracy: 0.43558184143222506
+Per-token out-of-context loss: 1.6789911203385903
+Per-token out-of-context accuracy: 0.47895317673025384
 --------------------------------------------------------------------------------
-Per-token shuffled-context loss: 3.3033876877383546
-Per-token shuffled-context accuracy: 0.43416721527320606
+Per-token shuffled-context loss: 1.6625944530786265
+Per-token shuffled-context accuracy: 0.4760111347633863
 ================================================================================
 Began training epoch 39
 ================================================================================
 Epoch 39
 --------------------------------------------------------------------------------
-Per-token train loss: 0.7641272083190935
+Per-token train loss: 1.6005992709792085
 --------------------------------------------------------------------------------
-Per-token in-context loss: 3.3266100020696228
-Per-token in-context accuracy: 0.44385204931689437
+Per-token in-context loss: 1.6675423769839537
+Per-token in-context accuracy: 0.4820782637290365
 --------------------------------------------------------------------------------
-Per-token out-of-context loss: 3.678351230938416
-Per-token out-of-context accuracy: 0.440537084398977
+Per-token out-of-context loss: 1.6690988376767182
+Per-token out-of-context accuracy: 0.48210625886804354
 --------------------------------------------------------------------------------
-Per-token shuffled-context loss: 3.3783057250976563
-Per-token shuffled-context accuracy: 0.435
+Per-token shuffled-context loss: 1.665035085875802
+Per-token shuffled-context accuracy: 0.4846989141164857
 ================================================================================
 Began training epoch 40
 ================================================================================
 Epoch 40
 --------------------------------------------------------------------------------
-Per-token train loss: 0.7532971426844597
+Per-token train loss: 1.5896934218970793
 --------------------------------------------------------------------------------
-Per-token in-context loss: 3.4042206115620965
-Per-token in-context accuracy: 0.4431856047984005
+Per-token in-context loss: 1.661691868238565
+Per-token in-context accuracy: 0.4837224597171983
 --------------------------------------------------------------------------------
-Per-token out-of-context loss: 3.7918040948298275
-Per-token out-of-context accuracy: 0.43845907928388744
+Per-token out-of-context loss: 1.6619811215160887
+Per-token out-of-context accuracy: 0.4833674917231594
 --------------------------------------------------------------------------------
-Per-token shuffled-context loss: 3.2887322421199587
-Per-token shuffled-context accuracy: 0.45056236360584184
+Per-token shuffled-context loss: 1.6508740366364525
+Per-token shuffled-context accuracy: 0.48541939711664484
 ================================================================================
 Began training epoch 41
 ================================================================================
 Epoch 41
 --------------------------------------------------------------------------------
-Per-token train loss: 0.7471446170737701
+Per-token train loss: 1.5772183224824923
 --------------------------------------------------------------------------------
-Per-token in-context loss: 3.3734572327005905
-Per-token in-context accuracy: 0.44401866044651783
+Per-token in-context loss: 1.667727750447658
+Per-token in-context accuracy: 0.4850378165077277
 --------------------------------------------------------------------------------
-Per-token out-of-context loss: 3.6905471964565386
-Per-token out-of-context accuracy: 0.43638107416879796
+Per-token out-of-context loss: 1.6651047242471477
+Per-token out-of-context accuracy: 0.4869935361816175
 --------------------------------------------------------------------------------
-Per-token shuffled-context loss: 3.2309279414839716
-Per-token shuffled-context accuracy: 0.43956043956043955
+Per-token shuffled-context loss: 1.6671803549236581
+Per-token shuffled-context accuracy: 0.4884640738299275
 ================================================================================
 Began training epoch 42
 ================================================================================
 Epoch 42
 --------------------------------------------------------------------------------
-Per-token train loss: 0.7443737384331014
+Per-token train loss: 1.5661151355930738
 --------------------------------------------------------------------------------
-Per-token in-context loss: 3.36946857456206
-Per-token in-context accuracy: 0.44301899366877706
+Per-token in-context loss: 1.6532879358684887
+Per-token in-context accuracy: 0.48783294968760277
 --------------------------------------------------------------------------------
-Per-token out-of-context loss: 3.71874632676849
-Per-token out-of-context accuracy: 0.43877877237851665
+Per-token out-of-context loss: 1.6537529891848695
+Per-token out-of-context accuracy: 0.4869935361816175
 --------------------------------------------------------------------------------
-Per-token shuffled-context loss: 3.220129085364592
-Per-token shuffled-context accuracy: 0.46581691772885286
+Per-token shuffled-context loss: 1.641869941643909
+Per-token shuffled-context accuracy: 0.4885283513602098
 ================================================================================
 Began training epoch 43
 ================================================================================
 Epoch 43
 --------------------------------------------------------------------------------
-Per-token train loss: 0.7356079810831163
+Per-token train loss: 1.5526933075327958
 --------------------------------------------------------------------------------
-Per-token in-context loss: 3.5024115293274636
-Per-token in-context accuracy: 0.437187604131956
+Per-token in-context loss: 1.6418219769875182
+Per-token in-context accuracy: 0.49227227885563957
 --------------------------------------------------------------------------------
-Per-token out-of-context loss: 3.8461472917243342
-Per-token out-of-context accuracy: 0.4319053708439898
+Per-token out-of-context loss: 1.6421726462255795
+Per-token out-of-context accuracy: 0.49140785117452307
 --------------------------------------------------------------------------------
-Per-token shuffled-context loss: 3.640054964839664
-Per-token shuffled-context accuracy: 0.4299581589958159
+Per-token shuffled-context loss: 1.640982102978137
+Per-token shuffled-context accuracy: 0.4868876793666502
 ================================================================================
 Began training epoch 44
 ================================================================================
 Epoch 44
 --------------------------------------------------------------------------------
-Per-token train loss: 0.7293222915780332
+Per-token train loss: 1.5401656167315585
 --------------------------------------------------------------------------------
-Per-token in-context loss: 3.631651438859573
-Per-token in-context accuracy: 0.43652115961346216
+Per-token in-context loss: 1.636679519206746
+Per-token in-context accuracy: 0.49095692206511016
 --------------------------------------------------------------------------------
-Per-token out-of-context loss: 3.987756518070655
-Per-token out-of-context accuracy: 0.4312659846547315
+Per-token out-of-context loss: 1.6371511886045795
+Per-token out-of-context accuracy: 0.4910925429607441
 --------------------------------------------------------------------------------
-Per-token shuffled-context loss: 3.768858251508498
-Per-token shuffled-context accuracy: 0.43112582781456954
+Per-token shuffled-context loss: 1.6425344562420485
+Per-token shuffled-context accuracy: 0.49332454260754904
 ================================================================================
 Began training epoch 45
 ================================================================================
 Epoch 45
 --------------------------------------------------------------------------------
-Per-token train loss: 0.7286683043598065
+Per-token train loss: 1.5291868170191134
 --------------------------------------------------------------------------------
-Per-token in-context loss: 3.4688261109008587
-Per-token in-context accuracy: 0.43418860379873375
+Per-token in-context loss: 1.6101772856532017
+Per-token in-context accuracy: 0.5042749095692206
 --------------------------------------------------------------------------------
-Per-token out-of-context loss: 3.843219664090735
-Per-token out-of-context accuracy: 0.4296675191815857
+Per-token out-of-context loss: 1.610890742639779
+Per-token out-of-context accuracy: 0.497241053129434
 --------------------------------------------------------------------------------
-Per-token shuffled-context loss: 3.359870131821181
-Per-token shuffled-context accuracy: 0.4410678307588986
+Per-token shuffled-context loss: 1.6314458587193377
+Per-token shuffled-context accuracy: 0.4948604992657856
 ================================================================================
 Began training epoch 46
 ================================================================================
 Epoch 46
 --------------------------------------------------------------------------------
-Per-token train loss: 0.7236650699882635
+Per-token train loss: 1.5161452512922031
 --------------------------------------------------------------------------------
-Per-token in-context loss: 3.462824622220653
-Per-token in-context accuracy: 0.4356881039653449
+Per-token in-context loss: 1.6078070929394628
+Per-token in-context accuracy: 0.5011509371917132
 --------------------------------------------------------------------------------
-Per-token out-of-context loss: 3.8570116365809577
-Per-token out-of-context accuracy: 0.4322250639386189
+Per-token out-of-context loss: 1.6110220076476627
+Per-token out-of-context accuracy: 0.497556361343213
 --------------------------------------------------------------------------------
-Per-token shuffled-context loss: 3.490537747309078
-Per-token shuffled-context accuracy: 0.4315510677040225
+Per-token shuffled-context loss: 1.5937397668329685
+Per-token shuffled-context accuracy: 0.5009107468123861
 ================================================================================
 Began training epoch 47
 ================================================================================
 Epoch 47
 --------------------------------------------------------------------------------
-Per-token train loss: 0.7228210662890758
+Per-token train loss: 1.4986542638923441
 --------------------------------------------------------------------------------
-Per-token in-context loss: 3.5605887565879732
-Per-token in-context accuracy: 0.4363545484838387
+Per-token in-context loss: 1.6065748491321727
+Per-token in-context accuracy: 0.5019730351857942
 --------------------------------------------------------------------------------
-Per-token out-of-context loss: 3.9452240826071376
-Per-token out-of-context accuracy: 0.4304667519181586
+Per-token out-of-context loss: 1.6083649352354976
+Per-token out-of-context accuracy: 0.49929055651899734
 --------------------------------------------------------------------------------
-Per-token shuffled-context loss: 3.3184892836280957
-Per-token shuffled-context accuracy: 0.45381062355658197
+Per-token shuffled-context loss: 1.5835268708733787
+Per-token shuffled-context accuracy: 0.4919812084885793
 ================================================================================
 Began training epoch 48
 ================================================================================
 Epoch 48
 --------------------------------------------------------------------------------
-Per-token train loss: 0.7096057569475046
+Per-token train loss: 1.4833389733518874
 --------------------------------------------------------------------------------
-Per-token in-context loss: 3.622202684147602
-Per-token in-context accuracy: 0.4418527157614129
+Per-token in-context loss: 1.5880031943203625
+Per-token in-context accuracy: 0.5100295955277869
 --------------------------------------------------------------------------------
-Per-token out-of-context loss: 3.95506210560384
-Per-token out-of-context accuracy: 0.4359015345268542
+Per-token out-of-context loss: 1.5931213284335677
+Per-token out-of-context accuracy: 0.5041778338325713
 --------------------------------------------------------------------------------
-Per-token shuffled-context loss: 3.685999074805629
-Per-token shuffled-context accuracy: 0.4375934851254778
+Per-token shuffled-context loss: 1.566024906748042
+Per-token shuffled-context accuracy: 0.5104826913700634
 ================================================================================
 Began training epoch 49
 ================================================================================
 Epoch 49
 --------------------------------------------------------------------------------
-Per-token train loss: 0.7016644437930414
+Per-token train loss: 1.4727136810709323
 --------------------------------------------------------------------------------
-Per-token in-context loss: 3.557116962599381
-Per-token in-context accuracy: 0.4366877707430856
+Per-token in-context loss: 1.560402036928417
+Per-token in-context accuracy: 0.5162775402828017
 --------------------------------------------------------------------------------
-Per-token out-of-context loss: 3.9358447927343265
-Per-token out-of-context accuracy: 0.4309462915601023
+Per-token out-of-context loss: 1.5663425169512806
+Per-token out-of-context accuracy: 0.513479426139051
 --------------------------------------------------------------------------------
-Per-token shuffled-context loss: 3.538953260142092
-Per-token shuffled-context accuracy: 0.43657331136738053
+Per-token shuffled-context loss: 1.5409394669629302
+Per-token shuffled-context accuracy: 0.5240485829959514
 ================================================================================
 Began training epoch 50
 ================================================================================
 Epoch 50
 --------------------------------------------------------------------------------
-Per-token train loss: 0.7056219500622579
+Per-token train loss: 1.4487052291099514
 --------------------------------------------------------------------------------
-Per-token in-context loss: 3.5786864786933004
-Per-token in-context accuracy: 0.4298567144285238
+Per-token in-context loss: 1.549840885100887
+Per-token in-context accuracy: 0.5189082538638605
 --------------------------------------------------------------------------------
-Per-token out-of-context loss: 4.031487906680388
-Per-token out-of-context accuracy: 0.4221547314578005
+Per-token out-of-context loss: 1.572059578123518
+Per-token out-of-context accuracy: 0.5106416522150402
 --------------------------------------------------------------------------------
-Per-token shuffled-context loss: 3.4312960047126415
-Per-token shuffled-context accuracy: 0.4439236692333445
+Per-token shuffled-context loss: 1.5333961543144996
+Per-token shuffled-context accuracy: 0.5140278917145201
 ================================================================================

@@ -77,7 +77,7 @@ ax.plot([epoch for epoch in range(1, 21)], shuffled_accuracy, label="Shuffled Ac
 ax.legend(loc='upper left')
 
 # Customize the plot
-ax.set_title("MedMamba Accuracy on Single Letters")
+ax.set_title("MedMamba Accuracy on Synthetic Letters")
 ax.set_xticks([epoch for epoch in range(1, 21)])
 ax.set_xlabel("Epoch")
 ax.set_ylabel("Accuracy")
