@@ -175,8 +175,14 @@ The full architecture is shown in Figure \ref{sequencestack}.
     \caption{MedMamba}
     \label{medmambastack}
 \end{figure}
-Just look at the figure man...
 Another model architecture we look at is based on the MedMamba
 architecture\cite{medmamba}.
-For the most part, 
+The main difference between MedMamba's architecture and our architecture is that
+We modify the SS2D block(boxed in red in Figure \ref{medmambastacklow}) to include context injection for each scanning
+path.
+Since context injection adds new channels, we also add a linear layer to the
+output of the SS2D block to ensure that the number of channels matches the
+number of channels in the gating vector.
 
+Like MedMamba, we use Patch Merging layers(originally introduced by the SWin
+Transformer architecture \cite{swintrans}).
