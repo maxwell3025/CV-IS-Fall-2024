@@ -1,14 +1,24 @@
 \section{Results}
 \begin{figure}[!ht]
-    \includegraphics[width=0.5\textwidth]{figures/sequence_stack_mnist_like.png}
-    \includegraphics[width=0.5\textwidth]{figures/medmamba_mnist_like.png}
-    \includegraphics[width=0.5\textwidth]{figures/sequence_stack_words.png}
-    \includegraphics[width=0.5\textwidth]{figures/medmamba_words.png}
-    \includegraphics[width=0.5\textwidth]{figures/sequence_stack_mscoco.png}
-    \includegraphics[width=0.5\textwidth]{figures/medmamba_mscoco.png}
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{figures/sequence_stack_mnist_like.png}
+    \end{subfigure}\begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{figures/medmamba_mnist_like.png}
+    \end{subfigure}
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{figures/sequence_stack_words.png}
+    \end{subfigure}\begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{figures/medmamba_words.png}
+    \end{subfigure}
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{figures/sequence_stack_mscoco.png}
+    \end{subfigure}\begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{figures/medmamba_mscoco.png}
+    \end{subfigure}
     \caption{Graphs of results}
     \label{resultslide}
 \end{figure}
+The results of 
 In our tests with synthetic data, we found that our in-context learning
 hypothesis is confirmed for single letters. With single-character context
 images, we find that in-context predictions are significantly more accurate
