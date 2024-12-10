@@ -6,8 +6,6 @@ This section(and the background on SSMs and Mamba) constitute Maxwell's
 independent portion. In this section, we investigate several useful features of
 Mamba-based models.
 
-This 
-
 \subsection{Known Results For State-Space Models}
 % SSMs are only able to model star-free languages
 It is known that state space models are only capable of recognizing a subset of
@@ -201,8 +199,103 @@ counters.
 An important component of many CFG-related operations is matching strings to
 non-terminal symbols.
 
+% ARITHMETIC
 
+\begin{figure}
+    \includegraphics[width=\textwidth]{figures/arithmetic.png}
+    \caption{}
+    \label{resultsarithmetic}
+\end{figure}
+In this experiment, we train a multi-layer Mamba model to distinguish 2
+non-terminal symbols in the following CFG:
+\begin{verbatim}
+    G := E
+    E := T
+    E := E+T
+    T := F
+    T := T*F
+    F := X
+    F := (E)
+    X := X'
+    X := x
+\end{verbatim}
+This is the CFG for valid arithmetic expressions.
+For instance, \verb|(x'+x)*x'| is a valid string in this language while
+\verb|x'+x)| is not.
 
+We train a multi-layer model to distinguish the non-terminal symbols E and T.
+This requires the model to detect 
+Since \verb|T| is a subset of \verb|E|, we don't expect the model to perform
+perfectly on this task.
 
-% explain that hyperparameters in original paper were unreasonable and risking
-% overfitting
+The model we use is the same model as in our \texttt{a|bb+} recognizer.
+The hyperparameters are \begin{verbatim}
+  mamba_d_model=16
+  d_intermediate=16
+  mamba_d_state=256
+  mamba_d_conv=4
+\end{verbatim}
+
+As shown in Figure \ref{resultsarithmetic}, the model learns to distinguish the
+2 languages with around 70\% accuracy across all string lengths.
+
+% DYCK
+\begin{figure}
+    \includegraphics[width=\textwidth]{figures/dyck.png}
+    \caption{}
+    \label{resultsdyck}
+\end{figure}
+\begin{figure}
+    \includegraphics[width=\textwidth]{figures/dyck_challenge.pdf}
+    \caption{}
+    \label{dyckchallenge}
+\end{figure}
+
+One specific CFG that's well studied is the Dyck family of languages.
+A previous paper\cite{ssmformal} has found that multi-layer Mamba architectures
+claims to experimentally confirm that multi-layer Mamba is capable of
+recognizing Dyck-1 strings. However, they sweep through a set of hyperparameters
+such that the largest total state size is many times the length of their
+validation samples: in their tests on Dyck-1, their maximum state size is 256
+dimensions while their longest validation string is 100 characters long.
+In addition, they don't disclose the actual hyperparameters used.
+
+In this section, I confirm their finding using a much smaller model.
+The hyperparameters that I use are:
+\begin{verbatim}
+  n_layer=2
+  d_intermediate=64
+  mamba_d_model=4
+  mamba_d_state=2
+  mamba_d_conv=2
+\end{verbatim}
+
+The total state dimension is given by
+$$
+n_layer * d_model * (d_state + d_conv - 1) = 24
+$$
+
+The model is trained on to distinguish instances from non-instances of Dyck-1.
+In addition, the non-instances of Dyck-1 are sampled such that they are
+particularly "difficult".
+To understand what this means, it's first important to understand the rules for
+valid Dyck-1 strings.
+Dyck-1 strings are equivalent to matched strings of parentheses.
+The validity of a string can be checked by scanning along the string and
+tracking the "depth" at each character. The character \verb|(| increases the
+depth, since it enters a pair. The character \verb|)| decreases the depth, since
+it exits a pair.
+If the depth is never negative, and the final depth is 0, then the string is
+valid.
+A difficult string ends at a depth of 0, and only has a negative depth of -1 at
+one point near the middle.
+This ensures that any counter-based recognizer needs to be numerically precise,
+since a small error can prevent the model from recognizing the small negative
+region.
+An example of such a string is shown in Figure \ref{dyckchallenge}
+
+The model is trained on random strings of length up to 64 and is validated on
+strings of up to length 128.
+As shown in Figure \ref{resultsdyck}, the smaller model is able to achieve
+better-than-chance results on strings twice the length of its training data,
+confirming that Mamba is able to generalize on Dyck-1 with a small model size.
