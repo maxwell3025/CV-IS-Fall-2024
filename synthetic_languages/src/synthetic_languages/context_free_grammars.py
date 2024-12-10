@@ -30,7 +30,7 @@ class CFGSymbol:
     def __repr__(self) -> str:
         return self.string_repr
 
-    def add_rule(self, *args: tuple["CFGSymbol", ...]):
+    def add_rule(self, *args: "CFGSymbol"):
         self.rules.append(list(args))
 
     def provide_test(self, test: Callable[[list["CFGSymbol"]], bool]):
@@ -180,7 +180,7 @@ class CFGSymbol:
         logger.info(f"Deriving {self}")
         # Pick a random production rule
         choice_index = random.randint(0, sum(self.cache[tuple(rule)][length] for rule in self.rules) - 1)
-        chosen_rule: tuple[CFGSymbol] = None
+        chosen_rule: tuple[CFGSymbol, ...] | None = None
         for candidate_rule in self.rules:
             candidate_rule = tuple(candidate_rule)
             choice_index -= self.cache[tuple(candidate_rule)][length]

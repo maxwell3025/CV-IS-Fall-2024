@@ -161,6 +161,35 @@ def recognize_json(limit: int) -> LanguageSelectTask:
 
     return CFGRecognizerTask(obj, limit)
 
+def json_all(limit: int) -> LanguageSelectTask:
+    value = CFGSymbol(False, "<value>")
+    obj = CFGSymbol(False, "<Object>")
+    obj_inner = CFGSymbol(False, "<entry list>")
+    arr = CFGSymbol(False, "<Array>")
+    arr_inner = CFGSymbol(False, "<inner list")
+    num = CFGSymbol(True, "0")
+    str = CFGSymbol(True, "\"s\"")
+    id = CFGSymbol(True, "p")
+    colon = CFGSymbol(True, ":")
+    lcurly = CFGSymbol(True, "{")
+    rcurly = CFGSymbol(True, "}")
+    lsquare = CFGSymbol(True, "[")
+    rsquare = CFGSymbol(True, "]")
+    comma = CFGSymbol(True, ",")
+    
+    value.add_rule(obj)
+    value.add_rule(arr)
+    value.add_rule(str)
+    value.add_rule(num)
+    obj.add_rule(lcurly,obj_inner,rcurly)
+    obj_inner.add_rule(obj_inner,id,colon,value,comma)
+    obj_inner.add_rule()
+    arr.add_rule(lsquare,obj_inner,rsquare)
+    arr_inner.add_rule(arr_inner,value,comma)
+    arr_inner.add_rule()
+
+    return CFGDiscriminationTask([obj, arr], limit)
+
 def get_list_cfg(limit: int) -> LanguageSelectTask:
     L = CFGSymbol(False, "L")
     i = CFGSymbol(True, "i")
