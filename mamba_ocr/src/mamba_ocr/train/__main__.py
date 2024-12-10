@@ -95,16 +95,16 @@ if __name__ == '__main__':
             total_loss = 0
             total_correct = 0
             sum_criterion = torch.nn.CrossEntropyLoss(reduction="sum")
-            for batch in dataset_val.batches_no_context(conf["val_config"]["batch_size"]):
+            for batch in dataset_val.batches(conf["val_config"]["batch_size"]):
                 for features, labels in batch:
                     features = [feature.to(device) for feature in features]
                     labels = [label.to(device) for label in labels]
                     result: torch.Tensor = model(features, labels)[0]
                     total_tokens += result.shape[0]
-                    total_loss += sum_criterion(result, torch.argmax(torch.cat(labels), dim=1)).item()
+                    total_loss += sum_criterion(result, torch.argmax(labels[0], dim=1)).item()
                     result_argmax = torch.argmax(result, dim=1)
                     result_one_hot = nn.functional.one_hot(result_argmax, dataset.d_alphabet)
-                    total_correct += (result_one_hot * torch.cat(labels)).sum().item()
+                    total_correct += (result_one_hot * labels[0]).sum().item()
             logger.info(f"Per-token out-of-context loss: {total_loss / total_tokens}")
             logger.info(f"Per-token out-of-context accuracy: {total_correct / total_tokens}")
             logger.info("-" * 80)

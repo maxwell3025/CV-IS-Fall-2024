@@ -108,7 +108,7 @@ class SequenceStack(ocr_model.OcrModel):
             x_new = layer(x)
             assert x_new.shape == (batch_size, length, self.d_intermediate)
 
-            x_new = nn.functional.layer_norm(x_new, x.shape)
+            # x_new = nn.functional.layer_norm(x_new, x.shape)
             if self.skip_connection:
                 x = x + x_new
             else:

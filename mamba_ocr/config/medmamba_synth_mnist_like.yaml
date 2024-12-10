@@ -39,24 +39,24 @@ base:
       - "ss_conv_ssm"
       - "ss_conv_ssm"
     stack_options:
-      - drop_path: 0.0
+      - drop_path: 0.5
         attn_drop_rate: 0
         d_state: 256
-      - drop_path: 0.0
-        attn_drop_rate: 0
-        d_state: 256
-      - {}
-      - drop_path: 0.0
-        attn_drop_rate: 0
-        d_state: 256
-      - drop_path: 0.0
+      - drop_path: 0.5
         attn_drop_rate: 0
         d_state: 256
       - {}
-      - drop_path: 0.0
+      - drop_path: 0.5
         attn_drop_rate: 0
         d_state: 256
-      - drop_path: 0.0
+      - drop_path: 0.5
+        attn_drop_rate: 0
+        d_state: 256
+      - {}
+      - drop_path: 0.5
+        attn_drop_rate: 0
+        d_state: 256
+      - drop_path: 0.5
         attn_drop_rate: 0
         d_state: 256
     final_mamba_options:
