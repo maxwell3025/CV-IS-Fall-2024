@@ -1,13 +1,11 @@
 \section{Abstract}
 Recently, Mamba has emerged as a powerful model for sequence prediction.
 In particular, Mamba has been shown to have a strong inductive bias for the
-induction heads task. In this paper, we experiment with multiple model
-architectures, including [TODO], and find that
-
-2 options:
-
-...[Model Architecture] performs better than established models on text
-prediction in on the [Insert Dataset].
-
-...Mamba fails to use context information in order to improve accuracy on OCR
-tasks.
+induction heads task. In this paper, we experiment with two model architectures:
+multi-layer Mamba and MedMamba. 
+State space models have been widely studied for their use in for both language
+tasks\cite{mamba} and vision tasks\cite{medmamba} \cite{vmamba} \cite{s4}.
+A natural synthesis of these 2 areas is optical character recognition.
+In particular, we find that Mamba's ability to learn from context allows it to
+perform better on OCR tasks when given environmental context in single-character
+recognition tasks.
