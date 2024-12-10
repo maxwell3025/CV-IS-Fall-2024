@@ -131,7 +131,7 @@ Images within the same context have the same foreground and background color,
 but images in different contexts might have different colors.
 Like with COCO-Text, the label strings in this datasets are ended with a special
 terminator character.
-An example is shown in Figure \ref{syntheticexamples}\ref{sub@syntheticwordsexample}.
+An example is shown in Figure \ref{syntheticwordsexample}.
 It is also important to note that positional encodings are omitted since there
 is no "original" image that the text instances are placed in.
 
@@ -141,8 +141,7 @@ foreground/background mean within a dataset.
 \subsubsection{Synthetic Digits}
 This dataset is similar to the synthetic words dataset, except that instead of
 entire words, this dataset is just images of single letters.
-In addition, the labels are not terminated, since they are all the same length.
-An example is shown in Figure \ref{syntheticexamples}\ref{sub@syntheticdigitsexample}
+An example is shown in Figure \ref{syntheticdigitsexample}
 
 \subsection{Models}
 In our experiments, we evaluate 2 models.
@@ -186,3 +185,27 @@ number of channels in the gating vector.
 
 Like MedMamba, we use Patch Merging layers(originally introduced by the SWin
 Transformer architecture \cite{swintrans}).
+
+\subsection{Validation Set}
+In our tests, we validate the models against 2 different datasets: the
+in-context validation set, and the shuffled-context validation set.
+The in-context validation set is simply a smaller split samples from the same
+population as the training data.
+The shuffled context validation set is the in-context validation set, but the
+instances are shuffled, meaning that each image/word pair is replaced with
+another random image-word pair from the original validation set.
+This validation set tests whether the model is using the rest of the context for
+text prediction.
+Models that ignore the previous image/label pairs from the context are expected
+to perform the same on both sets.
+Models that rely on previous image/label pairs are expected to perform worse,
+since their state is now "contaminated" with unrelated data.
+
+\subsection{Hyperparameters}
+For sequence stack, we set the \verb|d_model| and \verb|d_state| both to 256.
+We set the layer count to 4 and set the intermediate size to 128.
+
+For the MedMamba stack, we set the input dimension to 16, we set \verb|d_state|
+to 256 for all mamba layers, and set \verb|d_model| to 256 for the final Mamba
+layer.
+We also set the droppath probability to 0.5.

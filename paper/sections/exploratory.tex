@@ -113,7 +113,93 @@ other layers.
 Drop-path would allow the other layers to then learn to solve the tasks without
 being influenced by the Mamba layer.
 
-\subsection{Weak Generalization on Counter CFGs}
-Another interesting finding from the literature is that 
+In order to confirm these findings, we test a mixed Mamba model to solve a task
+that Mamba alone cannot solve.
+
+\textbf{Model} Our model in this test is identical to the model shown in
+Figure \ref{simplestack}, except that 2 input layers are replaced with LSTM
+layers.
+In addition, drop path layers are placed after each Mamba layer.
+
+\textbf{Dataset} We train our models to recognize even-length bitstrings.
+It has been shown that Mamba cannot find parity\cite{ssmformal}, while parity
+is a trivial task for LSTM architectures.
+
+\textbf{Results}
+\begin{figure}
+    \begin{subfigure}{0.5\textwidth}
+        \begin{center}
+        \includegraphics[width=0.8\textwidth]{figures/parity_lstm_False_3_1.png.png}
+        \end{center}
+    \end{subfigure}\begin{subfigure}{0.5\textwidth}
+        \begin{center}
+        \includegraphics[width=0.8\textwidth]{figures/parity_lstm_True_3_1.png.png}
+        \end{center}
+    \end{subfigure}
+    \begin{subfigure}{0.5\textwidth}
+        \begin{center}
+        \includegraphics[width=0.8\textwidth]{figures/parity_lstm_False_3_2.png.png}
+        \end{center}
+    \end{subfigure}\begin{subfigure}{0.5\textwidth}
+        \begin{center}
+        \includegraphics[width=0.8\textwidth]{figures/parity_lstm_True_3_2.png.png}
+        \end{center}
+    \end{subfigure}
+    \begin{subfigure}{0.5\textwidth}
+        \begin{center}
+        \includegraphics[width=0.8\textwidth]{figures/parity_lstm_False_4_1.png.png}
+        \end{center}
+    \end{subfigure}\begin{subfigure}{0.5\textwidth}
+        \begin{center}
+        \includegraphics[width=0.8\textwidth]{figures/parity_lstm_True_4_1.png.png}
+        \end{center}
+    \end{subfigure}
+    \begin{subfigure}{0.5\textwidth}
+        \begin{center}
+        \includegraphics[width=0.8\textwidth]{figures/parity_lstm_False_4_2.png.png}
+        \end{center}
+    \end{subfigure}\begin{subfigure}{0.5\textwidth}
+        \begin{center}
+        \includegraphics[width=0.8\textwidth]{figures/parity_lstm_True_4_2.png.png}
+        \end{center}
+    \end{subfigure}
+    \begin{subfigure}{0.5\textwidth}
+        \begin{center}
+        \includegraphics[width=0.8\textwidth]{figures/parity_lstm_False_5_1.png.png}
+        \end{center}
+    \end{subfigure}\begin{subfigure}{0.5\textwidth}
+        \begin{center}
+        \includegraphics[width=0.8\textwidth]{figures/parity_lstm_True_5_1.png.png}
+        \end{center}
+    \end{subfigure}
+    \begin{subfigure}{0.5\textwidth}
+        \begin{center}
+        \includegraphics[width=0.8\textwidth]{figures/parity_lstm_False_5_2.png.png}
+        \end{center}
+    \end{subfigure}\begin{subfigure}{0.5\textwidth}
+        \begin{center}
+        \includegraphics[width=0.8\textwidth]{figures/parity_lstm_True_5_2.png.png}
+        \end{center}
+    \end{subfigure}
+    \caption{Results for parity}
+    \label{droppathresults}
+\end{figure}
+as shown in Figure \ref{droppathresults}, all of the stacks with droppath
+generalized within 5000 training steps, while only 3 of the 6 runs generalized
+without Drop Path.
+
+\subsection{Ability to recognize CFGs}
+
+\textbf{Rationale} An interesting finding from the literature is that Mamba is
+theoretically capable of recognizing some CFGs. For instance, SSMs are
+theoretically capable of recognizing any Dyck language by implementing internal
+counters.
+
+An important component of many CFG-related operations is matching strings to
+non-terminal symbols.
+
+
+
+
 % explain that hyperparameters in original paper were unreasonable and risking
 % overfitting
