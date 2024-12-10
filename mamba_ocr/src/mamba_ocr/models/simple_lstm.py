@@ -1,6 +1,7 @@
 import torch
 from torch import nn
 
+
 class SimpleLSTM(nn.Module):
     def __init__(
         self,
@@ -15,7 +16,7 @@ class SimpleLSTM(nn.Module):
         self.output_dim = output_dim
         self.hidden_dim = hidden_dim
  
-        #lstm
+        # lstm
         self.lstm = nn.LSTM(
             input_size=self.hidden_dim,
             hidden_size=self.hidden_dim,
@@ -59,5 +60,5 @@ class SimpleLSTM(nn.Module):
         device = next(self.parameters()).device
         h0 = torch.zeros((1, batch_size, self.hidden_dim)).to(device)
         c0 = torch.zeros((1, batch_size, self.hidden_dim)).to(device)
-        hidden = (h0,c0)
+        hidden = (h0, c0)
         return hidden

@@ -10,6 +10,7 @@ from . import util
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
 logger = logging.getLogger()
 
+
 class SequenceStackConfig:
     def __init__(self, **kwargs: Any) -> None:
         self.n_layer = int(kwargs["n_layer"])
@@ -24,6 +25,7 @@ class SequenceStackConfig:
         self.mamba_d_model = int(kwargs["mamba_d_model"])
         self.mamba_d_state = int(kwargs["mamba_d_state"])
         self.mamba_d_conv = int(kwargs["mamba_d_conv"])
+
 
 class SequenceStack(ocr_model.OcrModel):
     """TODO format this docstring
@@ -104,8 +106,7 @@ class SequenceStack(ocr_model.OcrModel):
 
         for layer in self.layers:
             x_new = layer(x)
-            assert x_new.shape == (batch_size, length,
-                                   self.d_intermediate)
+            assert x_new.shape == (batch_size, length, self.d_intermediate)
 
             x_new = nn.functional.layer_norm(x_new, x.shape)
             if self.skip_connection:
@@ -145,8 +146,8 @@ class SequenceStack(ocr_model.OcrModel):
                 dt_info.append(dt)
             else:
                 x_new = layer(x)
-            assert x_new.shape == (batch_size, length,
-                                   self.config.d_intermediate)
+
+            assert x_new.shape == (batch_size, length, self.config.d_intermediate)
 
             if self.config.skip_connection:
                 x = x + x_new
@@ -156,6 +157,6 @@ class SequenceStack(ocr_model.OcrModel):
         x = self.fc2(x)
         assert x.shape == (batch_size, length, self.config.d_output)
 
-        if num_last_tokens != None:
+        if num_last_tokens:
             x = x[:, -num_last_tokens:, :]
         return x, dt_info

@@ -2,6 +2,7 @@ from abc import abstractmethod
 import torch
 from torch import nn
 
+
 class OcrModel(nn.Module):
     @abstractmethod
     def forward(

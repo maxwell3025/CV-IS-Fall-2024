@@ -7,9 +7,9 @@ import torch
 from torch import nn
 from typing import Any
 
+
 class MedmambaStack(ocr_model.OcrModel):
-    """Rough copy of MedMamba with context injection.
-    """
+    # Rough copy of MedMamba with context injection.
     def __init__(
         self,
         d_feature: int,
@@ -65,19 +65,22 @@ class MedmambaStack(ocr_model.OcrModel):
         labels: list[torch.Tensor]
     ) -> list[torch.Tensor]:
         assert len(features[0].shape) == 3, ("Expected features to be a list "
-        "of [C, H, W] tensors. Received a tensor with shape "
-        f"{features[0].shape}.")
+                                             "of [C, H, W] tensors. Received a tensor "
+                                             "with shape " f"{features[0].shape}.")
 
         C, H_0, W_0 = features[0].shape
         assert C == self.d_feature, (f"Expected images with {self.d_feature} "
-        f"channels. Received a tensor with shape {features[0].shape}")
+                                     f"channels. Received a tensor "
+                                     f"with shape {features[0].shape}")
 
         assert len(labels[0].shape) == 2, ("Expected labels to be a list of "
-        f"[L, D] tensors. Received a tensor with shape {labels[0].shape}")
+                                           f"[L, D] tensors. Received a tensor "
+                                           f"with shape {labels[0].shape}")
 
         L_0, D = labels[0].shape
         assert D == self.d_label, (f"Expected labels to have {self.d_label} "
-        f"channels. Received a tensor with shape {labels[0].shape}")
+                                   f"channels. Received a tensor "
+                                   f"with shape {labels[0].shape}")
 
         x = [feature.permute(1, 2, 0) for feature in features]
         assert x[0].shape == (H_0, W_0, C)
@@ -103,6 +106,7 @@ class MedmambaStack(ocr_model.OcrModel):
 
         current_index = -1
         output = []
+
         for i in range(len(feature_sizes)):
             current_index += feature_sizes[i]
             output.append(x[current_index:current_index + label_sizes[i]])

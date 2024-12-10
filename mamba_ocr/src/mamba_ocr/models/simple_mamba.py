@@ -4,6 +4,7 @@ import torch
 from torch import nn
 from typing import Any
 
+
 class SimpleMAMBA(nn.Module):
     def __init__(
         self,
@@ -15,7 +16,7 @@ class SimpleMAMBA(nn.Module):
     ):
         """This is a simple wrapper for a MAMBA layer.
 
-        This model takes tensors of the shape (B, L, I), and inputs tensors of
+        This model takes tensors of the shape (B, L, I), and input tensors of
         the shape (B, L, O), where
         - B represents the batch size.
         - L represents the sequence length.
@@ -52,7 +53,7 @@ class SimpleMAMBA(nn.Module):
 
     def forward(self, x: torch.Tensor):
         assert len(x.shape) == 3, ("Expected a [B, L, D] tensor. Received a "
-        f"Tensor with shape {x.shape}.")
+                                   f"Tensor with shape {x.shape}.")
         batch_size = x.shape[0]
         length = x.shape[1]
 
@@ -99,12 +100,14 @@ class SimpleMAMBA(nn.Module):
         batch, seqlen, dim = hidden_states.shape
 
         conv_state, ssm_state = None, None
+
         # We do matmul and transpose BLH -> HBL at the same time
         xz = mamba_simple.rearrange(
             self.layer.in_proj.weight @ mamba_simple.rearrange(hidden_states, "b l d -> d (b l)"),
             "d (b l) -> b d l",
             l=seqlen,
         )
+
         if self.layer.in_proj.bias is not None:
             xz = xz + mamba_simple.rearrange(self.layer.in_proj.bias.to(dtype=xz.dtype), "d -> d 1")
 

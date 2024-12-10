@@ -17,6 +17,7 @@ from unique_names_generator import get_random_name
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
 logger = logging.getLogger()
 
+
 def validate(
     task: synthetic_languages.LanguageSelectTask,
     model: nn.Module,
@@ -25,7 +26,7 @@ def validate(
     device: torch.device,
     additional_params: dict[str, any],
 ):
-    """Test the ability for a model to distinguish multiple context free
+    """Test the ability for a model to distinguish multiple context-free
     languages.
 
     Args:
@@ -51,6 +52,7 @@ def validate(
         for validation_length in val_lengths:
             old_positive = dataset_config.positive_rate
             dataset_config.positive_rate = 0.5
+
             inputs, targets = synthetic_languages.sample_batch(
                 task=task,
                 length=validation_length,
@@ -58,12 +60,14 @@ def validate(
                 randomize=False,
                 one_hot=dataset_config.one_hot,
             )
+
             alphabet_length = inputs.shape[2]
             assert inputs.shape == (dataset_config.batch_size, validation_length, alphabet_length)
             assert targets.shape == (dataset_config.batch_size,)
 
             inputs = inputs.to(device)
             targets = targets.to(device)
+
             outputs: torch.Tensor = model(inputs, num_last_tokens=1).squeeze(dim=1)
             output_dim = outputs.shape[1]
             assert outputs.shape == (dataset_config.batch_size, output_dim)
@@ -73,15 +77,18 @@ def validate(
 
             accuracy = 100 * correct / total
             print(accuracy)
-            log_object.append(dict(
-                accuracy=accuracy,
-                validation_length=validation_length,
-                dataset_config=dataset_config.__dict__,
-                **additional_params,
-            ))
+            log_object.append(
+                dict(
+                    accuracy=accuracy,
+                    validation_length=validation_length,
+                    dataset_config=dataset_config.__dict__,
+                    **additional_params,
+                )
+            )
             dataset_config.positive_rate = old_positive
     model.train()
     return log_object
+
 
 def train(
     task: synthetic_languages.LanguageSelectTask,
@@ -116,6 +123,7 @@ def train(
     optimizer = optim.Adam(model.parameters(), lr=training_config.learning_rate)
     model.train()
     start_time = time.time()
+
     for step in range(training_config.num_steps):
         batch_length = dataset_config.training_length
         inputs, targets = synthetic_languages.sample_batch(
@@ -125,8 +133,8 @@ def train(
             randomize=dataset_config.randomize_training_length,
             one_hot=dataset_config.one_hot,
         )
-        train_length_actual = inputs.shape[1]
-        alphabet_length = inputs.shape[2]
+
+        train_length_actual, alphabet_length = inputs.shape
         assert inputs.shape == (dataset_config.batch_size, train_length_actual, alphabet_length)
         assert targets.shape == (dataset_config.batch_size,)
 
@@ -141,6 +149,7 @@ def train(
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
+
         if step % training_config.val_interval == 0:
             log_object = log_object + validate(
                 task=task,
@@ -163,6 +172,7 @@ def train(
         f"Training instance completed in: {train_time_mins:.2f} minutes"
     )
     return model, log_object
+
 
 def manual_test(model: sequence_stack.SequenceStack, device: torch.device):
     data = torch.Tensor([[
@@ -195,7 +205,8 @@ def manual_test(model: sequence_stack.SequenceStack, device: torch.device):
     print(
         json.dumps(dt, indent=4)
     )
-    print( "=" * 80)
+    print("=" * 80)
+
 
 def main():
     if len(sys.argv) != 2:
@@ -204,12 +215,12 @@ def main():
     config_uri = sys.argv[1]
 
     # For this test, we will use the parity language
-    task=synthetic_languages.a_or_bb_plus(64)
+    task = synthetic_languages.a_or_bb_plus(64)
 
     # We will put all of our logs and checkpoints into a subfolder in output,
     # where the subfolder name is a random adjective_noun name.
     # We will save the folder name in a variable.
-    folder_name = f"./output/{get_random_name(separator="_", style="lowercase")}"
+    folder_name = f"./output/{get_random_name(separator='_', style='lowercase')}"
     os.makedirs(folder_name, exist_ok=True)
     logger.info(f"Saving to output to {folder_name}")
     validation_logs_object = []
@@ -218,17 +229,16 @@ def main():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     logger.info(f'Using device: {device}')
 
-    for (training_config, dataset_config,
-        mamba_config, iteration) in iterate_sweep(config_uri):
-
+    for (
+        training_config,
+        dataset_config,
+        mamba_config,
+        iteration
+    ) in iterate_sweep(config_uri):
         model = sequence_stack.SequenceStack(mamba_config)
         model.to(device)
 
-        logger.info(f"Training {dict(
-            **dataset_config.__dict__,
-            **training_config.__dict__,
-            **mamba_config.__dict__
-        )}")
+        logger.info(f"Training {dict(**dataset_config.__dict__, **training_config.__dict__, **mamba_config.__dict__)}")
 
         model, training_validation_logs = train(
             task=task,
@@ -241,7 +251,6 @@ def main():
         )
 
         validation_logs_object += training_validation_logs
-
         validation_logs_object += validate(
             task=task,
             model=model,
@@ -268,9 +277,11 @@ def main():
                 mamba_config.n_layer,
             ),
         )
+
     json_logs_path = f"{folder_name}/validation_logs.json"
     with open(json_logs_path, "w") as validation_logs_json:
         json.dump(validation_logs_object, validation_logs_json)
+
 
 if __name__ == "__main__":
     main()

@@ -1,6 +1,7 @@
 import torch
 from torch import nn
 
+
 class PatchMerging2D(nn.Module):
     """Patch merging layer adapted from MedMamba.
     Args:
@@ -15,43 +16,43 @@ class PatchMerging2D(nn.Module):
         self.d_input = dim
 
     def forward(self, x: torch.Tensor):
-        assert len(x.shape) == 3, "PatchMerging2D only accepts [C, H, W] "
+        assert len(x.shape) == 3, "PatchMerging2D only accepts [c, h, w] "
         f"tensors. Received rank {len(x.shape)} tensor with shape {x.shape}"
-        C, H, W = x.shape
-        assert C == self.d_input, "Expected channel count to be "
+        c, h, w = x.shape
+        assert c == self.d_input, "Expected channel count to be "
         f"{self.d_input}. Received tensor with shape {x.shape}"
 
-        H_out = H // 2
-        W_out = W // 2
-        H_crop = H_out * 2
-        W_crop = W_out * 2
+        h_out = h // 2
+        w_out = w // 2
+        h_crop = h_out * 2
+        w_crop = w_out * 2
 
         # We crop the image to the largest even dimensions that don't require
         # padding.
         # Unlike MedMamba, we have no constraints on the heights and widths
         # coming into this layer, so we crop by default.
-        x0 = x[:, 0:H_crop    :2, 0:W_crop    :2]
-        x1 = x[:, 1:H_crop + 1:2, 0:W_crop    :2]
-        x2 = x[:, 0:H_crop    :2, 1:W_crop + 1:2]
-        x3 = x[:, 1:H_crop + 1:2, 1:W_crop + 1:2]
-        assert x0.shape == (C, H_out, W_out)
-        assert x1.shape == (C, H_out, W_out)
-        assert x2.shape == (C, H_out, W_out)
-        assert x3.shape == (C, H_out, W_out)
+        x0 = x[:, 0:h_crop    :2, 0:w_crop    :2]
+        x1 = x[:, 1:h_crop + 1:2, 0:w_crop    :2]
+        x2 = x[:, 0:h_crop    :2, 1:w_crop + 1:2]
+        x3 = x[:, 1:h_crop + 1:2, 1:w_crop + 1:2]
+        assert x0.shape == (c, h_out, w_out)
+        assert x1.shape == (c, h_out, w_out)
+        assert x2.shape == (c, h_out, w_out)
+        assert x3.shape == (c, h_out, w_out)
 
         x = torch.cat([x0, x1, x2, x3], 0)
-        assert x.shape == (C * 4, H_out, W_out)
+        assert x.shape == (C * 4, h_out, w_out)
 
         x = x.permute(1, 2, 0)
-        assert x.shape == (H_out, W_out, C * 4)
+        assert x.shape == (h_out, w_out, c * 4)
 
         x = self.norm(x)
-        assert x.shape == (H_out, W_out, C * 4)
+        assert x.shape == (h_out, w_out, c * 4)
 
         x = self.reduction(x)
-        assert x.shape == (H_out, W_out, C * 2)
+        assert x.shape == (h_out, w_out, c * 2)
 
         x = x.permute(2, 0, 1)
-        assert x.shape == (C * 2, H_out, W_out)
+        assert x.shape == (c * 2, h_out, w_out)
 
         return x

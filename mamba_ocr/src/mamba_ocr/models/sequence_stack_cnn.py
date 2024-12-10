@@ -2,6 +2,7 @@ from . import sequence_stack
 import torch
 from torch import nn
 
+
 class SequenceStackCnnConfig(sequence_stack.SequenceStackConfig):
     def __init__(self, config: dict[str, any]) -> None:
         super(SequenceStackCnnConfig, self).__init__(config)
@@ -9,7 +10,8 @@ class SequenceStackCnnConfig(sequence_stack.SequenceStackConfig):
         self.conv_d_input = int(config["conv_d_input"])
         self.conv_d_intermediate = int(config["conv_d_intermediate"])
         self.conv_d_output = int(config["conv_d_input"])
-        
+
+
 class SequenceStackCnn(sequence_stack.SequenceStack):
     def __init__(
         self,
@@ -21,8 +23,7 @@ class SequenceStackCnn(sequence_stack.SequenceStack):
     def forward(self, x: torch.Tensor, num_last_tokens=None):
         # The input must be a rank 3 tensor
         assert len(x.shape) == 3
-        batch_size = x.shape[0]
-        length = x.shape[1]
+        batch_size, length = x.shape
         assert x.shape[2] == self.config.d_input
 
         x = self.fc1(x)
@@ -30,8 +31,7 @@ class SequenceStackCnn(sequence_stack.SequenceStack):
 
         for layer in self.layers:
             x_new = layer(x)
-            assert x_new.shape == (batch_size, length,
-                                   self.config.d_intermediate)
+            assert x_new.shape == (batch_size, length, self.config.d_intermediate)
 
             if self.config.skip_connection:
                 x = x + x_new
@@ -41,7 +41,7 @@ class SequenceStackCnn(sequence_stack.SequenceStack):
         x = self.fc2(x)
         assert x.shape == (batch_size, length, self.config.d_output)
 
-        if num_last_tokens != None:
+        if num_last_tokens:
             x = x[:, -num_last_tokens:, :]
         return x
     
@@ -63,8 +63,8 @@ class SequenceStackCnn(sequence_stack.SequenceStack):
                 dt_info.append(dt)
             else:
                 x_new = layer(x)
-            assert x_new.shape == (batch_size, length,
-                                   self.config.d_intermediate)
+
+            assert x_new.shape == (batch_size, length, self.config.d_intermediate)
 
             if self.config.skip_connection:
                 x = x + x_new
@@ -74,7 +74,7 @@ class SequenceStackCnn(sequence_stack.SequenceStack):
         x = self.fc2(x)
         assert x.shape == (batch_size, length, self.config.d_output)
 
-        if num_last_tokens != None:
+        if num_last_tokens:
             x = x[:, -num_last_tokens:, :]
         return x, dt_info
     

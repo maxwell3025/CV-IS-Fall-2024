@@ -1,4 +1,4 @@
-from . import ocr_task
+from ocr_task import OcrTask
 import logging
 import numpy
 import random
@@ -8,7 +8,7 @@ from abc import abstractmethod
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
 logger = logging.getLogger()
 
-class OcrTaskBase(ocr_task.OcrTask):
+class OcrTaskBase(OcrTask):
     def __init__(
         self,
     ):
