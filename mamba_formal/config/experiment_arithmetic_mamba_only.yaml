@@ -79,7 +79,7 @@ base:
   d_output: 2
   skip_connection: true
   ## MAMBA settings
-  mamba_d_model: 4
+  mamba_d_model: 16
   mamba_d_state: 256
   mamba_d_conv: 4
   ## LSTM settings
