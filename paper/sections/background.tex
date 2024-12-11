@@ -1,19 +1,23 @@
 
 \section{Background on State Space Models}
-In this paper, we use a network architecture called Mamba, which is centered
-around a type of sequence-to-sequence model called a state space model(SSM).
+In this paper, we use a network architecture called Mamba, which is a variant
+around a family of sequence-to-sequence models called a state space
+models(SSMs).
 
 \subsection{State Space Models}
 State space models(abbreviated SSMs) are a type of sequence-to-sequence model
 that have recently found promising applications in language
 modeling\cite{mamba}, image processing\cite{medmamba}, and more\cite{s4}.
 
-The recent wave of SSMs has been discrete SSMs, which, as the name suggests, are
+The most common of SSMs used in machine learning are discrete SSMs, which are
 discrete versions of continuous SSMs.
-Continuous SSMs introduced by Kalman\cite{kalman} for signal processing, and
-they assume that the system that they are modeling has some internal state $s$
-that is affected by an input signal $x$, and produces an output signal $y$ based
-on $x$ and $s$.
+There are two broad categories of SSMs: continuous SSMs and discrete SSMs.
+Discrete SSMs based on continuous SSMs, so it is important to first understand
+continuous SSMs.
+Continuous SSMs were introduced by Kalman\cite{kalman} for signal processing,
+and they assume that the system that they are modeling has some internal state
+$s$ that is affected by an input signal $x$, and produces an output signal $y$
+based on $x$ and $s$.
 The governing equations are as follows:
 $$\begin{aligned}
     \frac{ds}{dt} &= \Ab\vec{s} + \Bb x \\
@@ -22,9 +26,6 @@ $$\begin{aligned}
 where $x, y, s$ are vectors, and $\Ab, \Bb, \Cb, \Db$ are matrices.
 These models can simulate a variety of systems, such as physics equations,
 financial equations, and more.
-
-A key observation is that all of the relationships are linear. This is one of
-the key properties used by discrete SSMs.
 
 \subsubsection{Discretization}
 Since we can't store general continuous sequences in hardware, real
@@ -48,11 +49,12 @@ $$\begin{aligned}
 \end{aligned}$$
 This scheme assumes that the input signal is constant within each timestep and
 uses the trapezoidal rule for integration.
-Note that $\Db$ is omitted. This is since the "pass-through" function of $\Db$
-can be easily emulated with this discretization.
+Note that $\Db$ is omitted. $\Db$ can be omitted without significantly weakening
+the model's expressive capacity since the formulas above can absorb $\Db$ into
+$\Bb$ and $\Cb$, but some models include $\Db$ as a sort of skip connection.
 
 \subsection{Hyperparameters}
-In the style of Gu et al. \cite{s4}, we will use the following notation for
+In the style of Gu et al. \cite{s4}, we use the following notation for
 dimensions:
 \begin{itemize}
     \item $B$ - The batch size.
@@ -73,32 +75,38 @@ The key development introduced by S4 is that the S4 parametrizes $\Ab$ as a
 normal-plus-low-rank(NPLR) matrix. The authors then use the spectral properties
 of these matrices in an algorithm that brings the training complexity from
 $O(BLN^2)$ down to $O(BN(N \log N + L \log L) + B(L \log L)N)$\cite{s4}.
-This allows the authors to achieve much higher state sizes than normal.
-% TODO: How Much?
+This allows the authors to compete with Transformers in terms of expressiveness.
 As for parameterization, S4 makes $\Lambda$, $\Pb$(Components of
 $\Ab = \Lambda - \Pb\Pb^*$), $\Bb$ and $\Cb$ trainable parameters.
 $\Delta$ is indirectly trainable by scaling $\Bb$ and $\Ab$.
 
 \subsection{Mamba}
 Mamba\cite{mamba} is the model architecture that we use in our experiments.
-Mamba introduces a new SSM architecture, called S6, and it provides a new block
-design for introducing gating.
+Mamba introduces a new SSM architecture, called S6, and introduces a new block
+design for increased selectivity.
 
 The S6 architecture is an improvement on the S4 architecture that introduces
 timesteps that vary within sequences.
-This breaks the algorithm introduced in S4, so the authors fall back on more
-general, existing optimizations in order to maintain performance with large
+This breaks the efficient algorithm introduced in S4, so the authors fall use
+more hardware-level optimizations in order to maintain performance with large
 state sizes.
-Variable timesteps allow the model to selectively "forget" and "ignore"
+
+The block model introduced by the authors is an improvement on the existing
+H3\cite{h3} architecture, and adds explicit selection functionality.
+
+The main development of the model is its increased ability to select and ignore
+data.
+This is achieved through several mechanisms, but two main ones are detailed
+extensively in the paper:
+Firstly, variable timesteps allow the model to selectively "forget" and "ignore"
 different values.
 If the timestep for a given input is set to a high value, the existing state
 will decay to close to 0, allowing the model to "forget" all previous information.
 If the timestep for a given input is set to a low value, the state has very little
 time to be influences, and in the case of the timestep being 0 or almost 0, it
 is as if the model "skips over" the given input token.
-
-The block model introduced by the authors is an improvement on the existing
-H3\cite{h3} architecture, and adds explicit selection functionality.
+The second mechanism is the ability for the explicit gating path in the block
+architecture, which allows models to "spot-ignore" input data.
 
 This allows the model to perform well on copying tasks, which we hypothesize
 is crucial for in-context character recognition.
