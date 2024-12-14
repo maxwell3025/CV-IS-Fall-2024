@@ -143,20 +143,46 @@ This dataset is similar to the synthetic words dataset, except that instead of
 entire words, this dataset is just images of single letters.
 An example is shown in Figure \ref{syntheticdigitsexample}
 
+\subsection{Validation Set}
+In each of our tests, we validate the models against 2 different datasets: the
+in-context validation set, and the shuffled-context validation set.
+The in-context validation set is just a smaller set of contexts sampled from the
+same population as the training data.
+The shuffled context validation set is a modified version of the in-context
+validation set where the instances are shuffled with the following algorithm;
+\begin{enumerate}
+    \item Initialize the output set as a copy of the in-context validation set.
+    \item Let the current instance be the first image/word pair in the first
+        context in the output set.
+    \item Pick a random image/word pair from the in-context validation set.
+    \item Set the current instance to be the chosen image/word pair.
+    \item Repeat steps 2-4 for all instances image/word pairs in the output set.
+\end{enumerate}
+The resulting set contains contexts that have the same shape as the original
+contexts, but the actual image/word pairs in the shape are unrelated to each
+other.
+This validation set tests whether the model is using the context for text
+prediction.
+Models that ignore the previous image/label pairs from the context are expected
+to perform the same on both sets, since individual image/word pairs are left
+unchanged by this shuffling procedure.
+Models that rely on previous image/label pairs are expected to perform worse,
+since at best, they lose the ability to learn from context, and at worst, they
+actually learn incorrect information from the unrelated images.
+
 \subsection{Models}
 In our experiments, we evaluate 2 models.
 
-\subsubsection{Sequence Stack}
+\subsubsection{Multi-Layer Mamba}
 \begin{figure}[ht]
     \includegraphics[width=\textwidth]{figures/sequence_stack.pdf}
-    \caption{Sequence Stack Architecture}
+    \caption{Multi-Layer Mamba Architecture}
     \label{sequencestack}
 \end{figure}
 The first model architecture that we test is a multi-layer Mamba architecture.
 The method used for converting images is column-wise flattening. That is, we map
 pixels in the image to tokens in the sequence such that each pixel is placed
 next to the pixel directly above and below.
-These 
 The full architecture is shown in Figure \ref{sequencestack}.
 
 \subsubsection{MedMamba}
@@ -174,11 +200,11 @@ The full architecture is shown in Figure \ref{sequencestack}.
     \caption{MedMamba}
     \label{medmambastack}
 \end{figure}
-Another model architecture we look at is based on the MedMamba
+The second model architecture we look at is based on the MedMamba
 architecture\cite{medmamba}.
 The main difference between MedMamba's architecture and our architecture is that
-We modify the SS2D block(boxed in red in Figure \ref{medmambastacklow}) to include context injection for each scanning
-path.
+We modify the SS2D block(boxed in red in Figure \ref{medmambastacklow}) to
+include context injection for each scanning path.
 Since context injection adds new channels, we also add a linear layer to the
 output of the SS2D block to ensure that the number of channels matches the
 number of channels in the gating vector.
@@ -186,26 +212,11 @@ number of channels in the gating vector.
 Like MedMamba, we use Patch Merging layers(originally introduced by the SWin
 Transformer architecture \cite{swintrans}).
 
-\subsection{Validation Set}
-In our tests, we validate the models against 2 different datasets: the
-in-context validation set, and the shuffled-context validation set.
-The in-context validation set is simply a smaller split samples from the same
-population as the training data.
-The shuffled context validation set is the in-context validation set, but the
-instances are shuffled, meaning that each image/word pair is replaced with
-another random image-word pair from the original validation set.
-This validation set tests whether the model is using the rest of the context for
-text prediction.
-Models that ignore the previous image/label pairs from the context are expected
-to perform the same on both sets.
-Models that rely on previous image/label pairs are expected to perform worse,
-since their state is now "contaminated" with unrelated data.
-
 \subsection{Hyperparameters}
-For sequence stack, we set the \verb|d_model| and \verb|d_state| both to 256.
+For multi-layer Mamba, we set the \verb|d_model| and \verb|d_state| both to 256.
 We set the layer count to 4 and set the intermediate size to 128.
 
 For the MedMamba stack, we set the input dimension to 16, we set \verb|d_state|
 to 256 for all mamba layers, and set \verb|d_model| to 256 for the final Mamba
 layer.
-We also set the droppath probability to 0.5.
+We also set the drop path probability to 0.5.
