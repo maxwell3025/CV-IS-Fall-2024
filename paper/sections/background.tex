@@ -9,29 +9,33 @@ State space models(abbreviated SSMs) are a type of sequence-to-sequence model
 that have recently found promising applications in language
 modeling\cite{mamba}, image processing\cite{medmamba}, and more\cite{s4}.
 
-The most common of SSMs used in machine learning are discrete SSMs, which are
-discrete versions of continuous SSMs.
 There are two broad categories of SSMs: continuous SSMs and discrete SSMs.
 Discrete SSMs based on continuous SSMs, so it is important to first understand
 continuous SSMs.
-Continuous SSMs were introduced by Kalman\cite{kalman} for signal processing,
-and they assume that the system that they are modeling has some internal state
-$s$ that is affected by an input signal $x$, and produces an output signal $y$
-based on $x$ and $s$.
-The governing equations are as follows:
+Continuous SSMs were introduced by Kalman\cite{kalman} as a generalization of
+certain signal filters.
+Given an input signal $x$, which is a vector that depends on time, it produces
+an output signal $y$, which is another(possibly differently-sized) vector that
+depends on time based on the following formula:
 $$\begin{aligned}
     \frac{ds}{dt} &= \Ab\vec{s} + \Bb x \\
     y &= \Cb\vec{s} + \Db x
 \end{aligned}$$
-where $x, y, s$ are vectors, and $\Ab, \Bb, \Cb, \Db$ are matrices.
+, where $\Ab, \Bb, \Cb, \Db$ determine the specific dynamics of the system.
+One interpretation is that continuous SSMs model an internal state $s$ that is
+linearly affected by the input signal $x$, and produce an output signal $y$
+based on $x$ and $s$.
+Another perspective is that continuous SSMs are a generalization of matrix
+differential equations, where the system is driven by an input signal $x$ and
+the output signal is projected, possibly destroying information.
+
 These models can simulate a variety of systems, such as physics equations,
 financial equations, and more.
 
 \subsubsection{Discretization}
 Since we can't store general continuous sequences in hardware, real
-implementations of SSMs typically approximate the dynamics across discrete
-timesteps.
-A common method for discretizing SSMs is used by Gu et al. \cite{s4}
+implementations of SSMs approximate the dynamics across discrete timesteps.
+A common method for discretizing SSMs was introduced by Gu et al. \cite{s4}
 $$\begin{aligned}
     s_k &= \overline \Ab s_{k-1} + \overline \Bb x_k
     &
@@ -47,15 +51,22 @@ $$\begin{aligned}
     &
     \overline \Cb &= \Cb
 \end{aligned}$$
+, where $\Delta$ is the timestep.
 This scheme assumes that the input signal is constant within each timestep and
 uses the trapezoidal rule for integration.
-Note that $\Db$ is omitted. $\Db$ can be omitted without significantly weakening
-the model's expressive capacity since the formulas above can absorb $\Db$ into
-$\Bb$ and $\Cb$, but some models include $\Db$ as a sort of skip connection.
+Note that $\Db$ is omitted since many model architectures, such as Mamba,
+include skip connections, which make $\Db$ redundant.
 
 \subsection{Hyperparameters}
-In the style of Gu et al. \cite{s4}, we use the following notation for
-dimensions:
+For the specific SSM architectures that we will discuss, the core SSM layers
+will all be setup so they split the input signal dimension-wise into many
+1-dimensional signals and feed them individually through parallel SSMs.
+This means that all of the SSMs will have an input and output dimension size of
+1.
+This is done to maximize the internal state size.
+
+In the style of Gu et al. \cite{s4}, we use the following notation for the
+remaining hyperparameters:
 \begin{itemize}
     \item $B$ - The batch size.
     \item $L$ - The length of the sequence.
@@ -63,8 +74,6 @@ dimensions:
     actual number of input channels.
     \item $N$ - The state size for each SSM.
 \end{itemize}
-Note that the input and output sizes are omitted.
-These are generally both set to 1.
 
 \subsection{S4}
 S4\cite{s4} is one implementation of state space models that implements the
@@ -72,41 +81,47 @@ scheme detailed above.
 S4 uses an initialization for $\Ab$ based on the HiPPO framework, which is
 designed to efficiently represent long-range dependencies.
 The key development introduced by S4 is that the S4 parametrizes $\Ab$ as a
-normal-plus-low-rank(NPLR) matrix. The authors then use the spectral properties
-of these matrices in an algorithm that brings the training complexity from
-$O(BLN^2)$ down to $O(BN(N \log N + L \log L) + B(L \log L)N)$\cite{s4}.
-This allows the authors to compete with Transformers in terms of expressiveness.
-As for parameterization, S4 makes $\Lambda$, $\Pb$(Components of
-$\Ab = \Lambda - \Pb\Pb^*$), $\Bb$ and $\Cb$ trainable parameters.
-$\Delta$ is indirectly trainable by scaling $\Bb$ and $\Ab$.
+normal-plus-low-rank(NPLR) matrix -- a matrix that can be written as
+$$
+\Ab = \Lambda - \Pb\Pb^*
+$$
+, where $\Lambda$ is a diagonal matrix and $\Pb$ is a column vector. The authors
+then use the spectral properties of these matrices in an algorithm that brings
+the training complexity from $O(BLN^2)$ down to
+$O(BN(N \log N + L \log L) + B(L \log L)N)$\cite{s4}. This allows the model to
+use 99.7\% less memory compared to LSSLs, another popular SSM model at the time.
+Using the increased model size made feasible with the efficient algorithm, they
+were able to achieve SOTA on the task LRA Path-X \cite{lra}.
 
 \subsection{Mamba}
 Mamba\cite{mamba} is the model architecture that we use in our experiments.
 Mamba introduces a new SSM architecture, called S6, and introduces a new block
-design for increased selectivity.
+design around this SSM layer for increased selectivity.
 
 The S6 architecture is an improvement on the S4 architecture that introduces
-timesteps that vary within sequences.
-This breaks the efficient algorithm introduced in S4, so the authors fall use
-more hardware-level optimizations in order to maintain performance with large
-state sizes.
+timesteps that vary based on the input data.
+This breaks the efficient algorithm introduced in S4, so the authors design a
+hardware-aware algorithm to maintain performance with large state sizes.
 
-The block model introduced by the authors is an improvement on the existing
-H3\cite{h3} architecture, and adds explicit selection functionality.
+The authors also introduce a new block model, which improves on the
+existing H3\cite{h3} architecture and adds explicit selection functionality.
 
-The main development of the model is its increased ability to select and ignore
-data.
-This is achieved through several mechanisms, but two main ones are detailed
-extensively in the paper:
+The main advantage enabled by these changes is an increased ability to
+selectively ignore data.
+The authors propose several mechanisms for these effects, but the paper focuses
+on two primary mechanisms.
 Firstly, variable timesteps allow the model to selectively "forget" and "ignore"
-different values.
+specific sequence elements.
 If the timestep for a given input is set to a high value, the existing state
-will decay to close to 0, allowing the model to "forget" all previous information.
-If the timestep for a given input is set to a low value, the state has very little
-time to be influences, and in the case of the timestep being 0 or almost 0, it
-is as if the model "skips over" the given input token.
-The second mechanism is the ability for the explicit gating path in the block
-architecture, which allows models to "spot-ignore" input data.
+will decay to close to 0, allowing the model to "forget" all previous
+information. If the timestep for a given input is set to a low value, the state
+has very little time to be influenced, and in the case of the timestep being 0
+or almost 0, the model effectively skips the given input token.
+Secondly, the explicit gating path in the block architecture allows the model to
+set specific output tokens to 0.
 
-This allows the model to perform well on copying tasks, which we hypothesize
-is crucial for in-context character recognition.
+The authors find that this selectivity allows the model to generalize well on
+long-range copying tasks, as the model learns to skip over irrelevant tokens.
+It has also been found that Mamba is is capable of in-context learning for
+natural language tasks\cite{mambaicl}, which is we hypothesize generalizes to
+optical character recognition tasks.
