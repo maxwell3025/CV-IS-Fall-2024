@@ -67,9 +67,9 @@ for (name, run) in runs.items():
     cbar = fig.colorbar(image, orientation="horizontal")
     cbar.set_label("Accuracy as Percentage")
 
-    figure_name = f"parity_lstm_{drops}_{n_layers}_{iteration}.png"
+    figure_name = f"parity_lstm_{drops}_{n_layers}_{iteration}"
     pyplot.savefig(
-        f"{figure_name}.png",
+        f"./charts/{figure_name}.png",
         dpi=500,
     )
     

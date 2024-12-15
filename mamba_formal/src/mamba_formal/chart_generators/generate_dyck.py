@@ -62,7 +62,7 @@ for (name, run) in runs.items():
 
     figure_name = f"dyck"
     pyplot.savefig(
-        f"{figure_name}.png",
+        f"./charts/{figure_name}.png",
         dpi=500,
     )
     

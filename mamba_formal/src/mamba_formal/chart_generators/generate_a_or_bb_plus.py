@@ -71,7 +71,7 @@ for (name, run) in runs.items():
         "a_or_bb_plus_mixed"
     )
     pyplot.savefig(
-        f"{figure_name}.png",
+        f"./charts/{figure_name}.png",
         dpi=500,
     )
     
