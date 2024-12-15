@@ -1,5 +1,4 @@
 from mamba_formal.config import iterate_sweep, DatasetConfig, TrainingConfig, MambaConfig
-from mamba_formal.mamba_lstm import MambaLMHeadModelLstm
 from mamba_formal.models import sequence_stack
 import json
 import yaml
@@ -51,7 +50,7 @@ def validate(
     model.eval()
     with torch.no_grad():
         for validation_length in val_lengths:
-            inputs, targets = synthetic_languages.sample_batch(
+            batch = synthetic_languages.sample_batch(
                 task=task,
                 length=validation_length,
                 batch_size=dataset_config.batch_size,
@@ -59,6 +58,8 @@ def validate(
                 one_hot=dataset_config.one_hot,
                 positive_rate=dataset_config.positive_rate,
             )
+            assert batch != None, "Received batch equal to None"
+            inputs, targets = batch
             alphabet_length = inputs.shape[2]
             assert inputs.shape == (dataset_config.batch_size, validation_length, alphabet_length)
             assert targets.shape == (dataset_config.batch_size,)
@@ -87,7 +88,7 @@ def train(
     task: synthetic_languages.LanguageSelectTask,
     training_config: TrainingConfig,
     dataset_config: DatasetConfig,
-    mamba_config: MambaConfig,
+    mamba_config: sequence_stack.SequenceStackConfig,
     model: sequence_stack.SequenceStack,
     device: torch.device,
     iteration: int,
@@ -124,7 +125,7 @@ def train(
     start_time = time.time()
     for step in range(training_config.num_steps):
         batch_length = dataset_config.training_length
-        inputs, targets = synthetic_languages.sample_batch(
+        batch = synthetic_languages.sample_batch(
             task=task,
             length=batch_length,
             batch_size=dataset_config.batch_size,
@@ -132,6 +133,8 @@ def train(
             one_hot=dataset_config.one_hot,
             positive_rate=None,
         )
+        assert batch != None, "Received batch equal to None"
+        inputs, targets = batch
         train_length_actual = inputs.shape[1]
         alphabet_length = inputs.shape[2]
         assert inputs.shape == (dataset_config.batch_size, train_length_actual, alphabet_length)
