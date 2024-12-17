@@ -1,6 +1,7 @@
 """ DropBlock, DropPath
 
-Copied from timm version 0.4.12 to avoid circular import
+Copied from timm version 0.4.12 to avoid a dependency issue.
+Everything below this line is unmodified from how it appears in timm.
 
 PyTorch implementations of DropBlock and DropPath (Stochastic Depth) regularization layers.
 
