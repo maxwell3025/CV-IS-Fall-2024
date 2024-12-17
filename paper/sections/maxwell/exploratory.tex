@@ -97,6 +97,55 @@ strings that the model memorized, and the model is failing to recognize some
 negative cases, since they contain odd-length forbidden strings that were not
 memorized.
 
+\subsection{Mamba With Transformers}
+\begin{figure}[ht]
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{figures/mamba_no_self_attention.png}
+        \caption{}
+        \label{mambanoselfattention}
+    \end{subfigure}\begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{figures/mamba_self_attention.png}
+        \caption{}
+        \label{mambaselfattention}
+    \end{subfigure}
+    \caption{}
+    \label{mambaattentiontest}
+\end{figure}
+
+The Python library provided by the creators of Mamba\cite{mamba} includes
+options for mixing Mamba layers with multi-head attention layers.
+In this section, we run an experiment to test the effect including this
+attention layer.
+
+\textbf{Dataset}
+The dataset for this experiment consists of of 10000 batches of bitstrings
+labeled according to their parity.
+For the training data, the length was capped at 16 in order to test
+generalization.
+Our algorithm for generating samples is the same as in the previous experiment.
+
+\textbf{Model}
+The model used in these tests is the \verb|MambaLMHead| model provided by the
+Mamba library.
+For our self-attention-free model, we use 5 layers with \verb|d_model = 32|.
+We also use the default setting \verb|d_model = 32|.
+For the model with attention, we set the attention layer indices to \verb|[2]|,
+which actually corresponds to layer 3 due to zero-indexing.
+The number of attention heads is 8.
+All other settings are default.
+
+\textbf{Results}
+As shown in \ref{mambaattentiontest}, neither model showed significant
+generalization past the training data.
+However, the model with self-attention appears to develop a periodic pattern in
+the accuracy.
+This seems to indicate that the counting algorithm learned by the model is to
+some extent a general counting algorithm, but just with a constant error.
+This is also supported by the fact that the model achieves significantly
+worse-than chance accuracy in the low areas.
+This indicates that the model is actually capable of counting ones in the
+string, but does so with some predictable error.
+
 \subsection{Formation of "Bad Habits" with Mamba}
 Given Mamba's limited ability to recognize regular languages, it would be useful
 to place it alongside more formally powerful models such as LSTMs, which can
