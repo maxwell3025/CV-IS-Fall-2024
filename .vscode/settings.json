@@ -4,7 +4,13 @@
         "./mamba-debugger"
     ],
     "cSpell.words": [
+        "bitstring",
+        "bitstrings",
         "dyck",
+        "hyperparameter",
+        "hyperparameters",
+        "LSTM",
+        "LSTMs",
         "realpath",
         "venv"
     ],
