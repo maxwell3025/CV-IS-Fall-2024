@@ -1,5 +1,6 @@
 
 \section{Background on State Space Models}
+\label{section:background}
 In this paper, we use a network architecture called Mamba, which is a variant
 around a family of sequence-to-sequence models called a state space
 models(SSMs).
@@ -76,6 +77,7 @@ remaining hyperparameters:
 \end{itemize}
 
 \subsection{S4}
+\label{section:background:s4}
 S4\cite{s4} is one implementation of state space models that implements the
 scheme detailed above.
 S4 uses an initialization for $\Ab$ based on the HiPPO framework, which is
@@ -94,6 +96,7 @@ Using the increased model size made feasible with the efficient algorithm, they
 were able to achieve SOTA on the task LRA Path-X \cite{lra}.
 
 \subsection{Mamba}
+\label{section:background:mamba}
 Mamba\cite{mamba} is the model architecture that we use in our experiments.
 Mamba introduces a new SSM architecture, called S6, and introduces a new block
 design around this SSM layer for increased selectivity.
