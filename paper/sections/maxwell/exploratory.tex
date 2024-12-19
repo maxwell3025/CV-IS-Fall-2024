@@ -184,7 +184,11 @@ experiment, except that instead of sampling the language \texttt{a|bb+},
 we sample the language \texttt{(0*10*10*)*}, or the language of even bitstrings.
 
 \textbf{Results}
-\begin{figure}
+as shown in Figure \ref{droppathresults}, all of the stacks with drop path
+generalized within 5000 training steps, while only 3 of the 6 runs generalized
+without drop path.
+\newpage
+\begin{figure}[!hb]
     \begin{subfigure}{0.5\textwidth}
         \begin{center}
         \includegraphics[width=0.8\textwidth]{figures/parity_lstm_False_3_1.png}
@@ -230,6 +234,9 @@ we sample the language \texttt{(0*10*10*)*}, or the language of even bitstrings.
         \includegraphics[width=0.8\textwidth]{figures/parity_lstm_True_5_1.png}
         \end{center}
     \end{subfigure}
+\end{figure}
+\newpage
+\begin{figure}[!ht]\ContinuedFloat
     \begin{subfigure}{0.5\textwidth}
         \begin{center}
         \includegraphics[width=0.8\textwidth]{figures/parity_lstm_False_5_2.png}
@@ -242,12 +249,9 @@ we sample the language \texttt{(0*10*10*)*}, or the language of even bitstrings.
     \caption{Results for parity}
     \label{droppathresults}
 \end{figure}
-as shown in Figure \ref{droppathresults}, all of the stacks with drop path
-generalized within 5000 training steps, while only 3 of the 6 runs generalized
-without drop path.
 
 \subsection{Ability to Recognize CFGs}
-\begin{figure}
+\begin{figure}[ht]
     \includegraphics[width=\textwidth]{figures/arithmetic.png}
     \caption{}
     \label{resultsarithmetic}
@@ -314,7 +318,7 @@ than chance and shows that our model is capable of recognizing different
 non-terminals.
 
 \subsection{Dyck-1}
-\begin{figure}
+\begin{figure}[ht]
     \begin{subfigure}{0.5\textwidth}
         \includegraphics[width=\textwidth]{figures/dyck.png}
         \caption{}
