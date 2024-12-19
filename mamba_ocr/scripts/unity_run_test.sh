@@ -4,7 +4,7 @@
 #SBATCH -p gpu  # Partition
 #SBATCH -G 1  # Number of GPUs
 #SBATCH -t 04:00:00  # Job time limit
-#SBATCH -o latest-5.log  # %j = job ID
+#SBATCH -o latest.log  # %j = job ID
 #SBATCH --constraint sm_70
 #SBATCH --mail-type=ALL
 #

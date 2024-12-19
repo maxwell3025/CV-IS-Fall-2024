@@ -2,7 +2,9 @@
 This is the repository for Donald Winkelman and Maxwell Tang's independent study
 for Fall 2024
 
-There are 2 folders containing experiment-related code
+There are 4 folders containing experiment-related code
+- `dfa-ops-mamba`: Contains old code for formal language experiments - replaced\
+    with `mamba_formal`
 - `mamba_formal`: Contains Maxwell's independent experiments.
 - `synthetic_languages`: A Python project implementing generators for various\
     formal languages.
